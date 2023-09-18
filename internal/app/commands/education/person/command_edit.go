@@ -6,13 +6,14 @@ import (
 	"github.com/ozonmp/omp-bot/internal/model/education"
 	"log"
 	"strconv"
-	"strings"
 )
 
 func (c commander) Edit(inputMsg *tgbotapi.Message) {
 	const op = "commander.Edit"
 
-	args := strings.SplitN(inputMsg.CommandArguments(), " ", 2)
+	argsStr := inputMsg.CommandArguments()
+	args, err := parseArguments(argsStr)
+
 	if len(args) != 2 {
 		log.Printf("two arguments are required")
 		return
@@ -24,13 +25,7 @@ func (c commander) Edit(inputMsg *tgbotapi.Message) {
 		return
 	}
 
-	name := strings.TrimSpace(args[1])
-	if len(name) == 0 {
-		log.Printf("%s: argument required", op)
-		return
-	}
-
-	err = c.service.Update(id, education.Person{Name: name})
+	err = c.service.Update(id, education.Person{Name: args[1]})
 	if err != nil {
 		log.Printf("%s: can't update the item with id %d: %v", op, id, err)
 		return
