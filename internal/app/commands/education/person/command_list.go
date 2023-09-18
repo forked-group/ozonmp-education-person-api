@@ -10,7 +10,7 @@ import (
 )
 
 type callbackListData struct {
-	Offset uint64 `json:"offset"`
+	Cursor uint64 `json:"cursor"`
 }
 
 const listPageSize = 5
@@ -30,7 +30,7 @@ func (c commander) ListCallback(callback *tgbotapi.CallbackQuery, callbackPath p
 		return
 	}
 
-	c.listNext(callback.Message.Chat.ID, data.Offset)
+	c.listNext(callback.Message.Chat.ID, data.Cursor)
 }
 
 func (c commander) listNext(chatID int64, cursor uint64) {
@@ -58,7 +58,7 @@ func (c commander) listNext(chatID int64, cursor uint64) {
 	outputMsg := tgbotapi.NewMessage(chatID, outputText.String())
 
 	serializedData, _ := json.Marshal(callbackListData{
-		Offset: items[len(items)-1].ID,
+		Cursor: items[len(items)-1].ID + 1,
 	})
 
 	var callbackPath = path.CallbackPath{
