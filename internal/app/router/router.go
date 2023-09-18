@@ -1,12 +1,11 @@
 package router
 
 import (
-	"log"
-	"runtime/debug"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/ozonmp/omp-bot/internal/app/commands/demo"
 	"github.com/ozonmp/omp-bot/internal/app/path"
+	"log"
+	"runtime/debug"
 )
 
 type Commander interface {
@@ -20,31 +19,8 @@ type Router struct {
 
 	// demoCommander
 	demoCommander Commander
-	// user
-	// access
-	// buy
-	// delivery
-	// recommendation
-	// travel
-	// loyalty
-	// bank
-	// subscription
-	// license
-	// insurance
-	// payment
-	// storage
-	// streaming
-	// business
-	// work
-	// service
-	// exchange
-	// estate
-	// rating
-	// security
-	// cinema
-	// logistic
-	// product
-	// education
+
+	routes map[string]Commander
 }
 
 func NewRouter(
@@ -55,32 +31,17 @@ func NewRouter(
 		bot: bot,
 		// demoCommander
 		demoCommander: demo.NewDemoCommander(bot),
-		// user
-		// access
-		// buy
-		// delivery
-		// recommendation
-		// travel
-		// loyalty
-		// bank
-		// subscription
-		// license
-		// insurance
-		// payment
-		// storage
-		// streaming
-		// business
-		// work
-		// service
-		// exchange
-		// estate
-		// rating
-		// security
-		// cinema
-		// logistic
-		// product
-		// education
+
+		routes: map[string]Commander{},
 	}
+}
+
+func (c *Router) Route(domain, subdomain string) Commander {
+	return c.routes[domain+"/"+subdomain]
+}
+
+func (c *Router) SetRoute(domain, subdomain string, commander Commander) {
+	c.routes[domain+"/"+subdomain] = commander
 }
 
 func (c *Router) HandleUpdate(update tgbotapi.Update) {
@@ -108,58 +69,12 @@ func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 	switch callbackPath.Domain {
 	case "demo":
 		c.demoCommander.HandleCallback(callback, callbackPath)
-	case "user":
-		break
-	case "access":
-		break
-	case "buy":
-		break
-	case "delivery":
-		break
-	case "recommendation":
-		break
-	case "travel":
-		break
-	case "loyalty":
-		break
-	case "bank":
-		break
-	case "subscription":
-		break
-	case "license":
-		break
-	case "insurance":
-		break
-	case "payment":
-		break
-	case "storage":
-		break
-	case "streaming":
-		break
-	case "business":
-		break
-	case "work":
-		break
-	case "service":
-		break
-	case "exchange":
-		break
-	case "estate":
-		break
-	case "rating":
-		break
-	case "security":
-		break
-	case "cinema":
-		break
-	case "logistic":
-		break
-	case "product":
-		break
-	case "education":
-		break
 	default:
-		log.Printf("Router.handleCallback: unknown domain - %s", callbackPath.Domain)
+		if route := c.Route(callbackPath.Domain, callbackPath.Subdomain); route != nil {
+			route.HandleCallback(callback, callbackPath)
+		} else {
+			log.Printf("Router.handleMessage: unknown path - %s/%s", callbackPath.Domain, callbackPath.Subdomain)
+		}
 	}
 }
 
@@ -179,58 +94,12 @@ func (c *Router) handleMessage(msg *tgbotapi.Message) {
 	switch commandPath.Domain {
 	case "demo":
 		c.demoCommander.HandleCommand(msg, commandPath)
-	case "user":
-		break
-	case "access":
-		break
-	case "buy":
-		break
-	case "delivery":
-		break
-	case "recommendation":
-		break
-	case "travel":
-		break
-	case "loyalty":
-		break
-	case "bank":
-		break
-	case "subscription":
-		break
-	case "license":
-		break
-	case "insurance":
-		break
-	case "payment":
-		break
-	case "storage":
-		break
-	case "streaming":
-		break
-	case "business":
-		break
-	case "work":
-		break
-	case "service":
-		break
-	case "exchange":
-		break
-	case "estate":
-		break
-	case "rating":
-		break
-	case "security":
-		break
-	case "cinema":
-		break
-	case "logistic":
-		break
-	case "product":
-		break
-	case "education":
-		break
 	default:
-		log.Printf("Router.handleCallback: unknown domain - %s", commandPath.Domain)
+		if route := c.Route(commandPath.Domain, commandPath.Subdomain); route != nil {
+			route.HandleCommand(msg, commandPath)
+		} else {
+			log.Printf("Router.handleMessage: unknown path - %s/%s", commandPath.Domain, commandPath.Subdomain)
+		}
 	}
 }
 

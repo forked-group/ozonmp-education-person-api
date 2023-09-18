@@ -1,6 +1,8 @@
 package main
 
 import (
+	personCommands "github.com/ozonmp/omp-bot/internal/app/commands/education/person"
+	personService "github.com/ozonmp/omp-bot/internal/service/education/person"
 	"log"
 	"os"
 
@@ -36,9 +38,20 @@ func main() {
 		log.Panic(err)
 	}
 
-	routerHandler := routerPkg.NewRouter(bot)
+	router := routerPkg.NewRouter(bot)
+
+	var service *personService.DummyPersonService
+	if _, ok := os.LookupEnv("WITH_TEST_DATA"); ok {
+		service = personService.NewDummyPersonServiceWithTestData()
+	} else {
+		service = personService.NewDummyPersonService()
+	}
+
+	router.SetRoute("education", "person",
+		personCommands.NewPersonCommander(bot, service),
+	)
 
 	for update := range updates {
-		routerHandler.HandleUpdate(update)
+		router.HandleUpdate(update)
 	}
 }
