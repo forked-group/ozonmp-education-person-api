@@ -3,45 +3,42 @@ package person
 import (
 	"errors"
 	"github.com/ozonmp/omp-bot/internal/model/education"
-	"math/rand"
 	"sync"
-	"time"
 )
 
-var testData = []string{
-	"one",
-	"two",
-	"three",
-	"four",
-	"five",
-	"six",
-	"seven",
-	"eight",
-	"nine",
-	"ten",
+var testData = []education.Person{
+	{Name: "Zero"},
+	{Name: "One"},
+	{Name: "Two"},
+	{Name: "Three"},
+	{Name: "Four"},
+	{Name: "Five"},
+	{Name: "Six"},
+	{Name: "Seven"},
+	{Name: "Eight"},
+	{Name: "Nine"},
+	{Name: "Ten"},
+}
+
+type dataItem struct {
+	education.Person
+	deleted bool
 }
 
 type DummyPersonService struct {
-	data    []education.Person
-	index   map[uint64]int
-	deleted map[uint64]struct{}
-	mu      sync.RWMutex
-	rand    *rand.Rand
+	data []dataItem
+	mu   sync.RWMutex
 }
 
 func NewDummyPersonService() *DummyPersonService {
-	return &DummyPersonService{
-		index:   map[uint64]int{},
-		deleted: map[uint64]struct{}{},
-		rand:    rand.New(rand.NewSource(time.Now().UnixMicro())),
-	}
+	return &DummyPersonService{}
 }
 
 func NewDummyPersonServiceWithTestData() *DummyPersonService {
 	s := NewDummyPersonService()
 
-	for _, name := range testData {
-		s.Create(education.Person{Name: name})
+	for _, person := range testData {
+		s.Create(person)
 	}
 
 	return s
@@ -53,18 +50,15 @@ func (s *DummyPersonService) Describe(personID uint64) (*education.Person, error
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	index, ok := s.index[personID]
-	if !ok {
-		return nil, ErrNotFound
-	}
+	index := personID
 
-	if _, ok := s.deleted[personID]; ok {
+	if s.data[index].deleted {
 		return nil, ErrNotFound
 	}
 
 	// Returns a pointer to a copy of the element for security.
 	// Imho, this function should return a value, but not a pointer
-	person := s.data[index]
+	person := s.data[index].Person
 	return &person, nil
 }
 
@@ -72,44 +66,28 @@ func (s *DummyPersonService) List(cursor uint64, limit uint64) ([]education.Pers
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	index := -1
-
-	if cursor != 0 {
-		var ok bool
-		if index, ok = s.index[cursor]; !ok {
-			return nil, ErrNotFound
-		}
-	}
-
 	result := make([]education.Person, 0, limit)
 
-	for i := index + 1; i < len(s.data) && uint64(len(result)) < limit; i++ {
-		person := s.data[i]
-		if _, ok := s.deleted[person.ID]; !ok {
-			result = append(result, person)
+	for i := cursor; i < uint64(len(s.data)) && uint64(len(result)) < limit; i++ {
+		if s.data[i].deleted {
+			continue
 		}
+		result = append(result, s.data[i].Person)
+	}
+
+	if len(result) == 0 {
+		return nil, ErrNotFound
 	}
 
 	return result, nil
-}
-
-func (s *DummyPersonService) randID() uint64 {
-	for {
-		id := s.rand.Uint64()
-		if _, ok := s.index[id]; !ok {
-			return id
-		}
-	}
 }
 
 func (s *DummyPersonService) Create(person education.Person) (uint64, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	person.ID = s.randID()
-
-	s.data = append(s.data, person)
-	s.index[person.ID] = len(s.data) - 1
+	person.ID = uint64(len(s.data))
+	s.data = append(s.data, dataItem{Person: person})
 
 	return person.ID, nil
 }
@@ -118,17 +96,13 @@ func (s *DummyPersonService) Update(personID uint64, person education.Person) er
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	index, ok := s.index[personID]
-	if !ok {
-		return ErrNotFound
-	}
-
-	if _, ok := s.deleted[personID]; ok {
+	index := personID
+	if s.data[index].deleted {
 		return ErrNotFound
 	}
 
 	person.ID = personID
-	s.data[index] = person
+	s.data[index].Person = person
 
 	return nil
 }
@@ -137,15 +111,12 @@ func (s *DummyPersonService) Remove(personID uint64) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if _, ok := s.index[personID]; !ok {
+	index := personID
+	if s.data[index].deleted {
 		return false, nil
 	}
 
-	if _, ok := s.deleted[personID]; ok {
-		return false, nil
-	}
-
-	s.deleted[personID] = struct{}{}
+	s.data[index].deleted = true
 
 	return true, nil
 }
