@@ -120,7 +120,7 @@ func (s *dummyRepo) Lock(n uint64) ([]person.PersonEvent, error) {
 		// mark as processed
 		s.processed[id] = true
 
-		// push to Events
+		// push to events
 		events = append(events, person.PersonEvent{
 			ID:     id,
 			Type:   person.Created,
@@ -139,8 +139,7 @@ func (s *dummyRepo) Unlock(eventIDs []uint64) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	for i := len(eventIDs) - 1; i >= 0; i-- {
-		id := eventIDs[i]
+	for _, id := range eventIDs {
 		if 0 <= id && id < uint64(len(s.processed)) && s.processed[id] {
 			s.processed[id] = false
 			heap.Push(&s.Deferred, id)
