@@ -93,8 +93,9 @@ func TestStart2(t *testing.T) {
 	//lo.DebugEnable = true
 
 	repoCfg := DummyRepoCfg{
-		Size:    20_000,
-		Timeout: 100 * time.Millisecond,
+		Size:       20_000,
+		Timeout:    100 * time.Millisecond,
+		ErrPer100K: 50_000,
 	}
 
 	senderCfg := DummySenderCfg{
@@ -119,7 +120,7 @@ func TestStart2(t *testing.T) {
 		CollectSize:    100,
 		CollectTimeout: 100 * time.Millisecond,
 
-		WorkerCount: 3,
+		WorkerCount: 8,
 		WorkTimeout: 100 * time.Millisecond,
 
 		Repo:   repo,
