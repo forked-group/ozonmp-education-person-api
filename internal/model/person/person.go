@@ -2,6 +2,7 @@ package person
 
 type Person struct {
 	ID uint64
+	// TODO:
 }
 
 type EventType uint8
