@@ -77,19 +77,22 @@ func TestConfig_Run(t *testing.T) {
 				"worker1",
 			},
 		},
-		{
-			"[2] failed jobs three times (blocking on receive)",
-			fields{
-				3,
-				3,
-				makeFailedJobsChan,
-				10 * time.Millisecond,
-			},
-			args{
-				100 * time.Millisecond,
-				"worker2",
-			},
-		},
+
+		// (!!!) this test should not be used after adding retries on error
+		//{
+		//	"[2] failed jobs three times (blocking on receive)",
+		//	fields{
+		//		3,
+		//		3,
+		//		makeFailedJobsChan,
+		//		10 * time.Millisecond,
+		//	},
+		//	args{
+		//		100 * time.Millisecond,
+		//		"worker2",
+		//	},
+		//},
+
 		{
 			"[3] failed jobs three times (blocking on sleep)",
 			fields{

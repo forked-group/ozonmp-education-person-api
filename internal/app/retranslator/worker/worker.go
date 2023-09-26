@@ -45,11 +45,12 @@ func (w *worker) run() {
 		}
 
 		err := job.Do()
-		if err != nil {
+		for err != nil {
 			lo.Debug("%s.%s: can't do job %v: %v", w.name, op, job, err)
 			if !w.sleep() {
 				return
 			}
+			err = job.Do()
 		}
 	}
 
