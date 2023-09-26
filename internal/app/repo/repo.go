@@ -8,6 +8,6 @@ type EventRepo interface {
 	Lock(n uint64) ([]person.PersonEvent, error)
 	Unlock(eventIDs []uint64) error
 
-	Add(event []person.PersonEvent) error
+	Add(events []person.PersonEvent) error
 	Remove(eventIDs []uint64) error
 }
