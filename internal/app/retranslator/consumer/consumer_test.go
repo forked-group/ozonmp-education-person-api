@@ -138,7 +138,7 @@ func TestConfig_Run(t *testing.T) {
 				BatchSize: tt.fields.BatchSize,
 				Timeout:   tt.fields.Timeout,
 				Repo:      tt.fields.Repo(ctrl),
-				Out:       tt.fields.Out,
+				Out:       tt.fields.Out, // TODO: Fix, now: Out chan<- []person.PersonEvent
 			}
 
 			var ctx context.Context

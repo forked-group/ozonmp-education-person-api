@@ -14,8 +14,6 @@ import (
 )
 
 func TestStart(t *testing.T) {
-	//lo.DebugEnable = true
-
 	t.Run("successful sends", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		repo := mocks.NewMockEventRepo(ctrl)
@@ -47,7 +45,10 @@ func TestStart(t *testing.T) {
 			Sender: sender,
 		}
 
-		r := retranslator.Start(&cfg)
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+
+		r := cfg.Start(ctx)
 		time.Sleep(390 * time.Millisecond)
 		r.Close()
 	})
@@ -83,7 +84,10 @@ func TestStart(t *testing.T) {
 			Sender: sender,
 		}
 
-		r := retranslator.Start(&cfg)
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+
+		r := cfg.Start(ctx)
 		time.Sleep(390 * time.Millisecond)
 		r.Close()
 	})
@@ -127,13 +131,12 @@ func TestStart2(t *testing.T) {
 		Sender: sender,
 	}
 
-	r := retranslator.Start(&cfg)
-
-	time.Sleep(5 * time.Second)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	r.CloseCtx(ctx)
+
+	r := cfg.Start(ctx)
+	time.Sleep(5 * time.Second)
+	r.Close()
 
 	sortEvents := func(events []uint64) {
 		sort.Slice(events, func(i, j int) bool {

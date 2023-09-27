@@ -21,21 +21,21 @@ type Config struct {
 }
 
 type consumer struct {
-	cfg   *Config
-	name  string
-	ctx   context.Context
-	alert context.Context
-	tm    *time.Timer
+	cfg  *Config
+	name string
+	ctx  context.Context
+	term context.Context
+	tm   *time.Timer
 }
 
 func (cfg *Config) Run(ctx context.Context, name string) {
 	const op = "Run"
 
 	c := consumer{
-		cfg:   cfg,
-		name:  name,
-		ctx:   ctx,
-		alert: context2.Alert(ctx),
+		cfg:  cfg,
+		name: name,
+		ctx:  ctx,
+		term: context2.Term(ctx),
 	}
 
 	c.run()
@@ -46,7 +46,7 @@ func (c *consumer) run() {
 
 	lo.Debug("%s.%s: running...", c.name, op)
 
-	for c.alert.Err() == nil {
+	for c.term.Err() == nil {
 		events, err := c.cfg.Repo.Lock(uint64(c.cfg.BatchSize))
 		if err != nil {
 			lo.Debug("%s.%s: can't lock events: %v", c.name, op, err)
@@ -71,7 +71,7 @@ func (c *consumer) run() {
 		}
 	}
 
-	lo.Debug("%s.%s: alert received", c.name, op)
+	lo.Debug("%s.%s: term received", c.name, op)
 }
 
 func (c *consumer) send(events []person.PersonEvent) bool {
@@ -102,8 +102,8 @@ func (c *consumer) sleep() bool {
 	}
 
 	select {
-	case <-c.alert.Done():
-		lo.Debug("%s.%s: alert received", c.name, op)
+	case <-c.term.Done():
+		lo.Debug("%s.%s: term received", c.name, op)
 		if !c.tm.Stop() {
 			<-c.tm.C
 		}
