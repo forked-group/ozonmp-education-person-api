@@ -2,22 +2,22 @@ package context
 
 import "context"
 
-type contextWithAlert struct {
+type contextWithTerm struct {
 	context.Context
-	alert context.Context
+	term context.Context
 }
 
-func Alert(ctx context.Context) context.Context {
-	if c, ok := ctx.(*contextWithAlert); ok {
-		return c.alert
+func Term(ctx context.Context) context.Context {
+	if c, ok := ctx.(*contextWithTerm); ok {
+		return c.term
 	}
 	return ctx
 }
 
-func WithAlert(ctx context.Context) (*contextWithAlert, context.CancelFunc) {
-	alert, sendAlert := context.WithCancel(ctx)
-	return &contextWithAlert{
+func WithTerm(ctx context.Context) (*contextWithTerm, context.CancelFunc) {
+	term, sendTerm := context.WithCancel(ctx)
+	return &contextWithTerm{
 		Context: ctx,
-		alert:   alert,
-	}, sendAlert
+		term:    term,
+	}, sendTerm
 }
