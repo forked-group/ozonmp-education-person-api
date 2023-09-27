@@ -1,56 +1,60 @@
 package person
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"strings"
 	"unicode"
 )
 
-var ErrUnpairedQuotationMark = errors.New("unpaired quotation mark")
-
-// NOTE: now "some text,"" other text" -> ["some text,", " other text"]
+var ErrUnclosedQuotationMark = errors.New("unclosed quotation mark detected")
 
 func parseArguments(text string) ([]string, error) {
 	var args []string
 
-	for len(text) != 0 {
+	r := strings.NewReader(text)
+	var buf bytes.Buffer
 
-		pos := len(text)
-		for i, c := range text {
-			if !unicode.IsSpace(c) {
-				pos = i
-				break
-			}
+	for r.Len() != 0 {
+		c, _, err := r.ReadRune()
+
+		for err == nil && unicode.IsSpace(c) {
+			c, _, err = r.ReadRune()
 		}
 
-		if pos == len(text) {
+		if err == io.EOF {
 			break
 		}
 
-		text = text[pos:]
+		for err == nil && !unicode.IsSpace(c) {
+			switch c {
+			default:
+				buf.WriteRune(c)
+			case '"', '\'':
+				q := c
+				c, _, err = r.ReadRune()
 
-		switch text[0] {
-		case '"', '\'':
-			q := text[0]
-			text = text[1:]
-			pos = strings.IndexByte(text, q)
-			if pos == -1 {
-				return nil, ErrUnpairedQuotationMark
-			}
-			args = append(args, text[:pos])
-			pos++
-		default:
-			pos = len(text)
-			for i, c := range text {
-				if unicode.IsSpace(c) {
-					pos = i
-					break
+				for err == nil && c != q {
+					buf.WriteRune(c)
+					c, _, err = r.ReadRune()
+				}
+
+				if err == io.EOF {
+					args = append(args, string(buf.Bytes()))
+					return args, ErrUnclosedQuotationMark
 				}
 			}
-			args = append(args, text[:pos])
+
+			c, _, err = r.ReadRune()
 		}
 
-		text = text[pos:]
+		if err != nil && err != io.EOF {
+			return nil, err
+		}
+
+		args = append(args, string(buf.Bytes()))
+		buf.Reset()
 	}
 
 	return args, nil
