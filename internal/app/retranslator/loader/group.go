@@ -21,7 +21,7 @@ type Group struct {
 func StartGroup(name string, n int, r Runner) *Group {
 	ctx, cancel := context.WithCancel(context.Background())
 	ctx, sendAlert := context2.WithAlert(ctx)
-	done := make(chan struct{})
+	done := make(chan struct{}, n)
 
 	for i := 0; i < n; i++ {
 		itemName := fmt.Sprintf("%s%d", name, i+1)
