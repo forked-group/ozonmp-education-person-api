@@ -11,8 +11,6 @@ import (
 )
 
 func TestConfig_Run(t *testing.T) {
-	//lo.DebugEnable = true
-
 	type fields struct {
 		BatchSize int
 		Timeout   time.Duration
@@ -22,7 +20,6 @@ func TestConfig_Run(t *testing.T) {
 
 	type args struct {
 		ctxTimeout time.Duration
-		name       string
 	}
 
 	batch := []person.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
@@ -48,7 +45,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"consumer1",
 			},
 		},
 		{
@@ -67,7 +63,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"consumer2",
 			},
 		},
 		{
@@ -87,7 +82,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"consumer3",
 			},
 		},
 		{
@@ -106,7 +100,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"consumer4",
 			},
 		},
 		{
@@ -124,7 +117,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				0,
-				"consumer4",
 			},
 		},
 		// TODO: Add test cases.
@@ -156,8 +148,7 @@ func TestConfig_Run(t *testing.T) {
 			done := make(chan struct{})
 			go func() {
 				defer close(done)
-
-				cfg.Run(ctx, tt.args.name)
+				cfg.Run(ctx)
 			}()
 
 			tm := time.NewTimer(1 * time.Second)

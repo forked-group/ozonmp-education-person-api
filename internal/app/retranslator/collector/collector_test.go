@@ -10,8 +10,6 @@ import (
 type Job = worker.Job
 
 func TestConfig_Run(t *testing.T) {
-	//lo.DebugEnable = true
-
 	makeChanSize := func(n int) <-chan uint64 {
 		ch := make(chan uint64, n)
 		for i := 1; i <= n; i++ {
@@ -36,7 +34,6 @@ func TestConfig_Run(t *testing.T) {
 	}
 	type args struct {
 		ctxTimeout time.Duration
-		name       string
 	}
 	tests := []struct {
 		name       string
@@ -56,7 +53,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"collector1",
 			},
 			(10 + 3 - 1) / 3,
 		},
@@ -72,7 +68,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"collector2",
 			},
 			0,
 		},
@@ -88,7 +83,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"collector3",
 			},
 			0,
 		},
@@ -104,7 +98,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				0,
-				"collector4",
 			},
 			0,
 		},
@@ -136,8 +129,7 @@ func TestConfig_Run(t *testing.T) {
 			done := make(chan struct{})
 			go func() {
 				defer close(done)
-
-				cfg.Run(ctx, tt.args.name)
+				cfg.Run(ctx)
 			}()
 
 			tm := time.NewTimer(200 * time.Millisecond)
