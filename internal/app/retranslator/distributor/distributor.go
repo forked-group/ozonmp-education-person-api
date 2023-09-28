@@ -2,7 +2,7 @@ package distributor
 
 import (
 	"context"
-	"github.com/aaa2ppp/zonmp-education-person-api/internal/model/person"
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/model/person"
 )
 
 type Config struct {

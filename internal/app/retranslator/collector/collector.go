@@ -2,7 +2,7 @@ package collector
 
 import (
 	"context"
-	"github.com/aaa2ppp/zonmp-education-person-api/internal/app/retranslator/worker"
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/app/retranslator/worker"
 	"time"
 )
 
