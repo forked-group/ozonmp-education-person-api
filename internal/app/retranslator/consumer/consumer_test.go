@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	mock_consumer "github.com/aaa2ppp/zonmp-education-person-api/internal/app/retranslator/consumer/mocks"
+	context2 "github.com/aaa2ppp/zonmp-education-person-api/internal/app/retranslator/context"
 	"github.com/aaa2ppp/zonmp-education-person-api/internal/model/person"
 	"github.com/golang/mock/gomock"
 	"testing"
@@ -15,7 +16,7 @@ func TestConfig_Run(t *testing.T) {
 		BatchSize int
 		Timeout   time.Duration
 		Repo      func(ctrl *gomock.Controller) EventLocker
-		Out       chan<- *person.PersonEvent
+		Out       chan []person.PersonEvent
 	}
 
 	type args struct {
@@ -41,7 +42,7 @@ func TestConfig_Run(t *testing.T) {
 						Return(batch, nil)
 					return repo
 				},
-				make(chan *person.PersonEvent, len(batch)*3-1),
+				make(chan []person.PersonEvent, 2),
 			},
 			args{
 				100 * time.Millisecond,
@@ -59,7 +60,7 @@ func TestConfig_Run(t *testing.T) {
 						Return(batch, errors.New("unknown error"))
 					return repo
 				},
-				make(chan *person.PersonEvent, 10),
+				make(chan []person.PersonEvent, 10),
 			},
 			args{
 				100 * time.Millisecond,
@@ -78,7 +79,7 @@ func TestConfig_Run(t *testing.T) {
 						Times(1)
 					return repo
 				},
-				make(chan *person.PersonEvent, 3),
+				make(chan []person.PersonEvent, 1),
 			},
 			args{
 				100 * time.Millisecond,
@@ -96,7 +97,7 @@ func TestConfig_Run(t *testing.T) {
 						Return(batch, nil)
 					return repo
 				},
-				make(chan *person.PersonEvent, len(batch)*2-1),
+				make(chan []person.PersonEvent, 1),
 			},
 			args{
 				100 * time.Millisecond,
@@ -113,7 +114,7 @@ func TestConfig_Run(t *testing.T) {
 						Times(0)
 					return repo
 				},
-				make(chan *person.PersonEvent, 3),
+				make(chan []person.PersonEvent, 1),
 			},
 			args{
 				0,
@@ -134,14 +135,20 @@ func TestConfig_Run(t *testing.T) {
 			}
 
 			var ctx context.Context
-			var cancel context.CancelFunc
+			var cancel, sendTerm context.CancelFunc
 
 			if tt.args.ctxTimeout > 0 {
 				ctx, cancel = context.WithTimeout(context.Background(),
 					tt.args.ctxTimeout)
-				defer cancel()
+				ctx, sendTerm = context2.WithTerm(ctx)
+				defer func() {
+					sendTerm()
+					cancel()
+				}()
 			} else {
 				ctx, cancel = context.WithCancel(context.Background())
+				ctx, sendTerm = context2.WithTerm(ctx)
+				sendTerm()
 				cancel()
 			}
 
