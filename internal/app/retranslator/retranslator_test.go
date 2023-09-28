@@ -35,8 +35,8 @@ func TestStart(t *testing.T) {
 			ProducerCount:  1,
 			ProduceTimeout: 100 * time.Millisecond,
 
-			CollectSize:    10,
-			CollectTimeout: 330 * time.Millisecond,
+			CollectSize:     10,
+			CollectMaxDelay: 330 * time.Millisecond,
 
 			WorkerCount: 2,
 			WorkTimeout: 100 * time.Millisecond,
@@ -74,8 +74,8 @@ func TestStart(t *testing.T) {
 			ProducerCount:  3,
 			ProduceTimeout: 50 * time.Millisecond,
 
-			CollectSize:    10,
-			CollectTimeout: 330 * time.Millisecond,
+			CollectSize:     10,
+			CollectMaxDelay: 330 * time.Millisecond,
 
 			WorkerCount: 2,
 			WorkTimeout: 100 * time.Millisecond,
@@ -119,8 +119,8 @@ func TestStart2(t *testing.T) {
 		ProducerCount:  100,
 		ProduceTimeout: 100 * time.Millisecond,
 
-		CollectSize:    100,
-		CollectTimeout: 100 * time.Millisecond,
+		CollectSize:     100,
+		CollectMaxDelay: 100 * time.Millisecond,
 
 		WorkerCount: 8,
 		WorkTimeout: 100 * time.Millisecond,
