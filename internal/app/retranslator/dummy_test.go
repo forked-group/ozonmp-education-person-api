@@ -14,7 +14,7 @@ import (
 var _ repo.EventRepo = (*dummyRepo)(nil)
 var _ sender.EventSender = (*dummySender)(nil)
 
-var errUnknownError = errors.New("unknown error")
+var ErrUnknownError = errors.New("unknown error")
 
 func randTimeoutAndError(timeout time.Duration, errPer100K int) error {
 	if timeout > 0 {
@@ -24,7 +24,7 @@ func randTimeoutAndError(timeout time.Duration, errPer100K int) error {
 	}
 
 	if errPer100K > 0 && rand.Intn(100_000) < errPer100K {
-		return errUnknownError
+		return ErrUnknownError
 	}
 
 	return nil
@@ -32,26 +32,33 @@ func randTimeoutAndError(timeout time.Duration, errPer100K int) error {
 
 type DummySenderCfg struct {
 	Size       int
-	Timeout    time.Duration
+	Latency    time.Duration
 	ErrPer100K int
 }
 
 type dummySender struct {
-	cfg    *DummySenderCfg
-	mu     sync.Mutex
-	Events []uint64
+	cfg  *DummySenderCfg
+	mu   sync.Mutex
+	sent []uint64
 }
 
 func (cfg *DummySenderCfg) New() *dummySender {
 	events := make([]uint64, 0, cfg.Size)
 	return &dummySender{
-		cfg:    cfg,
-		Events: events,
+		cfg:  cfg,
+		sent: events,
 	}
 }
 
+func (s *dummySender) Len() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	return len(s.sent)
+}
+
 func (s *dummySender) Send(events *person.PersonEvent) error {
-	if err := randTimeoutAndError(s.cfg.Timeout, s.cfg.ErrPer100K); err != nil {
+	if err := randTimeoutAndError(s.cfg.Latency, s.cfg.ErrPer100K); err != nil {
 		return err
 	}
 	return s.send(events)
@@ -61,22 +68,23 @@ func (s *dummySender) send(event *person.PersonEvent) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.Events = append(s.Events, event.ID)
+	s.sent = append(s.sent, event.ID)
 	return nil
 }
 
 type DummyRepoCfg struct {
 	Size       int
-	Timeout    time.Duration
+	Latency    time.Duration
 	ErrPer100K int
 }
 
 type dummyRepo struct {
 	cfg       *DummyRepoCfg
 	mu        sync.Mutex
-	Deferred  Uint64Heap
-	processed []bool
-	Removed   []uint64
+	deferred  Uint64Heap
+	processed *Uint64SparseMap
+	removed   []uint64
+	missed    int
 }
 
 func (cfg *DummyRepoCfg) New() *dummyRepo {
@@ -88,39 +96,41 @@ func (cfg *DummyRepoCfg) New() *dummyRepo {
 	}
 	heap.Init(&deferred)
 
-	processed := make([]bool, n+1)
+	processed := NewUin64SpareMap(n + 1)
 	removed := make([]uint64, 0, n)
 
 	return &dummyRepo{
 		cfg:       cfg,
-		Deferred:  deferred,
+		deferred:  deferred,
 		processed: processed,
-		Removed:   removed,
+		removed:   removed,
 	}
 }
 
-func (s *dummyRepo) Lock(n uint64) ([]person.PersonEvent, error) {
-	if err := randTimeoutAndError(s.cfg.Timeout, s.cfg.ErrPer100K); err != nil {
+func (r *dummyRepo) Len() int {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return len(r.deferred)
+}
+
+func (r *dummyRepo) Lock(n uint64) ([]person.PersonEvent, error) {
+	if err := randTimeoutAndError(r.cfg.Latency, r.cfg.ErrPer100K); err != nil {
 		return nil, err
 	}
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
-	if n > uint64(len(s.Deferred)) {
-		n = uint64(len(s.Deferred))
+	if n > uint64(len(r.deferred)) {
+		n = uint64(len(r.deferred))
 	}
 
 	events := make([]person.PersonEvent, 0, n)
 
-	for ; n > 0 && len(s.Deferred) != 0; n-- {
-		// pop from deferred
-		id := heap.Pop(&s.Deferred).(uint64)
+	for ; n > 0 && len(r.deferred) != 0; n-- {
+		id := heap.Pop(&r.deferred).(uint64)
+		r.processed.Add(id)
 
-		// mark as processed
-		s.processed[id] = true
-
-		// push to events
 		events = append(events, person.PersonEvent{
 			ID:     id,
 			Type:   person.Created,
@@ -131,62 +141,92 @@ func (s *dummyRepo) Lock(n uint64) ([]person.PersonEvent, error) {
 	return events, nil
 }
 
-func (s *dummyRepo) Unlock(eventIDs []uint64) error {
-	if err := randTimeoutAndError(s.cfg.Timeout, s.cfg.ErrPer100K); err != nil {
+func (r *dummyRepo) Unlock(eventIDs []uint64) error {
+	if err := randTimeoutAndError(r.cfg.Latency, r.cfg.ErrPer100K); err != nil {
 		return err
 	}
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
 	for _, id := range eventIDs {
-		if 0 <= id && id < uint64(len(s.processed)) && s.processed[id] {
-			s.processed[id] = false
-			heap.Push(&s.Deferred, id)
+		if !r.processed.Includes(id) {
+			r.missed++
+		} else {
+			r.processed.Delete(id)
+			heap.Push(&r.deferred, id)
 		}
 	}
 
 	return nil
 }
 
-func (s *dummyRepo) Add(events []person.PersonEvent) error {
+func (r *dummyRepo) Add(events []person.PersonEvent) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s *dummyRepo) Remove(eventIDs []uint64) error {
-	if err := randTimeoutAndError(s.cfg.Timeout, s.cfg.ErrPer100K); err != nil {
+func (r *dummyRepo) Remove(eventIDs []uint64) error {
+	if err := randTimeoutAndError(r.cfg.Latency, r.cfg.ErrPer100K); err != nil {
 		return err
 	}
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
 	for i := 0; i < len(eventIDs); i++ {
 		id := eventIDs[i]
-		if 0 <= id && id < uint64(len(s.processed)) && s.processed[id] {
-			s.processed[id] = false
-			s.Removed = append(s.Removed, id)
+		if !r.processed.Includes(id) {
+			r.missed++
+		} else {
+			r.processed.Delete(id)
+			r.removed = append(r.removed, id)
 		}
 	}
 
 	return nil
 }
 
-func (s *dummyRepo) ProcessedLen() int {
-	return cap(s.Deferred) - len(s.Deferred) - len(s.Removed)
+// =============================================================================
+// sparse map из статьи Расса Кокса (https://research.swtch.com/sparse)
+type Uint64SparseMap struct {
+	dense  []uint64
+	sparse []uint64
 }
 
-func (s *dummyRepo) Processed() []uint64 {
-	result := make([]uint64, 0, s.ProcessedLen())
+func NewUin64SpareMap(n int) *Uint64SparseMap {
+	spare := make([]uint64, n)
+	return &Uint64SparseMap{sparse: spare}
+}
 
-	for i, v := range s.processed {
-		if v {
-			result = append(result, uint64(i))
-		}
+func (sm *Uint64SparseMap) Len() int {
+	return len(sm.dense)
+}
+
+func (sm *Uint64SparseMap) Values() []uint64 {
+	return sm.dense
+}
+
+func (sm *Uint64SparseMap) Add(v uint64) {
+	n := len(sm.dense)
+	sm.sparse[v] = uint64(n)
+	sm.dense = append(sm.dense, v)
+}
+
+func (sm *Uint64SparseMap) Delete(v uint64) {
+	if i := sm.sparse[v]; i < uint64(len(sm.dense)) && sm.dense[i] == v {
+		n := len(sm.dense) - 1
+		last := sm.dense[n]
+
+		sm.dense[i] = last
+		sm.sparse[last] = i
+		sm.dense = sm.dense[:n]
 	}
+}
 
-	return result
+func (sm *Uint64SparseMap) Includes(v uint64) bool {
+	i := sm.sparse[v]
+	return i < uint64(len(sm.dense)) && sm.dense[i] == v
 }
 
 //=============================================================================
@@ -213,5 +253,3 @@ func (h *Uint64Heap) Pop() any {
 	*h = old[0 : n-1]
 	return x
 }
-
-//=============================================================================
