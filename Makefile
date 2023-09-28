@@ -93,3 +93,22 @@ build-go: generate-go .build
 			-X 'github.com/$(SERVICE_PATH)/internal/config.commitHash=$(COMMIT_HASH)' \
 		" \
 		-o ./bin/grpc-server$(shell go env GOEXE) ./cmd/grpc-server/main.go
+
+.PHONY: my-test
+my-test:
+	go test ./internal/app/retranslator/collector
+	go test ./internal/app/retranslator/consumer
+	go test ./internal/app/retranslator/producer
+	go test ./internal/app/retranslator/worker
+	go test ./internal/app/retranslator/
+
+.PHONY: my-mockgen
+my-mockgen:
+	go generate ./internal
+	go generate ./internal/app/retranslator/consumer
+	go generate ./internal/app/retranslator/producer
+	go generate ./internal/app/retranslator/worker
+
+.PHONY: my-rm-mocks
+my-rm-mocks:
+	find . -type d -name mocks -exec rm -fr '{}' ';' || true
