@@ -94,8 +94,6 @@ func TestStart(t *testing.T) {
 }
 
 func TestStart2(t *testing.T) {
-	//lo.DebugEnable = true
-
 	repoCfg := DummyRepoCfg{
 		Size:       20_000,
 		Timeout:    100 * time.Millisecond,

@@ -68,55 +68,50 @@ func (cfg *Config) Start(ctx context.Context) *Retranslator {
 
 	termCtx, sendTerm := context2.WithTerm(ctx)
 
-	consumers := loader.StartN(termCtx, "Consumers", cfg.ConsumerCount,
+	consumers := loader.StartN(termCtx, cfg.ConsumerCount,
 		&consumer.Config{
 			BatchSize: cfg.ConsumeSize,
 			Timeout:   cfg.ConsumeTimeout,
 			Repo:      cfg.Repo,
 			Out:       batches,
-		},
-	)
+		})
 
-	distributor := loader.Start(ctx, "Distributor",
+	distributor := loader.Start(ctx,
 		&distributor.Config{
 			In:  batches,
 			Out: events,
-		},
-	)
+		})
 
-	producers := loader.StartN(ctx, "Producers", cfg.ProducerCount,
+	producers := loader.StartN(ctx, cfg.ProducerCount,
 		&producer.Config{
 			Timeout: cfg.ProduceTimeout,
 			In:      events,
 			Sender:  cfg.Sender,
 			Ok:      clean,
 			Error:   unlock,
-		},
-	)
+		})
 
-	collectors := loader.StartGroup(ctx, "Collectors",
-		loader.Item{"Cleaner", &collector.Config{
+	collectors := loader.StartGroup(ctx,
+		&collector.Config{
 			Job:       cfg.Repo.Remove,
 			BatchSize: cfg.CollectSize,
 			Timeout:   cfg.CollectTimeout,
 			In:        clean,
 			Out:       jobs,
-		}},
-		loader.Item{"Unlocker", &collector.Config{
+		},
+		&collector.Config{
 			Job:       cfg.Repo.Unlock,
 			BatchSize: cfg.CollectSize,
 			Timeout:   cfg.CollectTimeout,
 			In:        unlock,
 			Out:       jobs,
-		}},
-	)
+		})
 
-	workers := loader.StartN(ctx, "Workers", cfg.WorkerCount,
+	workers := loader.StartN(ctx, cfg.WorkerCount,
 		&worker.Config{
 			In:      jobs,
 			Timeout: cfg.WorkTimeout,
-		},
-	)
+		})
 
 	return &Retranslator{
 		sendTerm: sendTerm,

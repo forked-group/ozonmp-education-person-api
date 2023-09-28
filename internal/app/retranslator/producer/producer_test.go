@@ -11,8 +11,6 @@ import (
 )
 
 func TestConfig_Run(t *testing.T) {
-	//lo.DebugEnable = true
-
 	makeChanSize := func(n int) chan *person.PersonEvent {
 		ch := make(chan *person.PersonEvent, n)
 		for i := 0; i < n; i++ {
@@ -37,7 +35,6 @@ func TestConfig_Run(t *testing.T) {
 
 	type args struct {
 		ctxTimeout time.Duration
-		name       string
 	}
 
 	tests := []struct {
@@ -62,7 +59,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"producer1",
 			},
 			3,
 			0,
@@ -83,7 +79,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"producer2",
 			},
 			0,
 			1,
@@ -104,7 +99,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"producer3",
 			},
 			0,
 			2,
@@ -124,7 +118,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"producer4",
 			},
 			0,
 			0,
@@ -144,7 +137,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				0,
-				"producer5",
 			},
 			0,
 			0,
@@ -178,7 +170,7 @@ func TestConfig_Run(t *testing.T) {
 			done := make(chan struct{})
 			go func() {
 				defer close(done)
-				cfg.Run(ctx, tt.args.name)
+				cfg.Run(ctx)
 			}()
 
 			tm := time.NewTimer(1 * time.Second)

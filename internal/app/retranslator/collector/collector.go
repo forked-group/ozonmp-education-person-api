@@ -3,7 +3,6 @@ package collector
 import (
 	"context"
 	"github.com/aaa2ppp/zonmp-education-person-api/internal/app/retranslator/worker"
-	"github.com/aaa2ppp/zonmp-education-person-api/internal/lib/log/lo"
 	"time"
 )
 
@@ -25,35 +24,24 @@ type Config struct {
 }
 
 type collector struct {
-	cfg  *Config
-	ctx  context.Context
-	name string
-	buf  []uint64
-	n    int
-	tm   *time.Timer
+	cfg *Config
+	ctx context.Context
+	buf []uint64
+	n   int
+	tm  *time.Timer
 }
 
-func (cfg *Config) Run(ctx context.Context, name string) {
-	const op = "Run"
-
+func (cfg *Config) Run(ctx context.Context) {
 	c := collector{
-		cfg:  cfg,
-		ctx:  ctx,
-		name: name,
-		buf:  make([]uint64, cfg.BatchSize),
+		cfg: cfg,
+		ctx: ctx,
+		buf: make([]uint64, cfg.BatchSize),
 	}
-
 	c.run()
 }
 
 func (c *collector) run() {
-	const op = "run"
-
-	lo.Debug("%s.%s: running...", c.name, op)
-
-	ok := true
-
-	for ok && c.ctx.Err() == nil {
+	for ok := true; ok && c.ctx.Err() == nil; {
 		ok = c.collect()
 		if c.ctx.Err() != nil {
 			break
@@ -62,15 +50,9 @@ func (c *collector) run() {
 			return
 		}
 	}
-
-	if ok {
-		lo.Debug("%s.%s: context canceled", c.name, op)
-	}
 }
 
 func (c *collector) collect() bool {
-	const op = "collect"
-
 	if c.tm == nil {
 		c.tm = time.NewTimer(c.cfg.Timeout)
 	} else {
@@ -84,19 +66,16 @@ loop:
 			break loop
 
 		case <-c.tm.C:
-			lo.Debug("%s.%s: collect timeout expired", c.name, op)
 			return true
 
 		case event, ok := <-c.cfg.In:
 			if !ok {
-				lo.Debug("%s.%s: input channel closed", c.name, op)
 				if !c.tm.Stop() {
 					<-c.tm.C
 				}
 				return false
 			}
 
-			lo.Debug("%s.%s: event %d received", c.name, op, event)
 			c.buf[c.n] = event
 			c.n++
 		}
@@ -106,20 +85,11 @@ loop:
 		<-c.tm.C
 	}
 
-	if c.n < len(c.buf) {
-		lo.Debug("%s.%s: context canceled", c.name, op)
-		return false
-	}
-
-	lo.Debug("%s.%s: full batch collected", c.name, op)
-	return true
+	return c.n == len(c.buf)
 }
 
 func (c *collector) flush() bool {
-	const op = "flush"
-
 	if c.n == 0 {
-		lo.Debug("%s.%s: no any data", c.name, op)
 		return true
 	}
 
@@ -134,11 +104,9 @@ func (c *collector) flush() bool {
 
 	select {
 	case <-c.ctx.Done():
-		lo.Debug("%s.%s: context canceled", c.name, op)
 		return false
 
 	case c.cfg.Out <- job:
-		lo.Debug("%s.%s: job %v sent", c.name, op, job)
 		return true
 	}
 }

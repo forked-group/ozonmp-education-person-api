@@ -45,8 +45,6 @@ func makeCosedJobsChan(ctrl *gomock.Controller, _, times int) <-chan Job {
 }
 
 func TestConfig_Run(t *testing.T) {
-	//lo.DebugEnable = true
-
 	type fields struct {
 		chLen    int
 		jobTimes int
@@ -56,7 +54,6 @@ func TestConfig_Run(t *testing.T) {
 
 	type args struct {
 		ctxTimeout time.Duration
-		name       string
 	}
 
 	tests := []struct {
@@ -74,7 +71,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"worker1",
 			},
 		},
 
@@ -89,7 +85,6 @@ func TestConfig_Run(t *testing.T) {
 		//	},
 		//	args{
 		//		100 * time.Millisecond,
-		//		"worker2",
 		//	},
 		//},
 
@@ -103,7 +98,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"worker3",
 			},
 		},
 		{
@@ -116,7 +110,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				100 * time.Millisecond,
-				"worker4",
 			},
 		},
 		{
@@ -129,7 +122,6 @@ func TestConfig_Run(t *testing.T) {
 			},
 			args{
 				0,
-				"worker1",
 			},
 		},
 		// TODO: Add test cases.
@@ -158,7 +150,7 @@ func TestConfig_Run(t *testing.T) {
 			done := make(chan struct{})
 			go func() {
 				defer close(done)
-				cfg.Run(ctx, tt.args.name)
+				cfg.Run(ctx)
 			}()
 
 			tm := time.NewTimer(1 * time.Second)

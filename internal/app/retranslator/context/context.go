@@ -8,10 +8,7 @@ type contextWithTerm struct {
 }
 
 func Term(ctx context.Context) context.Context {
-	if c, ok := ctx.(*contextWithTerm); ok {
-		return c.term
-	}
-	return ctx
+	return ctx.(*contextWithTerm).term
 }
 
 func WithTerm(ctx context.Context) (*contextWithTerm, context.CancelFunc) {
