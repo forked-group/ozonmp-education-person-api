@@ -20,7 +20,7 @@ type Config struct {
 	In        <-chan uint64
 	Out       chan<- worker.Job
 	BatchSize int
-	Timeout   time.Duration
+	MaxDelay  time.Duration
 }
 
 type collector struct {
@@ -46,17 +46,34 @@ func (c *collector) run() {
 		if c.ctx.Err() != nil {
 			break
 		}
+
 		if !c.flush() {
 			return
 		}
 	}
 }
 
-func (c *collector) collect() bool {
+func (c *collector) setTimer(delay time.Duration) {
 	if c.tm == nil {
-		c.tm = time.NewTimer(c.cfg.Timeout)
+		c.tm = time.NewTimer(delay)
 	} else {
-		c.tm.Reset(c.cfg.Timeout)
+		c.tm.Reset(delay)
+	}
+}
+
+func (c *collector) collect() bool {
+	select {
+	case <-c.ctx.Done():
+		return false
+
+	case event, ok := <-c.cfg.In:
+		if !ok {
+			return false
+		}
+
+		c.setTimer(c.cfg.MaxDelay)
+		c.buf[0] = event
+		c.n = 1
 	}
 
 loop:

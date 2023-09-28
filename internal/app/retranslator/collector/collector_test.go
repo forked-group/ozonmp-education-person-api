@@ -111,7 +111,7 @@ func TestConfig_Run(t *testing.T) {
 				In:        tt.fields.In(tt.fields.inLen),
 				Out:       tt.fields.Out,
 				BatchSize: tt.fields.BatchSize,
-				Timeout:   tt.fields.FlushTimeout,
+				MaxDelay:  tt.fields.FlushTimeout,
 			}
 
 			var ctx context.Context

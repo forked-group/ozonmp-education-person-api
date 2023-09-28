@@ -63,9 +63,8 @@ func (c *consumer) send(events []person.PersonEvent) bool {
 		return false
 
 	case c.cfg.Out <- events:
+		return true
 	}
-
-	return true
 }
 
 func (c *consumer) sleep() bool {

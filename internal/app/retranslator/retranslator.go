@@ -30,8 +30,8 @@ type Config struct {
 	ProducerCount  int
 	ProduceTimeout time.Duration
 
-	CollectSize    int
-	CollectTimeout time.Duration
+	CollectSize     int
+	CollectMaxDelay time.Duration
 
 	WorkerCount int
 	WorkTimeout time.Duration
@@ -95,14 +95,14 @@ func (cfg *Config) Start(ctx context.Context) *Retranslator {
 		&collector.Config{
 			Job:       cfg.Repo.Remove,
 			BatchSize: cfg.CollectSize,
-			Timeout:   cfg.CollectTimeout,
+			MaxDelay:  cfg.CollectMaxDelay,
 			In:        clean,
 			Out:       jobs,
 		},
 		&collector.Config{
 			Job:       cfg.Repo.Unlock,
 			BatchSize: cfg.CollectSize,
-			Timeout:   cfg.CollectTimeout,
+			MaxDelay:  cfg.CollectMaxDelay,
 			In:        unlock,
 			Out:       jobs,
 		})
