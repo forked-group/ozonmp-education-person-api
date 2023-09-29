@@ -24,10 +24,10 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
-	"github.com/ozonmp/omp-template-api/internal/api"
-	"github.com/ozonmp/omp-template-api/internal/config"
-	"github.com/ozonmp/omp-template-api/internal/repo"
-	pb "github.com/ozonmp/omp-template-api/pkg/omp-template-api"
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/api"
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/config"
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/repo"
+	pb "github.com/aaa2ppp/ozonmp-education-kw-person-api/pkg/education_kw-person-api"
 )
 
 // GrpcServer is gRPC server

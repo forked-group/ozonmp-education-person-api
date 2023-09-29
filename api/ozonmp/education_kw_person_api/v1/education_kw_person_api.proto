@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-package ozonmp.omp_template_api.v1;
+package ozonmp.education_kw_person_api.v1;
 
 import "validate/validate.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/ozonmp/omp-template-api/pkg/omp-template-api;omp_template_api";
+option go_package = "github.com/aaa2ppp/ozonmp-education-kw-person-api/pkg/education_kw-person-api;education_kw_person_api";
 
 // OmpTemplateApiService - Service for working with templates
 service OmpTemplateApiService {
