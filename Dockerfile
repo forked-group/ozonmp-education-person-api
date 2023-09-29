@@ -1,8 +1,8 @@
 # Builder
 
-ARG GITHUB_PATH=github.com/ozonmp/omp-template-api
-
 FROM golang:1.16-alpine AS builder
+
+ARG GITHUB_PATH=github.com/aaa2ppp/ozonmp-education-kw-person-api
 
 WORKDIR /home/${GITHUB_PATH}
 

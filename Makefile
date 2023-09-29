@@ -5,8 +5,8 @@ endif
 
 export GO111MODULE=on
 
-SERVICE_NAME=omp-template-api
-SERVICE_PATH=ozonmp/omp-template-api
+SERVICE_NAME=education_kw-person-api
+SERVICE_PATH=aaa2ppp/ozonmp-education-kw-person-api
 
 PGV_VERSION:="v0.6.1"
 BUF_VERSION:="v1.16.0"
@@ -40,7 +40,7 @@ test:
 .PHONY: generate
 generate: .generate-install-buf .generate-go .generate-python .generate-finalize-go .generate-finalize-python
 
-.PHONY: generate
+.PHONY: generate-go
 generate-go: .generate-install-buf .generate-go .generate-finalize-go
 
 .generate-install-buf:
@@ -60,7 +60,7 @@ generate-go: .generate-install-buf .generate-go .generate-finalize-go
 	cd pkg/$(SERVICE_NAME) && ls go.mod || (go mod init github.com/$(SERVICE_PATH)/pkg/$(SERVICE_NAME) && go mod tidy)
 
 .generate-finalize-python:
-	find pypkg/omp-template-api -type d -exec touch {}/__init__.py \;
+	find pypkg/education_kw-person-api -type d -exec touch {}/__init__.py \;
 
 # ----------------------------------------------------------------
 
@@ -77,7 +77,7 @@ deps-go:
 	go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger@latest
 
 .deps-python:
-	python -m pip install grpcio-tools grpclib protobuf
+	python -m pip install grpcio-tools grpclib protobuf mypy-protobuf
 
 .PHONY: build
 build: generate .build

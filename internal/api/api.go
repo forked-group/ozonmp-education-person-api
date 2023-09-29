@@ -10,29 +10,29 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/ozonmp/omp-template-api/internal/repo"
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/repo"
 
-	pb "github.com/ozonmp/omp-template-api/pkg/omp-template-api"
+	pb "github.com/aaa2ppp/ozonmp-education-kw-person-api/pkg/education_kw-person-api"
 )
 
 var (
 	totalTemplateNotFound = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "omp_template_api_template_not_found_total",
-		Help: "Total number of templates that were not found",
+		Name: "education_kw_person_api_person_not_found_total",
+		Help: "Total number of persons that were not found",
 	})
 )
 
-type templateAPI struct {
+type personAPI struct {
 	pb.UnimplementedOmpTemplateApiServiceServer
 	repo repo.Repo
 }
 
-// NewTemplateAPI returns api of omp-template-api service
+// NewTemplateAPI returns api of education_kw-person-api service
 func NewTemplateAPI(r repo.Repo) pb.OmpTemplateApiServiceServer {
-	return &templateAPI{repo: r}
+	return &personAPI{repo: r}
 }
 
-func (o *templateAPI) DescribeTemplateV1(
+func (o *personAPI) DescribeTemplateV1(
 	ctx context.Context,
 	req *pb.DescribeTemplateV1Request,
 ) (*pb.DescribeTemplateV1Response, error) {
@@ -43,26 +43,26 @@ func (o *templateAPI) DescribeTemplateV1(
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	template, err := o.repo.DescribeTemplate(ctx, req.TemplateId)
+	person, err := o.repo.DescribeTemplate(ctx, req.TemplateId)
 	if err != nil {
 		log.Error().Err(err).Msg("DescribeTemplateV1 -- failed")
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if template == nil {
-		log.Debug().Uint64("templateId", req.TemplateId).Msg("template not found")
+	if person == nil {
+		log.Debug().Uint64("personId", req.TemplateId).Msg("person not found")
 		totalTemplateNotFound.Inc()
 
-		return nil, status.Error(codes.NotFound, "template not found")
+		return nil, status.Error(codes.NotFound, "person not found")
 	}
 
 	log.Debug().Msg("DescribeTemplateV1 - success")
 
 	return &pb.DescribeTemplateV1Response{
 		Value: &pb.Template{
-			Id:  template.ID,
-			Foo: template.Foo,
+			Id:  person.ID,
+			Foo: person.Foo,
 		},
 	}, nil
 }

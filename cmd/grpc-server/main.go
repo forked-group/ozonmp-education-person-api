@@ -3,19 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
-
 	"github.com/pressly/goose/v3"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/config"
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/database"
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/server"
+	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/tracer"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/lib/pq"
-
-	"github.com/ozonmp/omp-template-api/internal/config"
-	"github.com/ozonmp/omp-template-api/internal/database"
-	"github.com/ozonmp/omp-template-api/internal/server"
-	"github.com/ozonmp/omp-template-api/internal/tracer"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var (
