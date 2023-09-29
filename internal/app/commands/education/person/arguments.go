@@ -10,10 +10,10 @@ import (
 
 var ErrUnclosedQuotationMark = errors.New("unclosed quotation mark detected")
 
-func parseArguments(text string) ([]string, error) {
+func splitIntoArguments(s string) ([]string, error) {
 	var args []string
 
-	r := strings.NewReader(text)
+	r := strings.NewReader(s)
 	var buf bytes.Buffer
 
 	for r.Len() != 0 {

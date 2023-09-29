@@ -2,46 +2,50 @@ package person
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/ozonmp/omp-bot/internal/service"
 	"log"
 	"strconv"
 )
 
 func (c commander) Get(inputMsg *tgbotapi.Message) {
 	const op = "commander.Get"
+	const usage = "usage: /get%s id"
 
-	argsStr := inputMsg.CommandArguments()
-	args, err := parseArguments(argsStr)
+	chatID := inputMsg.Chat.ID
 
+	args, err := splitIntoArguments(inputMsg.CommandArguments())
 	if err != nil {
-		log.Printf("%s: can't parse arguments %q: %v", op, argsStr, err)
+		c.SendError(chatID, err.Error())
 		return
 	}
 
 	if len(args) == 0 {
-		log.Printf("%s: argument required", op)
+		c.SendError(chatID, "you must specify the person id")
 		return
 	}
 
 	if len(args) > 1 {
-		log.Printf("%s: too many arguments, want one: %q", op, argsStr)
+		c.SendError(chatID, "you can only specify one person id")
 		return
 	}
 
-	id, err := strconv.ParseUint(args[0], 10, 64)
+	id, err := strconv.ParseUint(args[0], 0, 64)
 	if err != nil {
-		log.Printf("%s: invalid argument '%s': %v", op, args[0], err)
+		c.SendError(chatID, "id must be a positive number")
 		return
 	}
 
-	item, err := c.service.Describe(id)
-	if err != nil {
-		log.Printf("%s: can't get item with id %d: %v", op, id, err)
+	person, err := c.service.Describe(id)
+
+	switch {
+	case err == service.ErrNotFound:
+		c.SendError(chatID, "person id not found")
+		return
+	case err != nil:
+		log.Printf("%s: can't get person: %v", op, err)
+		c.SendError(chatID, "internal error")
 		return
 	}
 
-	outputMsg := tgbotapi.NewMessage(inputMsg.Chat.ID, item.String())
-
-	if _, err := c.bot.Send(outputMsg); err != nil {
-		log.Printf("%s: can't send message to chat: %v", op, err)
-	}
+	c.SendOk(chatID, person.String())
 }

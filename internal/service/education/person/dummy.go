@@ -1,24 +1,26 @@
 package person
 
 import (
-	"errors"
 	"github.com/ozonmp/omp-bot/internal/model/education"
+	"github.com/ozonmp/omp-bot/internal/service"
 	"sync"
 )
 
 var testData = []education.Person{
-	{Name: "Zero"},
-	{Name: "One"},
-	{Name: "Two"},
-	{Name: "Three"},
-	{Name: "Four"},
-	{Name: "Five"},
-	{Name: "Six"},
-	{Name: "Seven"},
-	{Name: "Eight"},
-	{Name: "Nine"},
-	{Name: "Ten"},
+	{LastName: "Zero"},
+	{LastName: "One"},
+	{LastName: "Two"},
+	{LastName: "Three"},
+	{LastName: "Four"},
+	{LastName: "Five"},
+	{LastName: "Six"},
+	{LastName: "Seven"},
+	{LastName: "Eight"},
+	{LastName: "Nine"},
+	{LastName: "Ten"},
 }
+
+var ErrNotFound = service.ErrNotFound
 
 type dataItem struct {
 	education.Person
@@ -44,15 +46,13 @@ func NewDummyPersonServiceWithTestData() *DummyPersonService {
 	return s
 }
 
-var ErrNotFound = errors.New("not found")
-
 func (s *DummyPersonService) Describe(personID uint64) (*education.Person, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	index := personID
 
-	if s.data[index].deleted {
+	if !(0 <= index && index < uint64(len(s.data))) || s.data[index].deleted {
 		return nil, ErrNotFound
 	}
 
@@ -93,6 +93,8 @@ func (s *DummyPersonService) Create(person education.Person) (uint64, error) {
 }
 
 func (s *DummyPersonService) Update(personID uint64, person education.Person) error {
+	const op = "DummyPersonService.Update"
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -112,7 +114,7 @@ func (s *DummyPersonService) Remove(personID uint64) (bool, error) {
 	defer s.mu.Unlock()
 
 	index := personID
-	if s.data[index].deleted {
+	if !(0 <= index && index < uint64(len(s.data))) || s.data[index].deleted {
 		return false, nil
 	}
 

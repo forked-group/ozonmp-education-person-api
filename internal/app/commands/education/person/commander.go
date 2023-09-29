@@ -86,3 +86,25 @@ func (c commander) HandleCommand(inputMsg *tgbotapi.Message, commandPath path.Co
 		c.Default(inputMsg)
 	}
 }
+
+func (c commander) SendError(chatID int64, msg string) {
+	c.Send(chatID, "ERR "+msg)
+}
+
+func (c commander) SendOk(chatID int64, msg string) {
+	c.Send(chatID, "OK "+msg)
+}
+
+func (c commander) Send(chatID int64, msg string) {
+	const op = "commander.Send"
+
+	output := tgbotapi.NewMessage(chatID, msg)
+
+	if _, err := c.bot.Send(output); err != nil {
+		log.Printf("%s: can't send message to chat: %v", op, err)
+	}
+}
+
+func (c commander) cmdSuffix() string {
+	return "__" + c.domain + "__" + c.subdomain
+}

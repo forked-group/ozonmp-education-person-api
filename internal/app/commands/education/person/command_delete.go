@@ -8,34 +8,38 @@ import (
 
 func (c commander) Delete(inputMsg *tgbotapi.Message) {
 	const op = "commander.Get"
+	const usage = "/delete%s id"
 
-	argsStr := inputMsg.CommandArguments()
-	args, err := parseArguments(argsStr)
+	chatID := inputMsg.Chat.ID
 
+	args, err := splitIntoArguments(inputMsg.CommandArguments())
 	if err != nil {
-		log.Printf("%s: can't parse arguments %q: %v", op, argsStr, err)
+		c.SendError(chatID, err.Error())
 		return
 	}
 
 	if len(args) == 0 {
-		log.Printf("%s: argument required", op)
+		c.SendError(chatID, "you must specify the person id")
 		return
 	}
 
 	if len(args) > 1 {
-		log.Printf("%s: too many arguments, want one: %q", op, argsStr)
+		c.SendError(chatID, "you can only specify one person id")
 		return
 	}
 
-	id, err := strconv.ParseUint(args[0], 10, 64)
+	id, err := strconv.ParseUint(args[0], 0, 64)
 	if err != nil {
-		log.Printf("%s: invalid argument '%s': %v", op, args[0], err)
+		c.SendError(chatID, "id must be a positive number")
 		return
 	}
 
 	_, err = c.service.Remove(id)
 	if err != nil {
-		log.Printf("%s: can't delete item with id %d: %v", op, id, err)
+		log.Printf("%s: can't remove person: %v", op, err)
+		c.SendError(chatID, "internal error")
 		return
 	}
+
+	c.SendOk(chatID, "successful deleted")
 }

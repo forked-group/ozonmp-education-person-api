@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func Test_parseArguments(t *testing.T) {
+func Test_splitIntoArguments(t *testing.T) {
 	type args struct {
 		text string
 	}
@@ -105,7 +105,7 @@ func Test_parseArguments(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseArguments(tt.args.text)
+			got, err := splitIntoArguments(tt.args.text)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SplitIntoWords() error = %v, wantErr %v", err, tt.wantErr)
 				return

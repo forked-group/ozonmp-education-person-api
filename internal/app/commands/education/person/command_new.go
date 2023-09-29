@@ -1,52 +1,48 @@
 package person
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/ozonmp/omp-bot/internal/model/education"
 	"log"
-	"strings"
 )
 
 func (c commander) New(inputMsg *tgbotapi.Message) {
 	const op = "commander.New"
+	const usage = "/new%s [[first_name [middle_name]] last_name] [field=value ...]"
 
-	argsStr := inputMsg.CommandArguments()
-	args, err := parseArguments(argsStr)
+	chatID := inputMsg.Chat.ID
 
+	args, err := splitIntoArguments(inputMsg.CommandArguments())
 	if err != nil {
-		log.Printf("%s: can't parse arguments %q: %v", op, argsStr, err)
+		c.SendError(chatID, err.Error())
 		return
 	}
 
 	if len(args) == 0 {
-		log.Printf("%s: argument required", op)
+		c.SendError(chatID, "you must specify the field(s) of person")
 		return
 	}
 
-	items := make([]education.Person, 0, len(args))
+	var p education.Person
 
-	for _, name := range args {
-		it := education.Person{Name: name}
-		id, err := c.service.Create(it)
-		if err != nil {
-			log.Printf("%s: can't create new item with name '%s': %v", op, name, err)
-			// TODO: rollback?
-			break
-		}
-		it.ID = id
-		items = append(items, it)
+	if args, err = parsePersonNames(args, &p); err != nil {
+		c.SendError(chatID, err.Error())
+		return
 	}
 
-	outputText := strings.Builder{}
-
-	for _, it := range items {
-		outputText.WriteString(it.String())
-		outputText.WriteByte('\n')
+	if err = parsePersonFields(args, &p); err != nil {
+		c.SendError(chatID, err.Error())
+		return
 	}
 
-	outputMsg := tgbotapi.NewMessage(inputMsg.Chat.ID, outputText.String())
+	id, err := c.service.Create(p)
 
-	if _, err := c.bot.Send(outputMsg); err != nil {
-		log.Printf("%s: can't send message to chat: %v", op, err)
+	if err != nil {
+		log.Printf("%s: can't create person: %v", op, err)
+		c.SendError(chatID, "internal error")
+		return
 	}
+
+	c.SendOk(chatID, fmt.Sprintf("create new person with id=%d", id))
 }

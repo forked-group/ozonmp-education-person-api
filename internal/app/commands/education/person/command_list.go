@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/ozonmp/omp-bot/internal/app/path"
+	"github.com/ozonmp/omp-bot/internal/service"
 
 	"log"
 	"strings"
@@ -16,7 +17,6 @@ type callbackListData struct {
 const listPageSize = 5
 
 func (c commander) List(inputMsg *tgbotapi.Message) {
-	const op = "commander.List"
 	c.listNext(inputMsg.Chat.ID, 0)
 }
 
@@ -36,29 +36,29 @@ func (c commander) ListCallback(callback *tgbotapi.CallbackQuery, callbackPath p
 func (c commander) listNext(chatID int64, cursor uint64) {
 	const op = "commander.listNext"
 
-	items, err := c.service.List(cursor, listPageSize)
+	entries, err := c.service.List(cursor, listPageSize)
 
-	if err != nil {
-		log.Printf("%s: can't get list of items: %v", op, err)
+	switch {
+	case err == service.ErrNotFound || len(entries) == 0:
+		c.SendError(chatID, "no more entries")
 		return
-	}
-
-	if len(items) == 0 {
-		log.Printf("%s: no any items", op)
+	case err != nil:
+		log.Printf("%s: can't list entries: %v", op, err)
+		c.SendError(chatID, "internal error")
 		return
 	}
 
 	outputText := strings.Builder{}
 
-	for _, it := range items {
-		outputText.WriteString(it.String())
+	for _, person := range entries {
+		outputText.WriteString(person.String())
 		outputText.WriteByte('\n')
 	}
 
 	outputMsg := tgbotapi.NewMessage(chatID, outputText.String())
 
 	serializedData, _ := json.Marshal(callbackListData{
-		Cursor: items[len(items)-1].ID + 1,
+		Cursor: entries[len(entries)-1].ID + 1,
 	})
 
 	var callbackPath = path.CallbackPath{

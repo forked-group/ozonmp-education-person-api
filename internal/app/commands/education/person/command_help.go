@@ -2,27 +2,41 @@ package person
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
 	"strings"
 )
 
 func (c commander) Help(inputMsg *tgbotapi.Message) {
 	const op = "commander.Help"
 
-	commandSuffix := "__" + c.domain + "__" + c.subdomain
-	outputText := strings.Builder{}
+	suffix := c.cmdSuffix()
+	msg := strings.Builder{}
+	msg.Grow(512)
 
 	// TODO: команда сома должна рассказывать о себе
-	outputText.WriteString("/help" + commandSuffix + " — print list of commands\n")
-	outputText.WriteString("/list" + commandSuffix + " — get a list of entity\n")
-	outputText.WriteString("/get" + commandSuffix + " <id> — get a entity with id\n")
-	outputText.WriteString("/delete" + commandSuffix + " <id> — delete an existing entity\n")
-	outputText.WriteString("/new" + commandSuffix + " <name> — create a new entity\n")
-	outputText.WriteString("/edit" + commandSuffix + " <id> <name> — edit a entity\n")
 
-	outputMsg := tgbotapi.NewMessage(inputMsg.Chat.ID, outputText.String())
+	msg.WriteString("/help")
+	msg.WriteString(suffix)
+	msg.WriteString(" — print list of commands\n")
 
-	if _, err := c.bot.Send(outputMsg); err != nil {
-		log.Printf("%s: can't send message to chat: %v", op, err)
-	}
+	msg.WriteString("/list")
+	msg.WriteString(suffix)
+	msg.WriteString(" — get a list of entity\n")
+
+	msg.WriteString("/get")
+	msg.WriteString(suffix)
+	msg.WriteString(" id — get a entity with id\n")
+
+	msg.WriteString("/delete")
+	msg.WriteString(suffix)
+	msg.WriteString(" id — delete an existing entity\n")
+
+	msg.WriteString("/new")
+	msg.WriteString(suffix)
+	msg.WriteString(" [[first_name [middle_name]] last_name] [field=value ...] — create a new entity\n")
+
+	msg.WriteString("/edit")
+	msg.WriteString(suffix)
+	msg.WriteString(" id [field=value ...] — edit a entity\n")
+
+	c.Send(inputMsg.Chat.ID, msg.String())
 }
