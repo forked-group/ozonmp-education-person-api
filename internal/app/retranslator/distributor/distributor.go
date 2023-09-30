@@ -2,12 +2,11 @@ package distributor
 
 import (
 	"context"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 )
 
 type Config struct {
-	In  <-chan []person.PersonEvent
-	Out chan<- *person.PersonEvent
+	In  <-chan []education.PersonEvent
+	Out chan<- *education.PersonEvent
 }
 
 type distributor struct {
@@ -35,7 +34,7 @@ func (d *distributor) run() {
 	}
 }
 
-func (d *distributor) receive() ([]person.PersonEvent, bool) {
+func (d *distributor) receive() ([]education.PersonEvent, bool) {
 	select {
 	case <-d.ctx.Done():
 		return nil, false
@@ -48,7 +47,7 @@ func (d *distributor) receive() ([]person.PersonEvent, bool) {
 	}
 }
 
-func (d *distributor) send(events []person.PersonEvent) bool {
+func (d *distributor) send(events []education.PersonEvent) bool {
 	for i := range events {
 		event := &events[i]
 

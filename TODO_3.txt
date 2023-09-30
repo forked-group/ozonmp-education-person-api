@@ -2,7 +2,7 @@
 
 + Сделать rebase своего репозитория {kw-domain}-{subdomain}-api на omp-template-api
 
-- Добавить в proto следующие handler-ы (пример template):
++ Добавить в proto следующие handler-ы (пример template):
     Create{Subdomain}
     Describe{Subdomain}
     List{Subdomains}
@@ -14,9 +14,9 @@
 
 + Сгенерировать gRPC код клиента и сервера (make generate)
 
-- Имплементировать код новых ручек в internal/api/api.go (пример template)
++ Имплементировать код новых ручек в internal/api/api.go (пример template)
 
-- Код ручек должен просто логгировать вызовы (с уровнем debug)
++ Код ручек должен просто логгировать вызовы (с уровнем debug)
     Возвращать пустой ответ или внутреннюю ошибку (not implemented)
     При желание разделить по разным файлам имплементацию ручек
     Протестировать через grpc_cli (или grpcurl) написанные ручки (пример template)

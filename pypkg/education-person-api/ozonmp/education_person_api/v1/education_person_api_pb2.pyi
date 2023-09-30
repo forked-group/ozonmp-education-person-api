@@ -3,40 +3,154 @@
 isort:skip_file
 """
 import builtins
+import collections.abc
 import google.protobuf.descriptor
+import google.protobuf.internal.containers
+import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
 import google.protobuf.timestamp_pb2
 import sys
+import typing
 
-if sys.version_info >= (3, 8):
+if sys.version_info >= (3, 10):
     import typing as typing_extensions
 else:
     import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
+class _Sex:
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
+
+class _SexEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Sex.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    SEX_NONE: _Sex.ValueType  # 0
+    SEX_FEMALE: _Sex.ValueType  # 1
+    SEX_MALE: _Sex.ValueType  # 2
+
+class Sex(_Sex, metaclass=_SexEnumTypeWrapper): ...
+
+SEX_NONE: Sex.ValueType  # 0
+SEX_FEMALE: Sex.ValueType  # 1
+SEX_MALE: Sex.ValueType  # 2
+global___Sex = Sex
+
+class _Education:
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
+
+class _EducationEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Education.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    EDUCATION_NONE: _Education.ValueType  # 0
+    EDUCATION_PRESCHOOL: _Education.ValueType  # 1
+    """Дошкольное"""
+    EDUCATION_PRIMARY_GENERAL: _Education.ValueType  # 2
+    """Начальное общее — 1—4 классы"""
+    EDUCATION_BASIC_GENERAL: _Education.ValueType  # 3
+    """Основное общее — 5—9 классы"""
+    EDUCATION_SECONDARY_GENERAL: _Education.ValueType  # 4
+    """Среднее общее — 10—11 классы"""
+    EDUCATION_SECONDARY_VOCATIONAL: _Education.ValueType  # 5
+    """Среднее профессиональное"""
+    EDUCATION_HIGHER_1: _Education.ValueType  # 6
+    """Высшее I степени — бакалавриат"""
+    EDUCATION_HIGHER_2: _Education.ValueType  # 7
+    """Высшее II степени — специалитет, магистратура"""
+    EDUCATION_HIGHER_3: _Education.ValueType  # 8
+    """Высшее III степени — подготовка кадров высшей квалификации"""
+
+class Education(_Education, metaclass=_EducationEnumTypeWrapper): ...
+
+EDUCATION_NONE: Education.ValueType  # 0
+EDUCATION_PRESCHOOL: Education.ValueType  # 1
+"""Дошкольное"""
+EDUCATION_PRIMARY_GENERAL: Education.ValueType  # 2
+"""Начальное общее — 1—4 классы"""
+EDUCATION_BASIC_GENERAL: Education.ValueType  # 3
+"""Основное общее — 5—9 классы"""
+EDUCATION_SECONDARY_GENERAL: Education.ValueType  # 4
+"""Среднее общее — 10—11 классы"""
+EDUCATION_SECONDARY_VOCATIONAL: Education.ValueType  # 5
+"""Среднее профессиональное"""
+EDUCATION_HIGHER_1: Education.ValueType  # 6
+"""Высшее I степени — бакалавриат"""
+EDUCATION_HIGHER_2: Education.ValueType  # 7
+"""Высшее II степени — специалитет, магистратура"""
+EDUCATION_HIGHER_3: Education.ValueType  # 8
+"""Высшее III степени — подготовка кадров высшей квалификации"""
+global___Education = Education
+
 @typing_extensions.final
 class Person(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     ID_FIELD_NUMBER: builtins.int
-    FOO_FIELD_NUMBER: builtins.int
+    FIST_NAME_FIELD_NUMBER: builtins.int
+    MIDDLE_NAME_FIELD_NUMBER: builtins.int
+    LAST_NAME_FIELD_NUMBER: builtins.int
+    BIRTHDAY_FIELD_NUMBER: builtins.int
+    SEX_FIELD_NUMBER: builtins.int
+    EDUCATION_FIELD_NUMBER: builtins.int
     CREATED_FIELD_NUMBER: builtins.int
     id: builtins.int
-    foo: builtins.int
+    fist_name: builtins.str
+    middle_name: builtins.str
+    last_name: builtins.str
+    @property
+    def birthday(self) -> google.protobuf.timestamp_pb2.Timestamp: ...
+    sex: global___Sex.ValueType
+    education: global___Education.ValueType
     @property
     def created(self) -> google.protobuf.timestamp_pb2.Timestamp: ...
     def __init__(
         self,
         *,
         id: builtins.int = ...,
-        foo: builtins.int = ...,
+        fist_name: builtins.str = ...,
+        middle_name: builtins.str = ...,
+        last_name: builtins.str = ...,
+        birthday: google.protobuf.timestamp_pb2.Timestamp | None = ...,
+        sex: global___Sex.ValueType = ...,
+        education: global___Education.ValueType = ...,
         created: google.protobuf.timestamp_pb2.Timestamp | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["created", b"created"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["created", b"created", "foo", b"foo", "id", b"id"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["birthday", b"birthday", "created", b"created"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["birthday", b"birthday", "created", b"created", "education", b"education", "fist_name", b"fist_name", "id", b"id", "last_name", b"last_name", "middle_name", b"middle_name", "sex", b"sex"]) -> None: ...
 
 global___Person = Person
+
+@typing_extensions.final
+class CreatePersonV1Request(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    VALUE_FIELD_NUMBER: builtins.int
+    @property
+    def value(self) -> global___Person: ...
+    def __init__(
+        self,
+        *,
+        value: global___Person | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["value", b"value"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["value", b"value"]) -> None: ...
+
+global___CreatePersonV1Request = CreatePersonV1Request
+
+@typing_extensions.final
+class CreatePersonV1Response(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    PERSON_ID_FIELD_NUMBER: builtins.int
+    person_id: builtins.int
+    def __init__(
+        self,
+        *,
+        person_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["person_id", b"person_id"]) -> None: ...
+
+global___CreatePersonV1Response = CreatePersonV1Response
 
 @typing_extensions.final
 class DescribePersonV1Request(google.protobuf.message.Message):
@@ -57,15 +171,76 @@ global___DescribePersonV1Request = DescribePersonV1Request
 class DescribePersonV1Response(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    VALUE_FIELD_NUMBER: builtins.int
+    PERSON_FIELD_NUMBER: builtins.int
     @property
-    def value(self) -> global___Person: ...
+    def person(self) -> global___Person: ...
     def __init__(
         self,
         *,
-        value: global___Person | None = ...,
+        person: global___Person | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["value", b"value"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["value", b"value"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["person", b"person"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["person", b"person"]) -> None: ...
 
 global___DescribePersonV1Response = DescribePersonV1Response
+
+@typing_extensions.final
+class ListPersonV1Request(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    CURSOR_FIELD_NUMBER: builtins.int
+    cursor: builtins.int
+    def __init__(
+        self,
+        *,
+        cursor: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cursor", b"cursor"]) -> None: ...
+
+global___ListPersonV1Request = ListPersonV1Request
+
+@typing_extensions.final
+class ListPersonV1Response(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    PERSON_FIELD_NUMBER: builtins.int
+    @property
+    def person(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Person]: ...
+    def __init__(
+        self,
+        *,
+        person: collections.abc.Iterable[global___Person] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["person", b"person"]) -> None: ...
+
+global___ListPersonV1Response = ListPersonV1Response
+
+@typing_extensions.final
+class RemovePersonV1Request(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    PERSON_ID_FIELD_NUMBER: builtins.int
+    person_id: builtins.int
+    def __init__(
+        self,
+        *,
+        person_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["person_id", b"person_id"]) -> None: ...
+
+global___RemovePersonV1Request = RemovePersonV1Request
+
+@typing_extensions.final
+class RemovePersonV1Response(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    OK_FIELD_NUMBER: builtins.int
+    ok: builtins.bool
+    def __init__(
+        self,
+        *,
+        ok: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ok", b"ok"]) -> None: ...
+
+global___RemovePersonV1Response = RemovePersonV1Response

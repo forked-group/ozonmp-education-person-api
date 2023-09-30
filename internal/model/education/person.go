@@ -1,4 +1,4 @@
-package person
+package education
 
 import "time"
 
@@ -7,7 +7,7 @@ type Person struct {
 	FistName   string
 	MiddleName string
 	LastName   string
-	Birthday   time.Duration
+	Birthday   time.Time
 	Sex
 	Education
 }

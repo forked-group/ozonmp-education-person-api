@@ -12,16 +12,68 @@ option go_package = "github.com/aaa2ppp/ozonmp-education-person-api/pkg/educatio
 service EducationPersonApiService {
   // DescribePersonV1 - Describe a person
   rpc DescribePersonV1(DescribePersonV1Request) returns (DescribePersonV1Response) {
+    // Q: что это за опция?
     option (google.api.http) = {
       get: "/v1/templates/{person_id}"
     };
   }
+  rpc CreatePersonV1(CreatePersonV1Request) returns (CreatePersonV1Response);
+  rpc ListPersonV1(ListPersonV1Request) returns (ListPersonV1Response);
+  rpc RemovePersonV1(RemovePersonV1Request) returns (RemovePersonV1Response);
+}
+
+enum Sex {
+  SEX_NONE   = 0;
+  SEX_FEMALE = 1;
+  SEX_MALE   = 2;
+}
+
+enum Education {
+  EDUCATION_NONE = 0;
+
+  // Дошкольное
+  EDUCATION_PRESCHOOL = 1;
+
+  // Начальное общее — 1—4 классы
+  EDUCATION_PRIMARY_GENERAL = 2;
+
+  // Основное общее — 5—9 классы
+  EDUCATION_BASIC_GENERAL = 3;
+
+  // Среднее общее — 10—11 классы
+  EDUCATION_SECONDARY_GENERAL = 4;
+
+  // Среднее профессиональное
+  EDUCATION_SECONDARY_VOCATIONAL = 5;
+
+  // Высшее I степени — бакалавриат
+  EDUCATION_HIGHER_1 = 6;
+
+  // Высшее II степени — специалитет, магистратура
+  EDUCATION_HIGHER_2 = 7;
+
+  // Высшее III степени — подготовка кадров высшей квалификации
+  EDUCATION_HIGHER_3 = 8;
 }
 
 message Person {
-  uint64 id  = 1;
-  uint64 foo = 2;
-  google.protobuf.Timestamp created = 3;
+  uint64 id           = 1;
+  string fist_name    = 2;
+  string middle_name  = 3;
+  string last_name    = 4;
+  google.protobuf.Timestamp birthday = 5;
+  Sex    sex          = 6;
+  Education education = 7;
+
+  google.protobuf.Timestamp created = 8;
+}
+
+message CreatePersonV1Request {
+  Person person = 1;
+}
+
+message CreatePersonV1Response {
+  uint64 person_id = 1;
 }
 
 message DescribePersonV1Request {
@@ -29,5 +81,22 @@ message DescribePersonV1Request {
 }
 
 message DescribePersonV1Response {
-  Person value = 1;
+  Person person = 1;
 }
+
+message ListPersonV1Request {
+  uint64 cursor = 1 [(validate.rules).uint64.gt = 0];
+}
+
+message ListPersonV1Response {
+  repeated Person person = 1;
+}
+
+message RemovePersonV1Request {
+  uint64 person_id = 1;
+}
+
+message RemovePersonV1Response {
+  bool ok = 1;
+}
+

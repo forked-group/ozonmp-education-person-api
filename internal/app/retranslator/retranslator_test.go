@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/mocks"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"github.com/golang/mock/gomock"
 	"reflect"
 	"sort"
@@ -19,7 +18,7 @@ func TestStart(t *testing.T) {
 		repo := mocks.NewMockEventRepo(ctrl)
 		sender := mocks.NewMockEventSender(ctrl)
 
-		batch := []person.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
+		batch := []education.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
 
 		repo.EXPECT().Lock(gomock.Any()).Times(8).Return(batch, nil)
 		repo.EXPECT().Remove(gomock.Any()).Times(3)
@@ -58,7 +57,7 @@ func TestStart(t *testing.T) {
 		repo := mocks.NewMockEventRepo(ctrl)
 		sender := mocks.NewMockEventSender(ctrl)
 
-		batch := []person.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
+		batch := []education.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
 
 		repo.EXPECT().Lock(gomock.Any()).Times(8).Return(batch, nil)
 		repo.EXPECT().Unlock(gomock.Any()).Times(3)

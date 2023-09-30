@@ -5,7 +5,6 @@ import (
 	"errors"
 	mock_consumer "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/consumer/mocks"
 	context2 "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/context"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"github.com/golang/mock/gomock"
 	"testing"
 	"time"
@@ -16,14 +15,14 @@ func TestConfig_Run(t *testing.T) {
 		BatchSize int
 		Timeout   time.Duration
 		Repo      func(ctrl *gomock.Controller) EventLocker
-		Out       chan []person.PersonEvent
+		Out       chan []education.PersonEvent
 	}
 
 	type args struct {
 		ctxTimeout time.Duration
 	}
 
-	batch := []person.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
+	batch := []education.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
 
 	tests := []struct {
 		name   string
@@ -42,7 +41,7 @@ func TestConfig_Run(t *testing.T) {
 						Return(batch, nil)
 					return repo
 				},
-				make(chan []person.PersonEvent, 2),
+				make(chan []education.PersonEvent, 2),
 			},
 			args{
 				100 * time.Millisecond,
@@ -60,7 +59,7 @@ func TestConfig_Run(t *testing.T) {
 						Return(batch, errors.New("unknown error"))
 					return repo
 				},
-				make(chan []person.PersonEvent, 10),
+				make(chan []education.PersonEvent, 10),
 			},
 			args{
 				100 * time.Millisecond,
@@ -79,7 +78,7 @@ func TestConfig_Run(t *testing.T) {
 						Times(1)
 					return repo
 				},
-				make(chan []person.PersonEvent, 1),
+				make(chan []education.PersonEvent, 1),
 			},
 			args{
 				100 * time.Millisecond,
@@ -97,7 +96,7 @@ func TestConfig_Run(t *testing.T) {
 						Return(batch, nil)
 					return repo
 				},
-				make(chan []person.PersonEvent, 1),
+				make(chan []education.PersonEvent, 1),
 			},
 			args{
 				100 * time.Millisecond,
@@ -114,7 +113,7 @@ func TestConfig_Run(t *testing.T) {
 						Times(0)
 					return repo
 				},
-				make(chan []person.PersonEvent, 1),
+				make(chan []education.PersonEvent, 1),
 			},
 			args{
 				0,

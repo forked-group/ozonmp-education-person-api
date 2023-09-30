@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/repo"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/sender"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"math/rand"
 	"sync"
 	"time"
@@ -57,14 +56,14 @@ func (s *dummySender) Len() int {
 	return len(s.sent)
 }
 
-func (s *dummySender) Send(events *person.PersonEvent) error {
+func (s *dummySender) Send(events *education.PersonEvent) error {
 	if err := randTimeoutAndError(s.cfg.Latency, s.cfg.ErrPer100K); err != nil {
 		return err
 	}
 	return s.send(events)
 }
 
-func (s *dummySender) send(event *person.PersonEvent) error {
+func (s *dummySender) send(event *education.PersonEvent) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -113,7 +112,7 @@ func (r *dummyRepo) Len() int {
 	return len(r.deferred)
 }
 
-func (r *dummyRepo) Lock(n uint64) ([]person.PersonEvent, error) {
+func (r *dummyRepo) Lock(n uint64) ([]education.PersonEvent, error) {
 	if err := randTimeoutAndError(r.cfg.Latency, r.cfg.ErrPer100K); err != nil {
 		return nil, err
 	}
@@ -125,16 +124,16 @@ func (r *dummyRepo) Lock(n uint64) ([]person.PersonEvent, error) {
 		n = uint64(len(r.deferred))
 	}
 
-	events := make([]person.PersonEvent, 0, n)
+	events := make([]education.PersonEvent, 0, n)
 
 	for ; n > 0 && len(r.deferred) != 0; n-- {
 		id := heap.Pop(&r.deferred).(uint64)
 		r.processed.Add(id)
 
-		events = append(events, person.PersonEvent{
+		events = append(events, education.PersonEvent{
 			ID:     id,
-			Type:   person.Created,
-			Status: person.Processed,
+			Type:   education.Created,
+			Status: education.Processed,
 		})
 	}
 
@@ -161,7 +160,7 @@ func (r *dummyRepo) Unlock(eventIDs []uint64) error {
 	return nil
 }
 
-func (r *dummyRepo) Add(events []person.PersonEvent) error {
+func (r *dummyRepo) Add(events []education.PersonEvent) error {
 	//TODO implement me
 	panic("implement me")
 }

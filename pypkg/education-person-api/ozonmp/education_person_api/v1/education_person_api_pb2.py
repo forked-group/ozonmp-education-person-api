@@ -16,7 +16,7 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n9ozonmp/education_person_api/v1/education_person_api.proto\x12\x1eozonmp.education_person_api.v1\x1a\x17validate/validate.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"`\n\x06Person\x12\x0e\n\x02id\x18\x01 \x01(\x04R\x02id\x12\x10\n\x03\x66oo\x18\x02 \x01(\x04R\x03\x66oo\x12\x34\n\x07\x63reated\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\x07\x63reated\"?\n\x17\x44\x65scribePersonV1Request\x12$\n\tperson_id\x18\x01 \x01(\x04\x42\x07\xfa\x42\x04\x32\x02 \x00R\x08personId\"X\n\x18\x44\x65scribePersonV1Response\x12<\n\x05value\x18\x01 \x01(\x0b\x32&.ozonmp.education_person_api.v1.PersonR\x05value2\xc6\x01\n\x19\x45\x64ucationPersonApiService\x12\xa8\x01\n\x10\x44\x65scribePersonV1\x12\x37.ozonmp.education_person_api.v1.DescribePersonV1Request\x1a\x38.ozonmp.education_person_api.v1.DescribePersonV1Response\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/templates/{person_id}B^Z\\github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api;education_person_apib\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n9ozonmp/education_person_api/v1/education_person_api.proto\x12\x1eozonmp.education_person_api.v1\x1a\x17validate/validate.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe1\x02\n\x06Person\x12\x0e\n\x02id\x18\x01 \x01(\x04R\x02id\x12\x1b\n\tfist_name\x18\x02 \x01(\tR\x08\x66istName\x12\x1f\n\x0bmiddle_name\x18\x03 \x01(\tR\nmiddleName\x12\x1b\n\tlast_name\x18\x04 \x01(\tR\x08lastName\x12\x36\n\x08\x62irthday\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\x08\x62irthday\x12\x35\n\x03sex\x18\x06 \x01(\x0e\x32#.ozonmp.education_person_api.v1.SexR\x03sex\x12G\n\teducation\x18\x07 \x01(\x0e\x32).ozonmp.education_person_api.v1.EducationR\teducation\x12\x34\n\x07\x63reated\x18\x08 \x01(\x0b\x32\x1a.google.protobuf.TimestampR\x07\x63reated\"U\n\x15\x43reatePersonV1Request\x12<\n\x05value\x18\x01 \x01(\x0b\x32&.ozonmp.education_person_api.v1.PersonR\x05value\"5\n\x16\x43reatePersonV1Response\x12\x1b\n\tperson_id\x18\x01 \x01(\x04R\x08personId\"?\n\x17\x44\x65scribePersonV1Request\x12$\n\tperson_id\x18\x01 \x01(\x04\x42\x07\xfa\x42\x04\x32\x02 \x00R\x08personId\"Z\n\x18\x44\x65scribePersonV1Response\x12>\n\x06person\x18\x01 \x01(\x0b\x32&.ozonmp.education_person_api.v1.PersonR\x06person\"6\n\x13ListPersonV1Request\x12\x1f\n\x06\x63ursor\x18\x01 \x01(\x04\x42\x07\xfa\x42\x04\x32\x02 \x00R\x06\x63ursor\"V\n\x14ListPersonV1Response\x12>\n\x06person\x18\x01 \x03(\x0b\x32&.ozonmp.education_person_api.v1.PersonR\x06person\"4\n\x15RemovePersonV1Request\x12\x1b\n\tperson_id\x18\x01 \x01(\x04R\x08personId\"(\n\x16RemovePersonV1Response\x12\x0e\n\x02ok\x18\x01 \x01(\x08R\x02ok*1\n\x03Sex\x12\x0c\n\x08SEX_NONE\x10\x00\x12\x0e\n\nSEX_FEMALE\x10\x01\x12\x0c\n\x08SEX_MALE\x10\x02*\x81\x02\n\tEducation\x12\x12\n\x0e\x45\x44UCATION_NONE\x10\x00\x12\x17\n\x13\x45\x44UCATION_PRESCHOOL\x10\x01\x12\x1d\n\x19\x45\x44UCATION_PRIMARY_GENERAL\x10\x02\x12\x1b\n\x17\x45\x44UCATION_BASIC_GENERAL\x10\x03\x12\x1f\n\x1b\x45\x44UCATION_SECONDARY_GENERAL\x10\x04\x12\"\n\x1e\x45\x44UCATION_SECONDARY_VOCATIONAL\x10\x05\x12\x16\n\x12\x45\x44UCATION_HIGHER_1\x10\x06\x12\x16\n\x12\x45\x44UCATION_HIGHER_2\x10\x07\x12\x16\n\x12\x45\x44UCATION_HIGHER_3\x10\x08\x32\xc3\x04\n\x19\x45\x64ucationPersonApiService\x12\xa8\x01\n\x10\x44\x65scribePersonV1\x12\x37.ozonmp.education_person_api.v1.DescribePersonV1Request\x1a\x38.ozonmp.education_person_api.v1.DescribePersonV1Response\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/templates/{person_id}\x12\x7f\n\x0e\x43reatePersonV1\x12\x35.ozonmp.education_person_api.v1.CreatePersonV1Request\x1a\x36.ozonmp.education_person_api.v1.CreatePersonV1Response\x12y\n\x0cListPersonV1\x12\x33.ozonmp.education_person_api.v1.ListPersonV1Request\x1a\x34.ozonmp.education_person_api.v1.ListPersonV1Response\x12\x7f\n\x0eRemovePersonV1\x12\x35.ozonmp.education_person_api.v1.RemovePersonV1Request\x1a\x36.ozonmp.education_person_api.v1.RemovePersonV1ResponseB^Z\\github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api;education_person_apib\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -26,14 +26,32 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._serialized_options = b'Z\\github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api;education_person_api'
   _DESCRIBEPERSONV1REQUEST.fields_by_name['person_id']._options = None
   _DESCRIBEPERSONV1REQUEST.fields_by_name['person_id']._serialized_options = b'\372B\0042\002 \000'
+  _LISTPERSONV1REQUEST.fields_by_name['cursor']._options = None
+  _LISTPERSONV1REQUEST.fields_by_name['cursor']._serialized_options = b'\372B\0042\002 \000'
   _EDUCATIONPERSONAPISERVICE.methods_by_name['DescribePersonV1']._options = None
   _EDUCATIONPERSONAPISERVICE.methods_by_name['DescribePersonV1']._serialized_options = b'\202\323\344\223\002\033\022\031/v1/templates/{person_id}'
-  _globals['_PERSON']._serialized_start=181
-  _globals['_PERSON']._serialized_end=277
-  _globals['_DESCRIBEPERSONV1REQUEST']._serialized_start=279
-  _globals['_DESCRIBEPERSONV1REQUEST']._serialized_end=342
-  _globals['_DESCRIBEPERSONV1RESPONSE']._serialized_start=344
-  _globals['_DESCRIBEPERSONV1RESPONSE']._serialized_end=432
-  _globals['_EDUCATIONPERSONAPISERVICE']._serialized_start=435
-  _globals['_EDUCATIONPERSONAPISERVICE']._serialized_end=633
+  _globals['_SEX']._serialized_start=1076
+  _globals['_SEX']._serialized_end=1125
+  _globals['_EDUCATION']._serialized_start=1128
+  _globals['_EDUCATION']._serialized_end=1385
+  _globals['_PERSON']._serialized_start=182
+  _globals['_PERSON']._serialized_end=535
+  _globals['_CREATEPERSONV1REQUEST']._serialized_start=537
+  _globals['_CREATEPERSONV1REQUEST']._serialized_end=622
+  _globals['_CREATEPERSONV1RESPONSE']._serialized_start=624
+  _globals['_CREATEPERSONV1RESPONSE']._serialized_end=677
+  _globals['_DESCRIBEPERSONV1REQUEST']._serialized_start=679
+  _globals['_DESCRIBEPERSONV1REQUEST']._serialized_end=742
+  _globals['_DESCRIBEPERSONV1RESPONSE']._serialized_start=744
+  _globals['_DESCRIBEPERSONV1RESPONSE']._serialized_end=834
+  _globals['_LISTPERSONV1REQUEST']._serialized_start=836
+  _globals['_LISTPERSONV1REQUEST']._serialized_end=890
+  _globals['_LISTPERSONV1RESPONSE']._serialized_start=892
+  _globals['_LISTPERSONV1RESPONSE']._serialized_end=978
+  _globals['_REMOVEPERSONV1REQUEST']._serialized_start=980
+  _globals['_REMOVEPERSONV1REQUEST']._serialized_end=1032
+  _globals['_REMOVEPERSONV1RESPONSE']._serialized_start=1034
+  _globals['_REMOVEPERSONV1RESPONSE']._serialized_end=1074
+  _globals['_EDUCATIONPERSONAPISERVICE']._serialized_start=1388
+  _globals['_EDUCATIONPERSONAPISERVICE']._serialized_end=1967
 # @@protoc_insertion_point(module_scope)
