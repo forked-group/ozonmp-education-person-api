@@ -5,12 +5,12 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/model"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model"
 )
 
-// Repo is DAO for Template
+// Repo is DAO for Person
 type Repo interface {
-	DescribeTemplate(ctx context.Context, personID uint64) (*model.Template, error)
+	DescribePerson(ctx context.Context, personID uint64) (*model.Person, error)
 }
 
 type repo struct {
@@ -23,6 +23,6 @@ func NewRepo(db *sqlx.DB, batchSize uint) Repo {
 	return &repo{db: db, batchSize: batchSize}
 }
 
-func (r *repo) DescribeTemplate(ctx context.Context, personID uint64) (*model.Template, error) {
+func (r *repo) DescribePerson(ctx context.Context, personID uint64) (*model.Person, error) {
 	return nil, nil
 }

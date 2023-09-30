@@ -45,4 +45,4 @@ jobs:
         with:
           push: true
           # tags: <org-name>/<repo-name>/<app-name>:${{ env.IMAGE_TAG }}
-          tags: ghcr.io/${{ github.repository_owner }}/education_kw-person-api/server:${{ env.IMAGE_TAG }}
+          tags: ghcr.io/${{ github.repository_owner }}/education-person-api/server:${{ env.IMAGE_TAG }}

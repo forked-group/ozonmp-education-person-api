@@ -3,9 +3,9 @@ package retranslator_test
 import (
 	"container/heap"
 	"errors"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/app/repo"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/app/sender"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/model/person"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/repo"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/sender"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"math/rand"
 	"sync"
 	"time"

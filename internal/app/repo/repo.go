@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/model/person"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 )
 
 type EventRepo interface {

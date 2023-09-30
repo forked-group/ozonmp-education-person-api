@@ -1,4 +1,4 @@
-module github.com/aaa2ppp/ozonmp-education-kw-person-api/pkg/education_kw-person-api
+module github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api
 
 go 1.20
 

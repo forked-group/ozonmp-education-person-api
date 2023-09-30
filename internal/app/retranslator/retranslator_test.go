@@ -3,9 +3,9 @@ package retranslator_test
 import (
 	"context"
 	"errors"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/app/retranslator"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/mocks"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/model/person"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/mocks"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"github.com/golang/mock/gomock"
 	"reflect"
 	"sort"

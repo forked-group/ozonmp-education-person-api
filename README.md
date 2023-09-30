@@ -1,4 +1,4 @@
-# Ozon Marketplace Template API
+# Ozon Marketplace Person API
 
 ---
 
@@ -41,7 +41,7 @@ The Swagger UI is an open source project to visually render documentation for an
 - http://localhost:8082
 
 ```sh
-[I] ➜ grpc_cli call localhost:8082 DescribeTemplateV1 "id: 1"
+[I] ➜ grpc_cli call localhost:8082 DescribePersonV1 "id: 1"
 connecting to localhost:8082
 Rpc failed with status code 5, error message: template not found
 ```
@@ -119,7 +119,7 @@ Graylog is a leading centralized log management solution for capturing, storing,
 For the convenience of working with the database, you can use the [pgcli](https://github.com/dbcli/pgcli) utility. Migrations are rolled out when the service starts. migrations are located in the **./migrations** directory and are created using the [goose](https://github.com/pressly/goose) tool.
 
 ```sh
-$ pgcli "postgresql://docker:docker@localhost:5432/education_kw_person_api"
+$ pgcli "postgresql://docker:docker@localhost:5432/education_person_api"
 ```
 
 ### Python client
@@ -129,7 +129,7 @@ $ python -m venv .venv
 $ . .venv/bin/activate
 $ make deps
 $ make generate
-$ cd pypkg/education_kw-person-api
+$ cd pypkg/education-person-api
 $ python setup.py install
 $ cd ../..
 $ docker-compose up -d

@@ -248,7 +248,7 @@ class HttpRule(google.protobuf.message.Message):
 
     ### Path template syntax
 
-        Template = "/" Segments [ Verb ] ;
+        Person = "/" Segments [ Verb ] ;
         Segments = Segment { "/" Segment } ;
         Segment  = "*" | "**" | LITERAL | Variable ;
         Variable = "{" FieldPath [ "=" Segments ] "}" ;

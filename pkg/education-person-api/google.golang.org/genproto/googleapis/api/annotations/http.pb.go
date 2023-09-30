@@ -282,7 +282,7 @@ func (x *Http) GetFullyDecodeReservedExpansion() bool {
 //
 // ### Path template syntax
 //
-//	Template = "/" Segments [ Verb ] ;
+//	Person = "/" Segments [ Verb ] ;
 //	Segments = Segment { "/" Segment } ;
 //	Segment  = "*" | "**" | LITERAL | Variable ;
 //	Variable = "{" FieldPath [ "=" Segments ] "}" ;

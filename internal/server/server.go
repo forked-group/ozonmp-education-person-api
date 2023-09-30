@@ -24,10 +24,10 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/api"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/config"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/repo"
-	pb "github.com/aaa2ppp/ozonmp-education-kw-person-api/pkg/education_kw-person-api"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/api"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/config"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/repo"
+	pb "github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api"
 )
 
 // GrpcServer is gRPC server
@@ -109,7 +109,7 @@ func (s *GrpcServer) Start(cfg *config.Config) error {
 
 	r := repo.NewRepo(s.db, s.batchSize)
 
-	pb.RegisterOmpTemplateApiServiceServer(grpcServer, api.NewTemplateAPI(r))
+	pb.RegisterEducationPersonApiServiceServer(grpcServer, api.NewPersonAPI(r))
 	grpc_prometheus.EnableHandlingTimeHistogram()
 	grpc_prometheus.Register(grpcServer)
 

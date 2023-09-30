@@ -2,7 +2,7 @@
 
 FROM golang:1.16-alpine AS builder
 
-ARG GITHUB_PATH=github.com/aaa2ppp/ozonmp-education-kw-person-api
+ARG GITHUB_PATH=github.com/aaa2ppp/ozonmp-education-person-api
 
 WORKDIR /home/${GITHUB_PATH}
 
