@@ -21,6 +21,18 @@ class EducationPersonApiServiceBase(abc.ABC):
     async def DescribePersonV1(self, stream: 'grpclib.server.Stream[ozonmp.education_person_api.v1.education_person_api_pb2.DescribePersonV1Request, ozonmp.education_person_api.v1.education_person_api_pb2.DescribePersonV1Response]') -> None:
         pass
 
+    @abc.abstractmethod
+    async def CreatePersonV1(self, stream: 'grpclib.server.Stream[ozonmp.education_person_api.v1.education_person_api_pb2.CreatePersonV1Request, ozonmp.education_person_api.v1.education_person_api_pb2.CreatePersonV1Response]') -> None:
+        pass
+
+    @abc.abstractmethod
+    async def ListPersonV1(self, stream: 'grpclib.server.Stream[ozonmp.education_person_api.v1.education_person_api_pb2.ListPersonV1Request, ozonmp.education_person_api.v1.education_person_api_pb2.ListPersonV1Response]') -> None:
+        pass
+
+    @abc.abstractmethod
+    async def RemovePersonV1(self, stream: 'grpclib.server.Stream[ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Request, ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Response]') -> None:
+        pass
+
     def __mapping__(self) -> typing.Dict[str, grpclib.const.Handler]:
         return {
             '/ozonmp.education_person_api.v1.EducationPersonApiService/DescribePersonV1': grpclib.const.Handler(
@@ -28,6 +40,24 @@ class EducationPersonApiServiceBase(abc.ABC):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 ozonmp.education_person_api.v1.education_person_api_pb2.DescribePersonV1Request,
                 ozonmp.education_person_api.v1.education_person_api_pb2.DescribePersonV1Response,
+            ),
+            '/ozonmp.education_person_api.v1.EducationPersonApiService/CreatePersonV1': grpclib.const.Handler(
+                self.CreatePersonV1,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                ozonmp.education_person_api.v1.education_person_api_pb2.CreatePersonV1Request,
+                ozonmp.education_person_api.v1.education_person_api_pb2.CreatePersonV1Response,
+            ),
+            '/ozonmp.education_person_api.v1.EducationPersonApiService/ListPersonV1': grpclib.const.Handler(
+                self.ListPersonV1,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                ozonmp.education_person_api.v1.education_person_api_pb2.ListPersonV1Request,
+                ozonmp.education_person_api.v1.education_person_api_pb2.ListPersonV1Response,
+            ),
+            '/ozonmp.education_person_api.v1.EducationPersonApiService/RemovePersonV1': grpclib.const.Handler(
+                self.RemovePersonV1,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Request,
+                ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Response,
             ),
         }
 
@@ -40,4 +70,22 @@ class EducationPersonApiServiceStub:
             '/ozonmp.education_person_api.v1.EducationPersonApiService/DescribePersonV1',
             ozonmp.education_person_api.v1.education_person_api_pb2.DescribePersonV1Request,
             ozonmp.education_person_api.v1.education_person_api_pb2.DescribePersonV1Response,
+        )
+        self.CreatePersonV1 = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/ozonmp.education_person_api.v1.EducationPersonApiService/CreatePersonV1',
+            ozonmp.education_person_api.v1.education_person_api_pb2.CreatePersonV1Request,
+            ozonmp.education_person_api.v1.education_person_api_pb2.CreatePersonV1Response,
+        )
+        self.ListPersonV1 = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/ozonmp.education_person_api.v1.EducationPersonApiService/ListPersonV1',
+            ozonmp.education_person_api.v1.education_person_api_pb2.ListPersonV1Request,
+            ozonmp.education_person_api.v1.education_person_api_pb2.ListPersonV1Response,
+        )
+        self.RemovePersonV1 = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/ozonmp.education_person_api.v1.EducationPersonApiService/RemovePersonV1',
+            ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Request,
+            ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Response,
         )

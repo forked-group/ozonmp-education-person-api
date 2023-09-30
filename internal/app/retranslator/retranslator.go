@@ -11,7 +11,6 @@ import (
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/producer"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/worker"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/sender"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"sync"
 	"time"
 )
@@ -43,8 +42,8 @@ type Config struct {
 type Retranslator struct {
 	sendTerm context.CancelFunc
 
-	batches chan []person.PersonEvent
-	events  chan *person.PersonEvent
+	batches chan []education.PersonEvent
+	events  chan *education.PersonEvent
 	clean   chan uint64
 	unlock  chan uint64
 	jobs    chan worker.Job
@@ -60,8 +59,8 @@ type Retranslator struct {
 }
 
 func (cfg *Config) Start(ctx context.Context) *Retranslator {
-	batches := make(chan []person.PersonEvent)
-	events := make(chan *person.PersonEvent, cfg.ChannelSize)
+	batches := make(chan []education.PersonEvent)
+	events := make(chan *education.PersonEvent, cfg.ChannelSize)
 	clean := make(chan uint64)
 	unlock := make(chan uint64)
 	jobs := make(chan worker.Job)

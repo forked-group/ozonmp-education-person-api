@@ -4,30 +4,29 @@ import (
 	"context"
 	"errors"
 	mock_producer "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/producer/mocks"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"github.com/golang/mock/gomock"
 	"testing"
 	"time"
 )
 
 func TestConfig_Run(t *testing.T) {
-	makeChanSize := func(n int) chan *person.PersonEvent {
-		ch := make(chan *person.PersonEvent, n)
+	makeChanSize := func(n int) chan *education.PersonEvent {
+		ch := make(chan *education.PersonEvent, n)
 		for i := 0; i < n; i++ {
-			ch <- &person.PersonEvent{ID: uint64(i + 1)}
+			ch <- &education.PersonEvent{ID: uint64(i + 1)}
 		}
 		return ch
 	}
 
-	makeCloseChan := func() chan *person.PersonEvent {
-		ch := make(chan *person.PersonEvent)
+	makeCloseChan := func() chan *education.PersonEvent {
+		ch := make(chan *education.PersonEvent)
 		close(ch)
 		return ch
 	}
 
 	type fields struct {
 		Timeout time.Duration
-		In      <-chan *person.PersonEvent
+		In      <-chan *education.PersonEvent
 		Sender  func(ctrl *gomock.Controller) EventSender
 		Ok      chan<- uint64
 		Error   chan<- uint64

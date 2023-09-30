@@ -1,16 +1,11 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"github.com/pressly/goose/v3"
-
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/config"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/database"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/server"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/tracer"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -26,8 +21,8 @@ func main() {
 	}
 	cfg := config.GetConfigInstance()
 
-	migration := flag.Bool("migration", true, "Defines the migration start option")
-	flag.Parse()
+	//migration := flag.Bool("migration", true, "Defines the migration start option")
+	//flag.Parse()
 
 	log.Info().
 		Str("version", cfg.Project.Version).
@@ -42,37 +37,39 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 
-	dsn := fmt.Sprintf("host=%v port=%v user=%v password=%v dbname=%v sslmode=%v",
-		cfg.Database.Host,
-		cfg.Database.Port,
-		cfg.Database.User,
-		cfg.Database.Password,
-		cfg.Database.Name,
-		cfg.Database.SslMode,
-	)
+	//dsn := fmt.Sprintf("host=%v port=%v user=%v password=%v dbname=%v sslmode=%v",
+	//	cfg.Database.Host,
+	//	cfg.Database.Port,
+	//	cfg.Database.User,
+	//	cfg.Database.Password,
+	//	cfg.Database.Name,
+	//	cfg.Database.SslMode,
+	//)
+	//
+	//db, err := database.NewPostgres(dsn, cfg.Database.Driver)
+	//if err != nil {
+	//	log.Fatal().Err(err).Msg("Failed init postgres")
+	//}
+	//defer db.Close()
+	//
+	//*migration = false // todo: need to delete this line for homework-4
+	//if *migration {
+	//	if err = goose.Up(db.DB, cfg.Database.Migrations); err != nil {
+	//		log.Error().Err(err).Msg("Migration failed")
+	//
+	//		return
+	//	}
+	//}
+	//
+	//tracing, err := tracer.NewTracer(&cfg)
+	//if err != nil {
+	//	log.Error().Err(err).Msg("Failed init tracing")
+	//
+	//	return
+	//}
+	//defer tracing.Close()
 
-	db, err := database.NewPostgres(dsn, cfg.Database.Driver)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed init postgres")
-	}
-	defer db.Close()
-
-	*migration = false // todo: need to delete this line for homework-4
-	if *migration {
-		if err = goose.Up(db.DB, cfg.Database.Migrations); err != nil {
-			log.Error().Err(err).Msg("Migration failed")
-
-			return
-		}
-	}
-
-	tracing, err := tracer.NewTracer(&cfg)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed init tracing")
-
-		return
-	}
-	defer tracing.Close()
+	var db *sqlx.DB // stub
 
 	if err := server.NewGrpcServer(db, batchSize).Start(&cfg); err != nil {
 		log.Error().Err(err).Msg("Failed creating gRPC server")

@@ -2,18 +2,17 @@ package producer
 
 import (
 	"context"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"time"
 )
 
 //go:generate mockgen -destination=./mocks/event_sender.go . EventSender
 type EventSender interface {
-	Send(person *person.PersonEvent) error
+	Send(person *education.PersonEvent) error
 }
 
 type Config struct {
 	Timeout time.Duration
-	In      <-chan *person.PersonEvent
+	In      <-chan *education.PersonEvent
 	Sender  EventSender
 	Ok      chan<- uint64
 	Error   chan<- uint64
@@ -52,7 +51,7 @@ func (p *producer) run() {
 	}
 }
 
-func (p *producer) receive() (*person.PersonEvent, bool) {
+func (p *producer) receive() (*education.PersonEvent, bool) {
 	select {
 	case <-p.ctx.Done():
 		return nil, false

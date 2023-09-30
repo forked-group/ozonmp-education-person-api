@@ -12,7 +12,6 @@ require (
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.9
 	github.com/opentracing/opentracing-go v1.2.0
-	github.com/pressly/goose/v3 v3.15.0
 	github.com/prometheus/client_golang v1.11.1
 	github.com/rs/zerolog v1.24.0
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
@@ -25,6 +24,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.0.2 // indirect
+	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.10.0 // indirect
@@ -39,6 +39,7 @@ require (
 	github.com/prometheus/common v0.26.0 // indirect
 	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	go.uber.org/atomic v1.6.0 // indirect
 	golang.org/x/crypto v0.13.0 // indirect

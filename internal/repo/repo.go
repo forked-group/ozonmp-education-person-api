@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model"
+	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 )
 
 // Repo is DAO for Person
