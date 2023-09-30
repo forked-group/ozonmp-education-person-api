@@ -112,3 +112,7 @@ my-mockgen:
 .PHONY: my-rm-mocks
 my-rm-mocks:
 	find . -type d -name mocks -exec rm -fr '{}' ';' || true
+
+.PHONY: bot-run
+bot-run:
+	go run cmd/bot/main.go
