@@ -2,8 +2,8 @@ package consumer
 
 import (
 	"context"
-	context2 "github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/app/retranslator/context"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/model/person"
+	context2 "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/context"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"time"
 )
 

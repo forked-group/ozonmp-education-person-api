@@ -5,7 +5,7 @@ import (
 	"github.com/uber/jaeger-client-go"
 	"io"
 
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/config"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/config"
 	"github.com/rs/zerolog/log"
 
 	jaegercfg "github.com/uber/jaeger-client-go/config"

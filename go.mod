@@ -1,9 +1,9 @@
-module github.com/aaa2ppp/ozonmp-education-kw-person-api
+module github.com/aaa2ppp/ozonmp-education-person-api
 
 go 1.20
 
 require (
-	github.com/aaa2ppp/ozonmp-education-kw-person-api/pkg/education_kw-person-api v0.0.0-00010101000000-000000000000
+	github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api v0.0.0-00010101000000-000000000000
 	github.com/golang/mock v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -51,4 +51,4 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 )
 
-replace github.com/aaa2ppp/ozonmp-education-kw-person-api/pkg/education_kw-person-api => ./pkg/education_kw-person-api
+replace github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api => ./pkg/education-person-api

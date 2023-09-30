@@ -10,57 +10,57 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/repo"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/repo"
 
-	pb "github.com/aaa2ppp/ozonmp-education-kw-person-api/pkg/education_kw-person-api"
+	pb "github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api"
 )
 
 var (
-	totalTemplateNotFound = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "education_kw_person_api_person_not_found_total",
+	totalPersonNotFound = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "education_person_api_person_not_found_total",
 		Help: "Total number of persons that were not found",
 	})
 )
 
 type personAPI struct {
-	pb.UnimplementedOmpTemplateApiServiceServer
+	pb.UnimplementedEducationPersonApiServiceServer
 	repo repo.Repo
 }
 
-// NewTemplateAPI returns api of education_kw-person-api service
-func NewTemplateAPI(r repo.Repo) pb.OmpTemplateApiServiceServer {
+// NewPersonAPI returns api of education-person-api service
+func NewPersonAPI(r repo.Repo) pb.EducationPersonApiServiceServer {
 	return &personAPI{repo: r}
 }
 
-func (o *personAPI) DescribeTemplateV1(
+func (o *personAPI) DescribePersonV1(
 	ctx context.Context,
-	req *pb.DescribeTemplateV1Request,
-) (*pb.DescribeTemplateV1Response, error) {
+	req *pb.DescribePersonV1Request,
+) (*pb.DescribePersonV1Response, error) {
 
 	if err := req.Validate(); err != nil {
-		log.Error().Err(err).Msg("DescribeTemplateV1 - invalid argument")
+		log.Error().Err(err).Msg("DescribePersonV1 - invalid argument")
 
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	person, err := o.repo.DescribeTemplate(ctx, req.TemplateId)
+	person, err := o.repo.DescribePerson(ctx, req.PersonId)
 	if err != nil {
-		log.Error().Err(err).Msg("DescribeTemplateV1 -- failed")
+		log.Error().Err(err).Msg("DescribePersonV1 -- failed")
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	if person == nil {
-		log.Debug().Uint64("personId", req.TemplateId).Msg("person not found")
-		totalTemplateNotFound.Inc()
+		log.Debug().Uint64("personId", req.PersonId).Msg("person not found")
+		totalPersonNotFound.Inc()
 
 		return nil, status.Error(codes.NotFound, "person not found")
 	}
 
-	log.Debug().Msg("DescribeTemplateV1 - success")
+	log.Debug().Msg("DescribePersonV1 - success")
 
-	return &pb.DescribeTemplateV1Response{
-		Value: &pb.Template{
+	return &pb.DescribePersonV1Response{
+		Value: &pb.Person{
 			Id:  person.ID,
 			Foo: person.Foo,
 		},

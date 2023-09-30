@@ -5,4 +5,4 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets:
-        - education_kw-person-api:9100
+        - education-person-api:9100

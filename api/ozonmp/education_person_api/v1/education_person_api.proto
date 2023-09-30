@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package ozonmp.education_person_api.v1;
+
+import "validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api;education_person_api";
+
+// EducationPersonApiService - Service for working with templates
+service EducationPersonApiService {
+  // DescribePersonV1 - Describe a person
+  rpc DescribePersonV1(DescribePersonV1Request) returns (DescribePersonV1Response) {
+    option (google.api.http) = {
+      get: "/v1/templates/{person_id}"
+    };
+  }
+}
+
+message Person {
+  uint64 id  = 1;
+  uint64 foo = 2;
+  google.protobuf.Timestamp created = 3;
+}
+
+message DescribePersonV1Request {
+  uint64 person_id = 1 [(validate.rules).uint64.gt = 0];
+}
+
+message DescribePersonV1Response {
+  Person value = 1;
+}

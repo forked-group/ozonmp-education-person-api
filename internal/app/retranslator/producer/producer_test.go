@@ -3,8 +3,8 @@ package producer
 import (
 	"context"
 	"errors"
-	mock_producer "github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/app/retranslator/producer/mocks"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/model/person"
+	mock_producer "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/producer/mocks"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"github.com/golang/mock/gomock"
 	"testing"
 	"time"

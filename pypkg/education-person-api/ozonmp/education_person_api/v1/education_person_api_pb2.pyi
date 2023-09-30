@@ -16,7 +16,7 @@ else:
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 @typing_extensions.final
-class Template(google.protobuf.message.Message):
+class Person(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     ID_FIELD_NUMBER: builtins.int
@@ -36,36 +36,36 @@ class Template(google.protobuf.message.Message):
     def HasField(self, field_name: typing_extensions.Literal["created", b"created"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["created", b"created", "foo", b"foo", "id", b"id"]) -> None: ...
 
-global___Template = Template
+global___Person = Person
 
 @typing_extensions.final
-class DescribeTemplateV1Request(google.protobuf.message.Message):
+class DescribePersonV1Request(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    TEMPLATE_ID_FIELD_NUMBER: builtins.int
-    template_id: builtins.int
+    PERSON_ID_FIELD_NUMBER: builtins.int
+    person_id: builtins.int
     def __init__(
         self,
         *,
-        template_id: builtins.int = ...,
+        person_id: builtins.int = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["template_id", b"template_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["person_id", b"person_id"]) -> None: ...
 
-global___DescribeTemplateV1Request = DescribeTemplateV1Request
+global___DescribePersonV1Request = DescribePersonV1Request
 
 @typing_extensions.final
-class DescribeTemplateV1Response(google.protobuf.message.Message):
+class DescribePersonV1Response(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     VALUE_FIELD_NUMBER: builtins.int
     @property
-    def value(self) -> global___Template: ...
+    def value(self) -> global___Person: ...
     def __init__(
         self,
         *,
-        value: global___Template | None = ...,
+        value: global___Person | None = ...,
     ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["value", b"value"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["value", b"value"]) -> None: ...
 
-global___DescribeTemplateV1Response = DescribeTemplateV1Response
+global___DescribePersonV1Response = DescribePersonV1Response

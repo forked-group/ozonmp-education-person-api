@@ -1,26 +1,26 @@
 version: v1
 plugins:
   - plugin: python
-    out: pypkg/education_kw-person-api
+    out: pypkg/education-person-api
     strategy: directory
 
   - plugin: mypy
-    out: pypkg/education_kw-person-api
+    out: pypkg/education-person-api
     strategy: directory
 
   - plugin: grpclib_python
-    out: pypkg/education_kw-person-api
+    out: pypkg/education-person-api
     strategy: directory
 
   - plugin: grpc-gateway
-    out: pkg/education_kw-person-api
+    out: pkg/education-person-api
     opt:
       - logtostderr=true
       - paths=import
     strategy: directory
 
   - plugin: validate
-    out: pkg/education_kw-person-api
+    out: pkg/education-person-api
     opt:
       - lang=go
     strategy: directory

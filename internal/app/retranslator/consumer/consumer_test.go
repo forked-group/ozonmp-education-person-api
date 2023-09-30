@@ -3,9 +3,9 @@ package consumer
 import (
 	"context"
 	"errors"
-	mock_consumer "github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/app/retranslator/consumer/mocks"
-	context2 "github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/app/retranslator/context"
-	"github.com/aaa2ppp/ozonmp-education-kw-person-api/internal/model/person"
+	mock_consumer "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/consumer/mocks"
+	context2 "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/context"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/person"
 	"github.com/golang/mock/gomock"
 	"testing"
 	"time"
