@@ -1,14 +1,20 @@
 package main
 
 import (
+	personCommands "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/commands/education/person"
+	routerPkg "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/router"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/config"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/repo"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/server"
+	personService "github.com/aaa2ppp/ozonmp-education-person-api/internal/service/education/person"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"os"
 )
 
 var (
@@ -68,12 +74,61 @@ func main() {
 	//	return
 	//}
 	//defer tracing.Close()
+	//
+	//r := repo.NewRepo(db, batchSize)
 
-	var db *sqlx.DB // stub
+	var service *personService.DummyPersonService
+	if _, ok := os.LookupEnv("WITH_TEST_DATA"); ok {
+		service = personService.NewDummyPersonServiceWithTestData()
+	} else {
+		service = personService.NewDummyPersonService()
+	}
 
-	if err := server.NewGrpcServer(db, batchSize).Start(&cfg); err != nil {
+	go startBot(service)
+
+	r := repo.NewDummyRepo(service) // TODO: должно быть: API [-> Service] -> Repo -> DB
+
+	if err := server.NewGrpcServer(r).Start(&cfg); err != nil {
 		log.Error().Err(err).Msg("Failed creating gRPC server")
 
 		return
+	}
+}
+
+func startBot(service personService.PersonService) {
+	_ = godotenv.Load() // TODO: remove this
+
+	token, found := os.LookupEnv("TOKEN")
+	if !found {
+		log.Panic().Msg("environment variable TOKEN not found in .env")
+	}
+
+	bot, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		log.Panic().Err(err)
+	}
+
+	// Uncomment if you want debugging
+	// bot.Debug = true
+
+	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	u := tgbotapi.UpdateConfig{
+		Timeout: 60,
+	}
+
+	updates, err := bot.GetUpdatesChan(u)
+	if err != nil {
+		log.Panic().Err(err)
+	}
+
+	router := routerPkg.NewRouter(bot)
+
+	router.SetRoute("education", "person",
+		personCommands.NewPersonCommander(bot, service),
+	)
+
+	for update := range updates {
+		router.HandleUpdate(update)
 	}
 }

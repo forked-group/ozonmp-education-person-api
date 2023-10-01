@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"strings"
+	"time"
 )
 
 func parsePersonNames(args []string, p *education.Person) ([]string, error) {
@@ -59,15 +60,15 @@ func parsePersonFields(args []string, p *education.Person) (err error) {
 		case "birthday":
 			var v education.Date
 			if val == "" {
-				p.Birthday = nil
+				p.Birthday = time.Time{}
 			} else if v, err = education.ParseDate(val); err == nil {
-				p.Birthday = &v
+				p.Birthday = time.Time(v)
 			}
 
 		case "sex":
 			var v education.Sex
 			if val == "" {
-				p.Sex = v
+				p.Sex = 0
 			} else if v, err = education.PaseSex(val); err == nil {
 				p.Sex = v
 			}
@@ -75,7 +76,7 @@ func parsePersonFields(args []string, p *education.Person) (err error) {
 		case "education":
 			var v education.Education
 			if val == "" {
-				p.Education = v
+				p.Education = 0
 			} else if v, err = education.ParseEducation(val); err == nil {
 				p.Education = v
 			}

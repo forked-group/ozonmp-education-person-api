@@ -121,6 +121,108 @@ class Person(google.protobuf.message.Message):
 global___Person = Person
 
 @typing_extensions.final
+class StringValue(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    VALUE_FIELD_NUMBER: builtins.int
+    value: builtins.str
+    def __init__(
+        self,
+        *,
+        value: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["value", b"value"]) -> None: ...
+
+global___StringValue = StringValue
+
+@typing_extensions.final
+class SexValue(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    VALUE_FIELD_NUMBER: builtins.int
+    value: global___Sex.ValueType
+    def __init__(
+        self,
+        *,
+        value: global___Sex.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["value", b"value"]) -> None: ...
+
+global___SexValue = SexValue
+
+@typing_extensions.final
+class EducationValue(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    VALUE_FIELD_NUMBER: builtins.int
+    value: global___Education.ValueType
+    def __init__(
+        self,
+        *,
+        value: global___Education.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["value", b"value"]) -> None: ...
+
+global___EducationValue = EducationValue
+
+@typing_extensions.final
+class TimestampValue(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    VALUE_FIELD_NUMBER: builtins.int
+    @property
+    def value(self) -> google.protobuf.timestamp_pb2.Timestamp: ...
+    def __init__(
+        self,
+        *,
+        value: google.protobuf.timestamp_pb2.Timestamp | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["value", b"value"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["value", b"value"]) -> None: ...
+
+global___TimestampValue = TimestampValue
+
+@typing_extensions.final
+class PersonValues(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    ID_FIELD_NUMBER: builtins.int
+    FIST_NAME_FIELD_NUMBER: builtins.int
+    MIDDLE_NAME_FIELD_NUMBER: builtins.int
+    LAST_NAME_FIELD_NUMBER: builtins.int
+    BIRTHDAY_FIELD_NUMBER: builtins.int
+    SEX_FIELD_NUMBER: builtins.int
+    EDUCATION_FIELD_NUMBER: builtins.int
+    id: builtins.int
+    @property
+    def fist_name(self) -> global___StringValue: ...
+    @property
+    def middle_name(self) -> global___StringValue: ...
+    @property
+    def last_name(self) -> global___StringValue: ...
+    @property
+    def birthday(self) -> global___TimestampValue: ...
+    @property
+    def sex(self) -> global___SexValue: ...
+    @property
+    def education(self) -> global___EducationValue: ...
+    def __init__(
+        self,
+        *,
+        id: builtins.int = ...,
+        fist_name: global___StringValue | None = ...,
+        middle_name: global___StringValue | None = ...,
+        last_name: global___StringValue | None = ...,
+        birthday: global___TimestampValue | None = ...,
+        sex: global___SexValue | None = ...,
+        education: global___EducationValue | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["birthday", b"birthday", "education", b"education", "fist_name", b"fist_name", "last_name", b"last_name", "middle_name", b"middle_name", "sex", b"sex"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["birthday", b"birthday", "education", b"education", "fist_name", b"fist_name", "id", b"id", "last_name", b"last_name", "middle_name", b"middle_name", "sex", b"sex"]) -> None: ...
+
+global___PersonValues = PersonValues
+
+@typing_extensions.final
 class CreatePersonV1Request(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
@@ -189,13 +291,16 @@ class ListPersonV1Request(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     CURSOR_FIELD_NUMBER: builtins.int
+    LIMIT_FIELD_NUMBER: builtins.int
     cursor: builtins.int
+    limit: builtins.int
     def __init__(
         self,
         *,
         cursor: builtins.int = ...,
+        limit: builtins.int = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["cursor", b"cursor"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cursor", b"cursor", "limit", b"limit"]) -> None: ...
 
 global___ListPersonV1Request = ListPersonV1Request
 
@@ -203,15 +308,15 @@ global___ListPersonV1Request = ListPersonV1Request
 class ListPersonV1Response(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
-    PERSON_FIELD_NUMBER: builtins.int
+    PERSONS_FIELD_NUMBER: builtins.int
     @property
-    def person(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Person]: ...
+    def persons(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Person]: ...
     def __init__(
         self,
         *,
-        person: collections.abc.Iterable[global___Person] | None = ...,
+        persons: collections.abc.Iterable[global___Person] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["person", b"person"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["persons", b"persons"]) -> None: ...
 
 global___ListPersonV1Response = ListPersonV1Response
 
@@ -244,3 +349,38 @@ class RemovePersonV1Response(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["ok", b"ok"]) -> None: ...
 
 global___RemovePersonV1Response = RemovePersonV1Response
+
+@typing_extensions.final
+class UpdatePersonV1Request(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    PERSON_ID_FIELD_NUMBER: builtins.int
+    PERSON_FIELD_NUMBER: builtins.int
+    person_id: builtins.int
+    @property
+    def person(self) -> global___PersonValues: ...
+    def __init__(
+        self,
+        *,
+        person_id: builtins.int = ...,
+        person: global___PersonValues | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["person", b"person"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["person", b"person", "person_id", b"person_id"]) -> None: ...
+
+global___UpdatePersonV1Request = UpdatePersonV1Request
+
+@typing_extensions.final
+class UpdatePersonV1Response(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    OK_FIELD_NUMBER: builtins.int
+    ok: builtins.bool
+    def __init__(
+        self,
+        *,
+        ok: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ok", b"ok"]) -> None: ...
+
+global___UpdatePersonV1Response = UpdatePersonV1Response

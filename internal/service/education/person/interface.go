@@ -5,9 +5,9 @@ import (
 )
 
 type PersonService interface {
-	Describe(PersonID uint64) (*education.Person, error)
+	Describe(personID uint64) (*education.Person, error)
 	List(cursor uint64, limit uint64) ([]education.Person, error)
 	Create(education.Person) (uint64, error)
-	Update(PersonID uint64, Person education.Person) error
-	Remove(PersonID uint64) (bool, error)
+	Update(personID uint64, person education.Person) error
+	Remove(personID uint64) (bool, error)
 }

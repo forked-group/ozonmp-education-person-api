@@ -12,7 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -32,15 +31,13 @@ import (
 
 // GrpcServer is gRPC server
 type GrpcServer struct {
-	db        *sqlx.DB
-	batchSize uint
+	repo repo.Repo
 }
 
 // NewGrpcServer returns gRPC server with supporting of batch listing
-func NewGrpcServer(db *sqlx.DB, batchSize uint) *GrpcServer {
+func NewGrpcServer(repo repo.Repo) *GrpcServer {
 	return &GrpcServer{
-		db:        db,
-		batchSize: batchSize,
+		repo: repo,
 	}
 }
 
@@ -107,9 +104,7 @@ func (s *GrpcServer) Start(cfg *config.Config) error {
 		)),
 	)
 
-	r := repo.NewRepo(s.db, s.batchSize)
-
-	pb.RegisterEducationPersonApiServiceServer(grpcServer, api.NewPersonAPI(r))
+	pb.RegisterEducationPersonApiServiceServer(grpcServer, api.NewPersonAPI(s.repo))
 	grpc_prometheus.EnableHandlingTimeHistogram()
 	grpc_prometheus.Register(grpcServer)
 

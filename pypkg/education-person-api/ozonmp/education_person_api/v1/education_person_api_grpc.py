@@ -33,6 +33,10 @@ class EducationPersonApiServiceBase(abc.ABC):
     async def RemovePersonV1(self, stream: 'grpclib.server.Stream[ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Request, ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Response]') -> None:
         pass
 
+    @abc.abstractmethod
+    async def UpdatePersonV1(self, stream: 'grpclib.server.Stream[ozonmp.education_person_api.v1.education_person_api_pb2.UpdatePersonV1Request, ozonmp.education_person_api.v1.education_person_api_pb2.UpdatePersonV1Response]') -> None:
+        pass
+
     def __mapping__(self) -> typing.Dict[str, grpclib.const.Handler]:
         return {
             '/ozonmp.education_person_api.v1.EducationPersonApiService/DescribePersonV1': grpclib.const.Handler(
@@ -58,6 +62,12 @@ class EducationPersonApiServiceBase(abc.ABC):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Request,
                 ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Response,
+            ),
+            '/ozonmp.education_person_api.v1.EducationPersonApiService/UpdatePersonV1': grpclib.const.Handler(
+                self.UpdatePersonV1,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                ozonmp.education_person_api.v1.education_person_api_pb2.UpdatePersonV1Request,
+                ozonmp.education_person_api.v1.education_person_api_pb2.UpdatePersonV1Response,
             ),
         }
 
@@ -88,4 +98,10 @@ class EducationPersonApiServiceStub:
             '/ozonmp.education_person_api.v1.EducationPersonApiService/RemovePersonV1',
             ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Request,
             ozonmp.education_person_api.v1.education_person_api_pb2.RemovePersonV1Response,
+        )
+        self.UpdatePersonV1 = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/ozonmp.education_person_api.v1.EducationPersonApiService/UpdatePersonV1',
+            ozonmp.education_person_api.v1.education_person_api_pb2.UpdatePersonV1Request,
+            ozonmp.education_person_api.v1.education_person_api_pb2.UpdatePersonV1Response,
         )

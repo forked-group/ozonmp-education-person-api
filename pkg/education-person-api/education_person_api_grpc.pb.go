@@ -23,6 +23,7 @@ type EducationPersonApiServiceClient interface {
 	CreatePersonV1(ctx context.Context, in *CreatePersonV1Request, opts ...grpc.CallOption) (*CreatePersonV1Response, error)
 	ListPersonV1(ctx context.Context, in *ListPersonV1Request, opts ...grpc.CallOption) (*ListPersonV1Response, error)
 	RemovePersonV1(ctx context.Context, in *RemovePersonV1Request, opts ...grpc.CallOption) (*RemovePersonV1Response, error)
+	UpdatePersonV1(ctx context.Context, in *UpdatePersonV1Request, opts ...grpc.CallOption) (*UpdatePersonV1Response, error)
 }
 
 type educationPersonApiServiceClient struct {
@@ -69,6 +70,15 @@ func (c *educationPersonApiServiceClient) RemovePersonV1(ctx context.Context, in
 	return out, nil
 }
 
+func (c *educationPersonApiServiceClient) UpdatePersonV1(ctx context.Context, in *UpdatePersonV1Request, opts ...grpc.CallOption) (*UpdatePersonV1Response, error) {
+	out := new(UpdatePersonV1Response)
+	err := c.cc.Invoke(ctx, "/ozonmp.education_person_api.v1.EducationPersonApiService/UpdatePersonV1", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EducationPersonApiServiceServer is the server API for EducationPersonApiService service.
 // All implementations must embed UnimplementedEducationPersonApiServiceServer
 // for forward compatibility
@@ -78,6 +88,7 @@ type EducationPersonApiServiceServer interface {
 	CreatePersonV1(context.Context, *CreatePersonV1Request) (*CreatePersonV1Response, error)
 	ListPersonV1(context.Context, *ListPersonV1Request) (*ListPersonV1Response, error)
 	RemovePersonV1(context.Context, *RemovePersonV1Request) (*RemovePersonV1Response, error)
+	UpdatePersonV1(context.Context, *UpdatePersonV1Request) (*UpdatePersonV1Response, error)
 	mustEmbedUnimplementedEducationPersonApiServiceServer()
 }
 
@@ -96,6 +107,9 @@ func (UnimplementedEducationPersonApiServiceServer) ListPersonV1(context.Context
 }
 func (UnimplementedEducationPersonApiServiceServer) RemovePersonV1(context.Context, *RemovePersonV1Request) (*RemovePersonV1Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemovePersonV1 not implemented")
+}
+func (UnimplementedEducationPersonApiServiceServer) UpdatePersonV1(context.Context, *UpdatePersonV1Request) (*UpdatePersonV1Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePersonV1 not implemented")
 }
 func (UnimplementedEducationPersonApiServiceServer) mustEmbedUnimplementedEducationPersonApiServiceServer() {
 }
@@ -183,6 +197,24 @@ func _EducationPersonApiService_RemovePersonV1_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EducationPersonApiService_UpdatePersonV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePersonV1Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EducationPersonApiServiceServer).UpdatePersonV1(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ozonmp.education_person_api.v1.EducationPersonApiService/UpdatePersonV1",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EducationPersonApiServiceServer).UpdatePersonV1(ctx, req.(*UpdatePersonV1Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EducationPersonApiService_ServiceDesc is the grpc.ServiceDesc for EducationPersonApiService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -205,6 +237,10 @@ var EducationPersonApiService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemovePersonV1",
 			Handler:    _EducationPersonApiService_RemovePersonV1_Handler,
+		},
+		{
+			MethodName: "UpdatePersonV1",
+			Handler:    _EducationPersonApiService_UpdatePersonV1_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
