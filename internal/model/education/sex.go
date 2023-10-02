@@ -8,45 +8,34 @@ import (
 
 type Sex int
 
+//go:generate stringer -type=Sex
 const (
 	_ Sex = iota
 	Female
 	Male
+	MinSex = Female
+	MaxSex = Male
 )
 
-func PaseSex(s string) (Sex, error) {
+func (sx Sex) Valid() bool {
+	return MinSex <= sx && sx <= MaxSex
+}
+
+func ParseSex(s string) (Sex, error) {
 	const op = "ParseSex"
 
-	if n, err := strconv.Atoi(s); err == nil {
-		switch sex := Sex(n); sex {
-		case Female, Male:
+	if i, err := strconv.Atoi(s); err == nil {
+		if sex := Sex(i); sex.Valid() {
 			return sex, nil
-		default:
-			return 0, fmt.Errorf("%s: unknown value: %s", op, s)
+		}
+		return 0, fmt.Errorf("%s: unknown value: %s", op, s)
+	}
+
+	for sex := MinSex; sex <= MaxSex; sex++ {
+		if strings.EqualFold(s, sex.String()) {
+			return sex, nil
 		}
 	}
 
-	switch {
-	case strings.EqualFold(s, Female.String()):
-		return Female, nil
-	case strings.EqualFold(s, Male.String()):
-		return Male, nil
-	default:
-		return 0, fmt.Errorf("%s: unknown value: %q", op, s)
-	}
-}
-
-func (s Sex) String() string {
-	switch s {
-	case Female:
-		return "Female"
-	case Male:
-		return "Male"
-	default:
-		return ""
-	}
-}
-
-func (s Sex) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.Quote(s.String())), nil
+	return 0, fmt.Errorf("%s: unknown value: %q", op, s)
 }
