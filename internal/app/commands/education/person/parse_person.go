@@ -58,18 +58,18 @@ func parsePersonFields(args []string, p *education.Person) (err error) {
 			p.LastName = val
 
 		case "birthday":
-			var v education.Date
+			var v time.Time
 			if val == "" {
 				p.Birthday = time.Time{}
 			} else if v, err = education.ParseDate(val); err == nil {
-				p.Birthday = time.Time(v)
+				p.Birthday = v
 			}
 
 		case "sex":
 			var v education.Sex
 			if val == "" {
 				p.Sex = 0
-			} else if v, err = education.PaseSex(val); err == nil {
+			} else if v, err = education.ParseSex(val); err == nil {
 				p.Sex = v
 			}
 

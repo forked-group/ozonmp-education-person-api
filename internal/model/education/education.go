@@ -40,8 +40,8 @@ const (
 	MaxEducation = Higher3
 )
 
-func (ed Education) Valid() bool {
-	return MinEducation <= ed && ed <= MaxEducation
+func (i Education) Valid() bool {
+	return MinEducation <= i && i <= MaxEducation
 }
 
 func ParseEducation(s string) (Education, error) {

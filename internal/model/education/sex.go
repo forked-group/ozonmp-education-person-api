@@ -17,8 +17,8 @@ const (
 	MaxSex = Male
 )
 
-func (sx Sex) Valid() bool {
-	return MinSex <= sx && sx <= MaxSex
+func (i Sex) Valid() bool {
+	return MinSex <= i && i <= MaxSex
 }
 
 func ParseSex(s string) (Sex, error) {

@@ -1,8 +1,8 @@
 package education
 
 import (
-	"encoding/json"
-	"log"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -17,12 +17,40 @@ type Person struct {
 }
 
 func (p Person) String() string {
-	const op = "Person.String"
+	var sb strings.Builder
 
-	buf, err := json.Marshal(p)
-	if err != nil {
-		log.Printf("%s: %v", op, err)
+	sb.WriteString(strconv.FormatUint(p.ID, 10))
+	sb.WriteByte(':')
+
+	if p.FirstName != "" {
+		sb.WriteByte(' ')
+		sb.WriteString(p.FirstName)
 	}
 
-	return string(buf)
+	if p.MiddleName != "" {
+		sb.WriteByte(' ')
+		sb.WriteString(p.MiddleName)
+	}
+
+	if p.LastName != "" {
+		sb.WriteByte(' ')
+		sb.WriteString(p.LastName)
+	}
+
+	if !p.Birthday.IsZero() {
+		sb.WriteByte(' ')
+		sb.WriteString(p.Birthday.Format(DateLayout))
+	}
+
+	if p.Sex != 0 {
+		sb.WriteByte(' ')
+		sb.WriteString(p.Sex.String())
+	}
+
+	if p.Education != 0 {
+		sb.WriteByte(' ')
+		sb.WriteString(p.Education.String())
+	}
+
+	return sb.String()
 }
