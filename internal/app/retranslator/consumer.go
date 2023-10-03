@@ -1,35 +1,29 @@
-package consumer
+package retranslator
 
 import (
 	"context"
-	context2 "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/context"
 	"time"
 )
 
-//go:generate mockgen -destination=./mocks/event_locker.go . EventLocker
-type EventLocker interface {
-	Lock(n uint64) ([]education.PersonEvent, error)
-}
-
-type Config struct {
+type consumerConfig struct {
 	BatchSize int
 	Timeout   time.Duration
 	Repo      EventLocker
-	Out       chan<- []education.PersonEvent
+	Out       chan<- []event
 }
 
 type consumer struct {
-	cfg  *Config
+	cfg  *consumerConfig
 	ctx  context.Context
 	term context.Context
 	tm   *time.Timer
 }
 
-func (cfg *Config) Run(ctx context.Context) {
+func (cfg *consumerConfig) Run(ctx context.Context) {
 	c := consumer{
 		cfg:  cfg,
 		ctx:  ctx,
-		term: context2.Term(ctx),
+		term: termFromContext(ctx),
 	}
 	c.run()
 }
@@ -56,7 +50,7 @@ func (c *consumer) run() {
 	}
 }
 
-func (c *consumer) send(events []education.PersonEvent) bool {
+func (c *consumer) send(events []event) bool {
 	select {
 	case <-c.ctx.Done():
 		return false

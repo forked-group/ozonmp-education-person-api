@@ -1,32 +1,32 @@
-package producer
+package retranslator
 
 import (
 	"context"
 	"errors"
-	mock_producer "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/producer/mocks"
+	mock_retranslator "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/mocks"
 	"github.com/golang/mock/gomock"
 	"testing"
 	"time"
 )
 
-func TestConfig_Run(t *testing.T) {
-	makeChanSize := func(n int) chan *education.PersonEvent {
-		ch := make(chan *education.PersonEvent, n)
+func TestProducerConfig_Run(t *testing.T) {
+	makeChanSize := func(n int) chan *event {
+		ch := make(chan *event, n)
 		for i := 0; i < n; i++ {
-			ch <- &education.PersonEvent{ID: uint64(i + 1)}
+			ch <- &event{ID: uint64(i + 1)}
 		}
 		return ch
 	}
 
-	makeCloseChan := func() chan *education.PersonEvent {
-		ch := make(chan *education.PersonEvent)
+	makeCloseChan := func() chan *event {
+		ch := make(chan *event)
 		close(ch)
 		return ch
 	}
 
 	type fields struct {
 		Timeout time.Duration
-		In      <-chan *education.PersonEvent
+		In      <-chan *event
 		Sender  func(ctrl *gomock.Controller) EventSender
 		Ok      chan<- uint64
 		Error   chan<- uint64
@@ -49,7 +49,7 @@ func TestConfig_Run(t *testing.T) {
 				2 * time.Second,
 				makeChanSize(3),
 				func(ctrl *gomock.Controller) EventSender {
-					sender := mock_producer.NewMockEventSender(ctrl)
+					sender := mock_retranslator.NewMockEventSender(ctrl)
 					sender.EXPECT().Send(gomock.Any()).Times(3).Return(nil)
 					return sender
 				},
@@ -68,7 +68,7 @@ func TestConfig_Run(t *testing.T) {
 				2 * time.Second,
 				makeChanSize(3),
 				func(ctrl *gomock.Controller) EventSender {
-					sender := mock_producer.NewMockEventSender(ctrl)
+					sender := mock_retranslator.NewMockEventSender(ctrl)
 					sender.EXPECT().Send(gomock.Any()).Times(1).
 						Return(errors.New("unknown error"))
 					return sender
@@ -88,7 +88,7 @@ func TestConfig_Run(t *testing.T) {
 				10 * time.Millisecond,
 				makeChanSize(3),
 				func(ctrl *gomock.Controller) EventSender {
-					sender := mock_producer.NewMockEventSender(ctrl)
+					sender := mock_retranslator.NewMockEventSender(ctrl)
 					sender.EXPECT().Send(gomock.Any()).Times(3).
 						Return(errors.New("unknown error"))
 					return sender
@@ -108,7 +108,7 @@ func TestConfig_Run(t *testing.T) {
 				2 * time.Second,
 				makeCloseChan(),
 				func(ctrl *gomock.Controller) EventSender {
-					sender := mock_producer.NewMockEventSender(ctrl)
+					sender := mock_retranslator.NewMockEventSender(ctrl)
 					sender.EXPECT().Send(gomock.Any()).Times(0)
 					return sender
 				},
@@ -127,7 +127,7 @@ func TestConfig_Run(t *testing.T) {
 				2 * time.Second,
 				makeCloseChan(),
 				func(ctrl *gomock.Controller) EventSender {
-					sender := mock_producer.NewMockEventSender(ctrl)
+					sender := mock_retranslator.NewMockEventSender(ctrl)
 					sender.EXPECT().Send(gomock.Any()).Times(0)
 					return sender
 				},
@@ -146,7 +146,7 @@ func TestConfig_Run(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 
-			cfg := &Config{
+			cfg := &producerConfig{
 				Timeout: tt.fields.Timeout,
 				In:      tt.fields.In,
 				Sender:  tt.fields.Sender(ctrl),

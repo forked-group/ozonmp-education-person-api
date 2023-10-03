@@ -1,10 +1,9 @@
-package consumer
+package retranslator
 
 import (
 	"context"
 	"errors"
-	mock_consumer "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/consumer/mocks"
-	context2 "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/context"
+	mock_retranslator "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/mocks"
 	"github.com/golang/mock/gomock"
 	"testing"
 	"time"
@@ -15,14 +14,14 @@ func TestConfig_Run(t *testing.T) {
 		BatchSize int
 		Timeout   time.Duration
 		Repo      func(ctrl *gomock.Controller) EventLocker
-		Out       chan []education.PersonEvent
+		Out       chan<- []event
 	}
 
 	type args struct {
 		ctxTimeout time.Duration
 	}
 
-	batch := []education.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
+	batch := []event{{ID: 1}, {ID: 2}, {ID: 3}}
 
 	tests := []struct {
 		name   string
@@ -35,13 +34,13 @@ func TestConfig_Run(t *testing.T) {
 				3,
 				10 * time.Second,
 				func(ctrl *gomock.Controller) EventLocker {
-					repo := mock_consumer.NewMockEventLocker(ctrl)
+					repo := mock_retranslator.NewMockEventLocker(ctrl)
 					repo.EXPECT().Lock(gomock.Eq(uint64(3))).
 						Times(3).
 						Return(batch, nil)
 					return repo
 				},
-				make(chan []education.PersonEvent, 2),
+				make(chan []event, 2),
 			},
 			args{
 				100 * time.Millisecond,
@@ -53,13 +52,13 @@ func TestConfig_Run(t *testing.T) {
 				10,
 				2 * time.Second,
 				func(ctrl *gomock.Controller) EventLocker {
-					repo := mock_consumer.NewMockEventLocker(ctrl)
+					repo := mock_retranslator.NewMockEventLocker(ctrl)
 					repo.EXPECT().Lock(gomock.Eq(uint64(10))).
 						Times(1).
 						Return(batch, errors.New("unknown error"))
 					return repo
 				},
-				make(chan []education.PersonEvent, 10),
+				make(chan []event, 10),
 			},
 			args{
 				100 * time.Millisecond,
@@ -71,14 +70,14 @@ func TestConfig_Run(t *testing.T) {
 				10,
 				2 * time.Second,
 				func(ctrl *gomock.Controller) EventLocker {
-					repo := mock_consumer.NewMockEventLocker(ctrl)
+					repo := mock_retranslator.NewMockEventLocker(ctrl)
 					repo.EXPECT().
 						Lock(gomock.Eq(uint64(10))).
 						Return(batch, nil).
 						Times(1)
 					return repo
 				},
-				make(chan []education.PersonEvent, 1),
+				make(chan []event, 1),
 			},
 			args{
 				100 * time.Millisecond,
@@ -90,13 +89,13 @@ func TestConfig_Run(t *testing.T) {
 				10,
 				10 * time.Millisecond,
 				func(ctrl *gomock.Controller) EventLocker {
-					repo := mock_consumer.NewMockEventLocker(ctrl)
+					repo := mock_retranslator.NewMockEventLocker(ctrl)
 					repo.EXPECT().Lock(gomock.Eq(uint64(10))).
 						Times(2).
 						Return(batch, nil)
 					return repo
 				},
-				make(chan []education.PersonEvent, 1),
+				make(chan []event, 1),
 			},
 			args{
 				100 * time.Millisecond,
@@ -108,12 +107,12 @@ func TestConfig_Run(t *testing.T) {
 				10,
 				2 * time.Millisecond,
 				func(ctrl *gomock.Controller) EventLocker {
-					repo := mock_consumer.NewMockEventLocker(ctrl)
+					repo := mock_retranslator.NewMockEventLocker(ctrl)
 					repo.EXPECT().Lock(gomock.Eq(uint64(10))).
 						Times(0)
 					return repo
 				},
-				make(chan []education.PersonEvent, 1),
+				make(chan []event, 1),
 			},
 			args{
 				0,
@@ -126,11 +125,11 @@ func TestConfig_Run(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 
-			cfg := &Config{
+			cfg := &consumerConfig{
 				BatchSize: tt.fields.BatchSize,
 				Timeout:   tt.fields.Timeout,
 				Repo:      tt.fields.Repo(ctrl),
-				Out:       tt.fields.Out, // TODO: Fix, now: Out chan<- []person.PersonEvent
+				Out:       tt.fields.Out, // TODO: Fix, now: Out chan<- []event. Fix what???
 			}
 
 			var ctx context.Context
@@ -139,14 +138,14 @@ func TestConfig_Run(t *testing.T) {
 			if tt.args.ctxTimeout > 0 {
 				ctx, cancel = context.WithTimeout(context.Background(),
 					tt.args.ctxTimeout)
-				ctx, sendTerm = context2.WithTerm(ctx)
+				ctx, sendTerm = contextWithTerm(ctx)
 				defer func() {
 					sendTerm()
 					cancel()
 				}()
 			} else {
 				ctx, cancel = context.WithCancel(context.Background())
-				ctx, sendTerm = context2.WithTerm(ctx)
+				ctx, sendTerm = contextWithTerm(ctx)
 				sendTerm()
 				cancel()
 			}

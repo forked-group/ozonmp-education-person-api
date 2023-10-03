@@ -1,10 +1,9 @@
-package retranslator_test
+package retranslator
 
 import (
 	"context"
 	"errors"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/mocks"
+	mock_retranslator "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/mocks"
 	"github.com/golang/mock/gomock"
 	"reflect"
 	"sort"
@@ -15,16 +14,16 @@ import (
 func TestStart(t *testing.T) {
 	t.Run("successful sends", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		repo := mocks.NewMockEventRepo(ctrl)
-		sender := mocks.NewMockEventSender(ctrl)
+		repo := mock_retranslator.NewMockEventRepo(ctrl)
+		sender := mock_retranslator.NewMockEventSender(ctrl)
 
-		batch := []education.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
+		batch := []event{{ID: 1}, {ID: 2}, {ID: 3}}
 
 		repo.EXPECT().Lock(gomock.Any()).Times(8).Return(batch, nil)
 		repo.EXPECT().Remove(gomock.Any()).Times(3)
 		sender.EXPECT().Send(gomock.Any()).Times(24)
 
-		cfg := retranslator.Config{
+		cfg := Config{
 			ChannelSize: 0,
 
 			ConsumerCount:  2,
@@ -54,16 +53,16 @@ func TestStart(t *testing.T) {
 
 	t.Run("failed sends", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		repo := mocks.NewMockEventRepo(ctrl)
-		sender := mocks.NewMockEventSender(ctrl)
+		repo := mock_retranslator.NewMockEventRepo(ctrl)
+		sender := mock_retranslator.NewMockEventSender(ctrl)
 
-		batch := []education.PersonEvent{{ID: 1}, {ID: 2}, {ID: 3}}
+		batch := []event{{ID: 1}, {ID: 2}, {ID: 3}}
 
 		repo.EXPECT().Lock(gomock.Any()).Times(8).Return(batch, nil)
 		repo.EXPECT().Unlock(gomock.Any()).Times(3)
 		sender.EXPECT().Send(gomock.Any()).Times(24).Return(errors.New("unknown error"))
 
-		cfg := retranslator.Config{
+		cfg := Config{
 			ChannelSize: 0,
 
 			ConsumerCount:  2,
@@ -97,7 +96,7 @@ func TestStart2(t *testing.T) {
 		name            string
 		repoCfg         DummyRepoCfg
 		senderCfg       DummySenderCfg
-		retranslatorCfg retranslator.Config
+		retranslatorCfg Config
 	}{
 		{
 			"small",
@@ -111,7 +110,7 @@ func TestStart2(t *testing.T) {
 				Latency:    50 * time.Millisecond,
 				ErrPer100K: 30_000,
 			},
-			retranslator.Config{
+			Config{
 				ChannelSize:    0,
 				ConsumerCount:  3,
 				ConsumeSize:    4,
@@ -139,7 +138,7 @@ func TestStart2(t *testing.T) {
 				Latency:    50 * time.Millisecond,
 				ErrPer100K: 30_000,
 			},
-			retranslator.Config{
+			Config{
 				ChannelSize:    0,
 				ConsumerCount:  2,
 				ConsumeSize:    100,
@@ -271,5 +270,4 @@ func TestStart2(t *testing.T) {
 			}
 		})
 	}
-
 }

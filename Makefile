@@ -96,22 +96,16 @@ build-go: generate-go .build
 
 .PHONY: my-test
 my-test:
-	go test ./internal/app/retranslator/collector
-	go test ./internal/app/retranslator/consumer
-	go test ./internal/app/retranslator/producer
-	go test ./internal/app/retranslator/worker
-	go test ./internal/app/retranslator/
+	go test ./internal/app/worker && \
+	go test ./internal/app/retranslator
 
 .PHONY: my-mockgen
 my-mockgen:
-	go generate ./internal
-	go generate ./internal/app/retranslator/consumer
-	go generate ./internal/app/retranslator/producer
-	go generate ./internal/app/retranslator/worker
+	go generate ./internal/app/retranslator
 
 .PHONY: my-rm-mocks
 my-rm-mocks:
-	find . -type d -name mocks -exec rm -fr '{}' ';' || true
+	find ./internal/app/retranslator -type d -name mocks -exec rm -fr '{}' ';' || true
 
 .PHONY: bot-run
 bot-run:

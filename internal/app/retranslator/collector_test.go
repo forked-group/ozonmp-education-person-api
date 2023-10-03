@@ -1,15 +1,12 @@
-package collector
+package retranslator
 
 import (
 	"context"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/worker"
 	"testing"
 	"time"
 )
 
-type Job = worker.Job
-
-func TestConfig_Run(t *testing.T) {
+func TestCollectorConfig_Run(t *testing.T) {
 	makeChanSize := func(n int) <-chan uint64 {
 		ch := make(chan uint64, n)
 		for i := 1; i <= n; i++ {
@@ -28,13 +25,15 @@ func TestConfig_Run(t *testing.T) {
 		Job          func([]uint64) error
 		inLen        int
 		In           func(n int) <-chan uint64
-		Out          chan<- Job
+		Out          chan<- workerJob
 		BatchSize    int
 		FlushTimeout time.Duration
 	}
+
 	type args struct {
 		ctxTimeout time.Duration
 	}
+
 	tests := []struct {
 		name       string
 		fields     fields
@@ -47,7 +46,7 @@ func TestConfig_Run(t *testing.T) {
 				nil,
 				10,
 				makeChanSize,
-				make(chan Job, 10),
+				make(chan workerJob, 10),
 				3,
 				20 * time.Millisecond,
 			},
@@ -62,7 +61,7 @@ func TestConfig_Run(t *testing.T) {
 				nil,
 				10,
 				makeClosedChan,
-				make(chan Job, 10),
+				make(chan workerJob, 10),
 				3,
 				20 * time.Millisecond,
 			},
@@ -77,7 +76,7 @@ func TestConfig_Run(t *testing.T) {
 				nil,
 				0,
 				makeChanSize,
-				make(chan Job, 10),
+				make(chan workerJob, 10),
 				3,
 				20 * time.Millisecond,
 			},
@@ -92,7 +91,7 @@ func TestConfig_Run(t *testing.T) {
 				nil,
 				10,
 				makeChanSize,
-				make(chan Job, 10),
+				make(chan workerJob, 10),
 				3,
 				20 * time.Millisecond,
 			},
@@ -106,7 +105,7 @@ func TestConfig_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cfg := &Config{
+			cfg := &collectorConfig{
 				Job:       tt.fields.Job,
 				In:        tt.fields.In(tt.fields.inLen),
 				Out:       tt.fields.Out,

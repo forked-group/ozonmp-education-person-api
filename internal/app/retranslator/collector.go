@@ -1,8 +1,7 @@
-package collector
+package retranslator
 
 import (
 	"context"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/worker"
 	"time"
 )
 
@@ -15,23 +14,23 @@ func (j batchJob) Do() error {
 	return j.do(j.batch)
 }
 
-type Config struct {
+type collectorConfig struct {
 	Job       func([]uint64) error
 	In        <-chan uint64
-	Out       chan<- worker.Job
+	Out       chan<- workerJob
 	BatchSize int
 	MaxDelay  time.Duration
 }
 
 type collector struct {
-	cfg *Config
+	cfg *collectorConfig
 	ctx context.Context
 	buf []uint64
 	n   int
 	tm  *time.Timer
 }
 
-func (cfg *Config) Run(ctx context.Context) {
+func (cfg *collectorConfig) Run(ctx context.Context) {
 	c := collector{
 		cfg: cfg,
 		ctx: ctx,

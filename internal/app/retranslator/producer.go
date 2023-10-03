@@ -1,30 +1,25 @@
-package producer
+package retranslator
 
 import (
 	"context"
 	"time"
 )
 
-//go:generate mockgen -destination=./mocks/event_sender.go . EventSender
-type EventSender interface {
-	Send(person *education.PersonEvent) error
-}
-
-type Config struct {
+type producerConfig struct {
 	Timeout time.Duration
-	In      <-chan *education.PersonEvent
+	In      <-chan *event
 	Sender  EventSender
 	Ok      chan<- uint64
 	Error   chan<- uint64
 }
 
 type producer struct {
-	cfg *Config
+	cfg *producerConfig
 	ctx context.Context
 	tm  *time.Timer
 }
 
-func (cfg *Config) Run(ctx context.Context) {
+func (cfg *producerConfig) Run(ctx context.Context) {
 	p := producer{
 		cfg: cfg,
 		ctx: ctx,
@@ -51,7 +46,7 @@ func (p *producer) run() {
 	}
 }
 
-func (p *producer) receive() (*education.PersonEvent, bool) {
+func (p *producer) receive() (*event, bool) {
 	select {
 	case <-p.ctx.Done():
 		return nil, false

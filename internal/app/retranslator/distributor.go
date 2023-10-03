@@ -1,20 +1,20 @@
-package distributor
+package retranslator
 
 import (
 	"context"
 )
 
-type Config struct {
-	In  <-chan []education.PersonEvent
-	Out chan<- *education.PersonEvent
+type distributorConfig struct {
+	In  <-chan []event
+	Out chan<- *event
 }
 
 type distributor struct {
-	cfg *Config
+	cfg *distributorConfig
 	ctx context.Context
 }
 
-func (cfg *Config) Run(ctx context.Context) {
+func (cfg *distributorConfig) Run(ctx context.Context) {
 	d := distributor{
 		cfg: cfg,
 		ctx: ctx,
@@ -34,7 +34,7 @@ func (d *distributor) run() {
 	}
 }
 
-func (d *distributor) receive() ([]education.PersonEvent, bool) {
+func (d *distributor) receive() ([]event, bool) {
 	select {
 	case <-d.ctx.Done():
 		return nil, false
@@ -47,7 +47,7 @@ func (d *distributor) receive() ([]education.PersonEvent, bool) {
 	}
 }
 
-func (d *distributor) send(events []education.PersonEvent) bool {
+func (d *distributor) send(events []event) bool {
 	for i := range events {
 		event := &events[i]
 

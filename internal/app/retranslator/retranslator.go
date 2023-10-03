@@ -2,15 +2,6 @@ package retranslator
 
 import (
 	"context"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/repo"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/collector"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/consumer"
-	context2 "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/context"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/distributor"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/loader"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/producer"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/worker"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/sender"
 	"sync"
 	"time"
 )
@@ -35,18 +26,18 @@ type Config struct {
 	WorkerCount int
 	WorkTimeout time.Duration
 
-	Repo   repo.EventRepo
-	Sender sender.EventSender
+	Repo   EventRepo
+	Sender EventSender
 }
 
 type Retranslator struct {
 	sendTerm context.CancelFunc
 
-	batches chan []education.PersonEvent
-	events  chan *education.PersonEvent
+	batches chan []event
+	events  chan *event
 	clean   chan uint64
 	unlock  chan uint64
-	jobs    chan worker.Job
+	jobs    chan workerJob
 
 	consumers   Waiter
 	distributor Waiter
@@ -59,30 +50,30 @@ type Retranslator struct {
 }
 
 func (cfg *Config) Start(ctx context.Context) *Retranslator {
-	batches := make(chan []education.PersonEvent)
-	events := make(chan *education.PersonEvent, cfg.ChannelSize)
+	batches := make(chan []event)
+	events := make(chan *event, cfg.ChannelSize)
 	clean := make(chan uint64)
 	unlock := make(chan uint64)
-	jobs := make(chan worker.Job)
+	jobs := make(chan workerJob)
 
-	termCtx, sendTerm := context2.WithTerm(ctx)
+	termCtx, sendTerm := contextWithTerm(ctx)
 
-	consumers := loader.StartN(termCtx, cfg.ConsumerCount,
-		&consumer.Config{
+	consumers := startN(termCtx, cfg.ConsumerCount,
+		&consumerConfig{
 			BatchSize: cfg.ConsumeSize,
 			Timeout:   cfg.ConsumeTimeout,
 			Repo:      cfg.Repo,
 			Out:       batches,
 		})
 
-	distributor := loader.Start(ctx,
-		&distributor.Config{
+	distributor := start(ctx,
+		&distributorConfig{
 			In:  batches,
 			Out: events,
 		})
 
-	producers := loader.StartN(ctx, cfg.ProducerCount,
-		&producer.Config{
+	producers := startN(ctx, cfg.ProducerCount,
+		&producerConfig{
 			Timeout: cfg.ProduceTimeout,
 			In:      events,
 			Sender:  cfg.Sender,
@@ -90,15 +81,15 @@ func (cfg *Config) Start(ctx context.Context) *Retranslator {
 			Error:   unlock,
 		})
 
-	collectors := loader.StartGroup(ctx,
-		&collector.Config{
+	collectors := groupStart(ctx,
+		&collectorConfig{
 			Job:       cfg.Repo.Remove,
 			BatchSize: cfg.CollectSize,
 			MaxDelay:  cfg.CollectMaxDelay,
 			In:        clean,
 			Out:       jobs,
 		},
-		&collector.Config{
+		&collectorConfig{
 			Job:       cfg.Repo.Unlock,
 			BatchSize: cfg.CollectSize,
 			MaxDelay:  cfg.CollectMaxDelay,
@@ -106,8 +97,8 @@ func (cfg *Config) Start(ctx context.Context) *Retranslator {
 			Out:       jobs,
 		})
 
-	workers := loader.StartN(ctx, cfg.WorkerCount,
-		&worker.Config{
+	workers := startN(ctx, cfg.WorkerCount,
+		&workerConfig{
 			In:      jobs,
 			Timeout: cfg.WorkTimeout,
 		})

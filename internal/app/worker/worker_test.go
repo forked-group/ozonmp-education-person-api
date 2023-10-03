@@ -3,7 +3,7 @@ package worker
 import (
 	"context"
 	"errors"
-	mock_worker "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator/worker/mocks"
+	mock_worker "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/worker/mocks"
 	"github.com/golang/mock/gomock"
 	"testing"
 	"time"

@@ -1,17 +1,15 @@
-package retranslator_test
+package retranslator
 
 import (
 	"container/heap"
 	"errors"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/repo"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/sender"
 	"math/rand"
 	"sync"
 	"time"
 )
 
-var _ repo.EventRepo = (*dummyRepo)(nil)
-var _ sender.EventSender = (*dummySender)(nil)
+var _ EventRepo = (*dummyRepo)(nil)
+var _ EventSender = (*dummySender)(nil)
 
 var ErrUnknownError = errors.New("unknown error")
 
@@ -56,14 +54,14 @@ func (s *dummySender) Len() int {
 	return len(s.sent)
 }
 
-func (s *dummySender) Send(events *education.PersonEvent) error {
+func (s *dummySender) Send(events *event) error {
 	if err := randTimeoutAndError(s.cfg.Latency, s.cfg.ErrPer100K); err != nil {
 		return err
 	}
 	return s.send(events)
 }
 
-func (s *dummySender) send(event *education.PersonEvent) error {
+func (s *dummySender) send(event *event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -112,7 +110,7 @@ func (r *dummyRepo) Len() int {
 	return len(r.deferred)
 }
 
-func (r *dummyRepo) Lock(n uint64) ([]education.PersonEvent, error) {
+func (r *dummyRepo) Lock(n uint64) ([]event, error) {
 	if err := randTimeoutAndError(r.cfg.Latency, r.cfg.ErrPer100K); err != nil {
 		return nil, err
 	}
@@ -124,16 +122,16 @@ func (r *dummyRepo) Lock(n uint64) ([]education.PersonEvent, error) {
 		n = uint64(len(r.deferred))
 	}
 
-	events := make([]education.PersonEvent, 0, n)
+	events := make([]event, 0, n)
 
 	for ; n > 0 && len(r.deferred) != 0; n-- {
 		id := heap.Pop(&r.deferred).(uint64)
 		r.processed.Add(id)
 
-		events = append(events, education.PersonEvent{
+		events = append(events, event{
 			ID:     id,
-			Type:   education.Created,
-			Status: education.Processed,
+			Type:   eventTypeCreated,
+			Status: eventStatusProcessed,
 		})
 	}
 
@@ -160,7 +158,7 @@ func (r *dummyRepo) Unlock(eventIDs []uint64) error {
 	return nil
 }
 
-func (r *dummyRepo) Add(events []education.PersonEvent) error {
+func (r *dummyRepo) Add(events []event) error {
 	//TODO implement me
 	panic("implement me")
 }
@@ -186,8 +184,7 @@ func (r *dummyRepo) Remove(eventIDs []uint64) error {
 	return nil
 }
 
-// =============================================================================
-// sparse map из статьи Расса Кокса (https://research.swtch.com/sparse)
+// Uint64SparseMap sparse map из статьи Расса Кокса [https://research.swtch.com/sparse]
 type Uint64SparseMap struct {
 	dense  []uint64
 	sparse []uint64
@@ -228,11 +225,7 @@ func (sm *Uint64SparseMap) Includes(v uint64) bool {
 	return i < uint64(len(sm.dense)) && sm.dense[i] == v
 }
 
-//=============================================================================
-// https://pkg.go.dev/container/heap@go1.21.1#example-package-IntHeap
-//
-
-// An Uint64Heap is a min-heap of ints.
+// Uint64Heap is a min-heap of ints [https://pkg.go.dev/container/heap@go1.21.1#example-package-IntHeap]
 type Uint64Heap []uint64
 
 func (h Uint64Heap) Len() int           { return len(h) }

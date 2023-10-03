@@ -11,7 +11,7 @@ type Group struct {
 	count int
 }
 
-func StartGroup(ctx context.Context, runners ...Runner) *Group {
+func GroupStart(ctx context.Context, runners ...Runner) *Group {
 	n := len(runners)
 
 	done := make(chan struct{}, n)
