@@ -2,10 +2,36 @@ package interfaces
 
 import (
 	"context"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/router"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/path"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
+
+type Commander interface {
+	HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath)
+	HandleCommand(callback *tgbotapi.Message, commandPath path.CommandPath)
+}
+
+type ConfigurableCommander interface {
+	Commander
+	Config(cfg CommanderCfg)
+}
+
+type CommanderCfg struct {
+	BotAPI    *tgbotapi.BotAPI
+	Domain    string
+	Subdomain string
+}
+
+type PersonCommander interface {
+	ConfigurableCommander
+	Help(inputMsg *tgbotapi.Message)
+	Get(inputMsg *tgbotapi.Message)
+	List(inputMsg *tgbotapi.Message)
+	Delete(inputMsg *tgbotapi.Message)
+	New(inputMsg *tgbotapi.Message)  // return error not implemented - where? how?
+	Edit(inputMsg *tgbotapi.Message) // return error not implemented - where? how?
+}
 
 type PersonService interface {
 	Describe(personID uint64) (*education.Person, error)
@@ -22,16 +48,4 @@ type PersonRepo interface {
 	CreatePerson(ctx context.Context, person education.Person) (uint64, error)
 	UpdatePerson(ctx context.Context, personID uint64, person education.Person) (bool, error)
 	RemovePerson(ctx context.Context, personID uint64) (bool, error)
-}
-
-type PersonCommander interface {
-	Help(inputMsg *tgbotapi.Message)
-	Get(inputMsg *tgbotapi.Message)
-	List(inputMsg *tgbotapi.Message)
-	Delete(inputMsg *tgbotapi.Message)
-
-	New(inputMsg *tgbotapi.Message)  // return error not implemented - where? how?
-	Edit(inputMsg *tgbotapi.Message) // return error not implemented - where? how?
-
-	router.Commander
 }

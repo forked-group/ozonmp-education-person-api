@@ -2,7 +2,7 @@ package subdomain
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
+	"github.com/rs/zerolog/log"
 )
 
 func (c *DemoSubdomainCommander) Help(inputMessage *tgbotapi.Message) {

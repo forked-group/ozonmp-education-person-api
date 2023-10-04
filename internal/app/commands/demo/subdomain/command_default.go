@@ -1,7 +1,7 @@
 package subdomain
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )

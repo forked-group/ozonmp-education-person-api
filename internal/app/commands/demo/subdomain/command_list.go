@@ -2,7 +2,7 @@ package subdomain
 
 import (
 	"encoding/json"
-	"log"
+	"github.com/rs/zerolog/log"
 
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/path"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"

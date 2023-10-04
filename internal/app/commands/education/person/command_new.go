@@ -1,9 +1,8 @@
 package person
 
 import (
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
+	"github.com/rs/zerolog/log"
 )
 
 func (c Commander) New(inputMsg *tgbotapi.Message) {
@@ -43,5 +42,5 @@ func (c Commander) New(inputMsg *tgbotapi.Message) {
 		return
 	}
 
-	c.sendOk(chatID, fmt.Sprintf("create new person with id=%d", id))
+	c.sendOk(chatID, "new person %d created", id)
 }

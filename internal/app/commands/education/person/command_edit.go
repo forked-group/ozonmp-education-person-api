@@ -2,7 +2,7 @@ package person
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
+	"github.com/rs/zerolog/log"
 	"strconv"
 )
 
@@ -36,13 +36,13 @@ func (c Commander) Edit(inputMsg *tgbotapi.Message) {
 
 	p, err := c.service.Describe(id)
 	if err != nil {
-		log.Printf("%s: can't get person: %v", op, err)
+		log.Printf("%s: can't get person %d: %v", op, id, err)
 		c.sendError(chatID, "internal error")
 		return
 	}
 
 	if p == nil {
-		c.sendError(chatID, "person id not found")
+		c.sendError(chatID, "person %d not found", id)
 		return
 	}
 
@@ -53,16 +53,15 @@ func (c Commander) Edit(inputMsg *tgbotapi.Message) {
 
 	ok, err := c.service.Update(id, *p)
 	if err != nil {
-		log.Printf("%s: can't update person: %v", op, err)
+		log.Printf("%s: can't update person %d: %v", op, id, err)
 		c.sendError(chatID, "internal error")
 		return
 	}
 
 	if !ok {
-		log.Printf("%s: person %d not found: %v", op, id, err)
-		c.sendError(chatID, "person not found")
+		c.sendError(chatID, "person %d not found", id)
 		return
 	}
 
-	c.sendOk(chatID, "successful updated")
+	c.sendOk(chatID, "person %d successful updated", id)
 }

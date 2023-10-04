@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
-	"log"
+	"github.com/rs/zerolog/log"
 	"strings"
 )
 
@@ -24,7 +24,7 @@ func (c Commander) ListCallback(callback *tgbotapi.CallbackQuery, callbackPath c
 	var data listCallbackData
 	err := json.Unmarshal([]byte(callbackPath.CallbackData), &data)
 	if err != nil {
-		log.Printf("%s: can't unmarshal calback data: %v", op, err)
+		log.Printf("%s: can't unmarshal callback data: %v", op, err)
 		return
 	}
 

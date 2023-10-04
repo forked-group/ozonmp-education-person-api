@@ -23,6 +23,9 @@ type (
 	callbackPath = path.CallbackPath
 )
 
-type personService = interfaces.PersonService
+type (
+	personService = interfaces.PersonService
+	commanderCfg  = interfaces.CommanderCfg
+)
 
 var _ interfaces.PersonCommander = (*Commander)(nil)

@@ -1,7 +1,7 @@
 package subdomain
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -12,7 +12,7 @@ func (c *DemoSubdomainCommander) Get(inputMessage *tgbotapi.Message) {
 
 	idx, err := strconv.Atoi(args)
 	if err != nil {
-		log.Println("wrong args", args)
+		log.Printf("wrong args: %v", args)
 		return
 	}
 

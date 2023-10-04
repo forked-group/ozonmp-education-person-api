@@ -1,57 +1,72 @@
 package main
 
 import (
+	"context"
+	"errors"
 	personCommands "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/commands/education/person"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/interfaces"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/repo"
 	personService "github.com/aaa2ppp/ozonmp-education-person-api/internal/service/education/person"
-	"log"
+	"github.com/rs/zerolog/log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	routerPkg "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/router"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 )
 
-func main() {
-	_ = godotenv.Load()
+const batchSize = 2
 
+func main() {
+	_ = godotenv.Load() // XXX
+
+	router, err := startBot(personService.NewService(repo.NewDummyRepo(batchSize)))
+	if err != nil {
+		log.Error().Err(err).Msgf("Can't start Telegram bot")
+
+		return
+	}
+	defer func() {
+		router.Close()
+		log.Info().Msg("Telegram bot stopped")
+	}()
+
+	log.Info().Msg("Telegram bot started")
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	// Block until a signal is received.
+	<-c
+}
+
+func startBot(service interfaces.PersonService) (*routerPkg.Router, error) {
 	token, found := os.LookupEnv("TOKEN")
 	if !found {
-		log.Panic("environment variable TOKEN not found in .env")
+		return nil, errors.New("environment variable TOKEN not found in .env")
 	}
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		log.Panic(err)
+		return nil, err
 	}
 
 	// Uncomment if you want debugging
 	// bot.Debug = true
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
-
-	u := tgbotapi.UpdateConfig{
-		Timeout: 60,
-	}
-
-	updates, err := bot.GetUpdatesChan(u)
-	if err != nil {
-		log.Panic(err)
-	}
+	log.Info().Msgf("Authorized on account %s", bot.Self.UserName)
 
 	router := routerPkg.NewRouter(bot)
 
-	var service *personService.DummyService
-	if _, ok := os.LookupEnv("WITH_TEST_DATA"); ok {
-		service = personService.NewDummyServiceWithTestData()
-	} else {
-		service = personService.NewDummyService()
-	}
-
 	router.Route("education", "person",
-		personCommands.NewCommander(bot, service),
+		personCommands.NewCommander(service),
 	)
 
-	for update := range updates {
-		router.HandleUpdate(update)
-	}
+	err = router.Start(context.Background(), tgbotapi.UpdateConfig{
+		Timeout: 60,
+	})
+
+	return router, nil
 }

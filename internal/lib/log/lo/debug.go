@@ -1,7 +1,7 @@
 package lo
 
 import (
-	"log"
+	"github.com/rs/zerolog/log"
 	"os"
 )
 

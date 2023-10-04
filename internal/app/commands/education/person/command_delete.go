@@ -2,7 +2,7 @@ package person
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
+	"github.com/rs/zerolog/log"
 	"strconv"
 )
 
@@ -34,12 +34,17 @@ func (c Commander) Delete(inputMsg *tgbotapi.Message) {
 		return
 	}
 
-	_, err = c.service.Remove(id)
+	ok, err := c.service.Remove(id)
 	if err != nil {
-		log.Printf("%s: can't remove person: %v", op, err)
+		log.Printf("%s: can't remove person %d: %v", op, id, err)
 		c.sendError(chatID, "internal error")
 		return
 	}
 
-	c.sendOk(chatID, "successful deleted")
+	if !ok {
+		c.sendError(chatID, "person %d not found", id)
+		return
+	}
+
+	c.sendOk(chatID, "person %d successful deleted", id)
 }

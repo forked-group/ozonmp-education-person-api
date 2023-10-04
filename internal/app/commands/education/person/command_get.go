@@ -2,7 +2,7 @@ package person
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
+	"github.com/rs/zerolog/log"
 	"strconv"
 )
 
@@ -43,9 +43,9 @@ func (c Commander) Get(inputMsg *tgbotapi.Message) {
 	}
 
 	if person == nil {
-		c.sendError(chatID, "person id not found")
+		c.sendError(chatID, "person %d not found", id)
 		return
 	}
 
-	c.sendOk(chatID, person.String()) // TODO: send(...) without Ok?
+	c.sendOk(chatID, person.String()) // TODO: send(...) without sendOk?
 }

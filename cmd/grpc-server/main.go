@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"fmt"
 	personCommands "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/commands/education/person"
@@ -21,14 +23,16 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
-	"sync"
 )
 
-var (
-	batchSize uint = 2 // TODO: ???
+const (
+	envDummyRepo = "DUMMY_REPO"
+	batchSize    = 2 // TODO: ???
 )
 
 func main() {
+	_ = godotenv.Load() // XXX
+
 	if err := config.ReadConfigYML("config.yml"); err != nil {
 		log.Fatal().Err(err).Msg("Failed init configuration")
 	}
@@ -47,13 +51,6 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 
-	db := openDB(cfg.Database)
-	if db == nil {
-		log.Error().Msg("Can't open data base")
-		return
-	}
-	defer db.Close()
-
 	//tracing, err := tracer.NewTracer(&cfg)
 	//if err != nil {
 	//	log.Error().Err(err).Msg("Failed init tracing")
@@ -62,11 +59,29 @@ func main() {
 	//}
 	//defer tracing.Close()
 
-	//r := repo.NewDummyRepo(batchSize)
-	r := repo.NewRepo(db, batchSize)
+	var r interfaces.PersonRepo
+	if _, ok := os.LookupEnv(envDummyRepo); ok {
+		r = repo.NewDummyRepo(batchSize)
 
-	stopBot := startBot(personService.NewService(r))
-	defer stopBot()
+	} else {
+		db := openDB(cfg.Database)
+		if db == nil {
+			log.Error().Msg("Can't open data base")
+
+			return
+		}
+		defer db.Close()
+
+		r = repo.NewRepo(db, batchSize)
+	}
+
+	router, err := startBot(personService.NewService(r))
+	if err != nil {
+		log.Error().Err(err).Msgf("Can't start Telegram bot")
+
+		return
+	}
+	defer router.Close()
 
 	if err := server.NewGrpcServer(r).Start(&cfg); err != nil {
 		log.Error().Err(err).Msg("Failed creating gRPC server")
@@ -107,17 +122,15 @@ func openDB(cfg config.Database) *sqlx.DB {
 	return db
 }
 
-func startBot(service interfaces.PersonService) func() {
-	_ = godotenv.Load() // XXX
-
+func startBot(service interfaces.PersonService) (*routerPkg.Router, error) {
 	token, found := os.LookupEnv("TOKEN")
 	if !found {
-		log.Panic().Msg("environment variable TOKEN not found in .env") // TODO: return error
+		return nil, errors.New("environment variable TOKEN not found in .env")
 	}
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		log.Panic().Err(err) // TODO: return error
+		return nil, err
 	}
 
 	// Uncomment if you want debugging
@@ -125,42 +138,15 @@ func startBot(service interfaces.PersonService) func() {
 
 	log.Info().Msgf("Authorized on account %s", bot.Self.UserName)
 
-	u := tgbotapi.UpdateConfig{
-		Timeout: 60,
-	}
-
-	updates, err := bot.GetUpdatesChan(u)
-	if err != nil {
-		log.Panic().Err(err) // TODO: return error
-	}
-
 	router := routerPkg.NewRouter(bot)
 
 	router.Route("education", "person",
-		personCommands.NewCommander(bot, service),
+		personCommands.NewCommander(service),
 	)
 
-	cancel := make(chan struct{})
-	done := make(chan struct{})
+	err = router.Start(context.Background(), tgbotapi.UpdateConfig{
+		Timeout: 60,
+	})
 
-	go func() {
-		defer close(done)
-		for {
-			select {
-			case update := <-updates:
-				router.HandleUpdate(update)
-			case <-cancel:
-				return
-			}
-		}
-	}()
-
-	var once sync.Once
-
-	return func() {
-		once.Do(func() {
-			close(cancel)
-			<-done
-		})
-	}
+	return router, nil
 }

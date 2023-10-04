@@ -1,13 +1,9 @@
 package person
 
 import (
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"log"
-)
-
-const (
-	myDomain    = "education"
-	mySubdomain = "person"
+	"github.com/rs/zerolog/log"
 )
 
 type Commander struct {
@@ -17,13 +13,16 @@ type Commander struct {
 	service   personService
 }
 
-func NewCommander(bot *tgbotapi.BotAPI, service personService) *Commander {
+func NewCommander(service personService) *Commander {
 	return &Commander{
-		domain:    myDomain,
-		subdomain: mySubdomain,
-		bot:       bot,
-		service:   service,
+		service: service,
 	}
+}
+
+func (c *Commander) Config(cfg commanderCfg) {
+	c.bot = cfg.BotAPI
+	c.domain = cfg.Domain
+	c.subdomain = cfg.Subdomain
 }
 
 func (c Commander) checkPath(op string, domain, subdomain string) bool {
@@ -76,18 +75,18 @@ func (c Commander) HandleCommand(inputMsg *tgbotapi.Message, commandPath command
 	}
 }
 
-func (c Commander) sendError(chatID int64, msg string) {
-	c.send(chatID, "ERR "+msg)
+func (c Commander) sendError(chatID int64, msg string, a ...any) {
+	c.send(chatID, "ERR "+msg, a...)
 }
 
-func (c Commander) sendOk(chatID int64, msg string) {
-	c.send(chatID, "OK "+msg)
+func (c Commander) sendOk(chatID int64, msg string, a ...any) {
+	c.send(chatID, "OK "+msg, a...)
 }
 
-func (c Commander) send(chatID int64, msg string) {
+func (c Commander) send(chatID int64, msg string, a ...any) {
 	const op = "Commander.send"
 
-	output := tgbotapi.NewMessage(chatID, msg)
+	output := tgbotapi.NewMessage(chatID, fmt.Sprintf(msg, a...))
 
 	if _, err := c.bot.Send(output); err != nil {
 		log.Printf("%s: can't send message to chat: %v", op, err)
