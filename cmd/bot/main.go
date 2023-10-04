@@ -40,15 +40,15 @@ func main() {
 
 	router := routerPkg.NewRouter(bot)
 
-	var service *personService.DummyPersonService
+	var service *personService.DummyService
 	if _, ok := os.LookupEnv("WITH_TEST_DATA"); ok {
-		service = personService.NewDummyPersonServiceWithTestData()
+		service = personService.NewDummyServiceWithTestData()
 	} else {
-		service = personService.NewDummyPersonService()
+		service = personService.NewDummyService()
 	}
 
-	router.SetRoute("education", "person",
-		personCommands.NewPersonCommander(bot, service),
+	router.Route("education", "person",
+		personCommands.NewCommander(bot, service),
 	)
 
 	for update := range updates {

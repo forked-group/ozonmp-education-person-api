@@ -36,11 +36,11 @@ func NewRouter(
 	}
 }
 
-func (c *Router) Route(domain, subdomain string) Commander {
+func (c *Router) getRoute(domain, subdomain string) Commander {
 	return c.routes[domain+"/"+subdomain]
 }
 
-func (c *Router) SetRoute(domain, subdomain string, commander Commander) {
+func (c *Router) Route(domain, subdomain string, commander Commander) {
 	c.routes[domain+"/"+subdomain] = commander
 }
 
@@ -70,7 +70,7 @@ func (c *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 	case "demo":
 		c.demoCommander.HandleCallback(callback, callbackPath)
 	default:
-		if route := c.Route(callbackPath.Domain, callbackPath.Subdomain); route != nil {
+		if route := c.getRoute(callbackPath.Domain, callbackPath.Subdomain); route != nil {
 			route.HandleCallback(callback, callbackPath)
 		} else {
 			log.Printf("Router.handleMessage: unknown path - %s/%s", callbackPath.Domain, callbackPath.Subdomain)
@@ -95,7 +95,7 @@ func (c *Router) handleMessage(msg *tgbotapi.Message) {
 	case "demo":
 		c.demoCommander.HandleCommand(msg, commandPath)
 	default:
-		if route := c.Route(commandPath.Domain, commandPath.Subdomain); route != nil {
+		if route := c.getRoute(commandPath.Domain, commandPath.Subdomain); route != nil {
 			route.HandleCommand(msg, commandPath)
 		} else {
 			log.Printf("Router.handleMessage: unknown path - %s/%s", commandPath.Domain, commandPath.Subdomain)

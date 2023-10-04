@@ -18,7 +18,7 @@ service EducationPersonApiService {
     };
   }
   rpc CreatePersonV1(CreatePersonV1Request) returns (CreatePersonV1Response);
-  rpc ListPersonV1(ListPersonV1Request) returns (ListPersonV1Response);
+  rpc ListPersonV1(ListPersonV1Request)     returns (ListPersonV1Response);
   rpc RemovePersonV1(RemovePersonV1Request) returns (RemovePersonV1Response);
   rpc UpdatePersonV1(UpdatePersonV1Request) returns (UpdatePersonV1Response);
 }
@@ -30,31 +30,31 @@ enum Sex {
 }
 
 enum Education {
-  EDUCATION_NONE = 0;
+  EDU_NONE = 0;
 
   // Дошкольное
-  EDUCATION_PRESCHOOL = 1;
+  EDU_PRESCHOOL = 1;
 
   // Начальное общее — 1—4 классы
-  EDUCATION_PRIMARY_GENERAL = 2;
+  EDU_PRIMARY_GENERAL = 2;
 
   // Основное общее — 5—9 классы
-  EDUCATION_BASIC_GENERAL = 3;
+  EDU_BASIC_GENERAL = 3;
 
   // Среднее общее — 10—11 классы
-  EDUCATION_SECONDARY_GENERAL = 4;
+  EDU_SECONDARY_GENERAL = 4;
 
   // Среднее профессиональное
-  EDUCATION_SECONDARY_VOCATIONAL = 5;
+  EDU_SECONDARY_VOCATIONAL = 5;
 
   // Высшее I степени — бакалавриат
-  EDUCATION_HIGHER_1 = 6;
+  EDU_HIGHER_1 = 6;
 
   // Высшее II степени — специалитет, магистратура
-  EDUCATION_HIGHER_2 = 7;
+  EDU_HIGHER_2 = 7;
 
   // Высшее III степени — подготовка кадров высшей квалификации
-  EDUCATION_HIGHER_3 = 8;
+  EDU_HIGHER_3 = 8;
 }
 
 message Person {
@@ -67,6 +67,7 @@ message Person {
   Education education = 7;
 
   google.protobuf.Timestamp created = 8;
+  google.protobuf.Timestamp updated = 9;
 }
 
 message StringValue {
@@ -103,7 +104,7 @@ message DescribePersonV1Response {
 
 message ListPersonV1Request {
   uint64 cursor = 1;
-  uint64 limit = 2 [(validate.rules).uint64.gt = 0];
+  uint64 limit  = 2 [(validate.rules).uint64.gt = 0];
 }
 
 message ListPersonV1Response {
@@ -120,12 +121,12 @@ message RemovePersonV1Response {
 
 message UpdatePersonV1Request {
   uint64 person_id = 1 [(validate.rules).uint64.gt = 0];
-  StringValue first_name   = 2;
-  StringValue middle_name  = 3;
-  StringValue last_name    = 4;
-  //TimestampValue birthday  = 5;
-  SexValue       sex       = 6;
-  EducationValue education = 7;
+  StringValue    first_name  = 2;
+  StringValue    middle_name = 3;
+  StringValue    last_name   = 4;
+  TimestampValue birthday    = 5;
+  SexValue       sex         = 6;
+  EducationValue education   = 7;
 }
 
 message UpdatePersonV1Response {

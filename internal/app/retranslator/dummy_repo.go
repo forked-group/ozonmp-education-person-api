@@ -130,8 +130,8 @@ func (r *dummyRepo) Lock(n uint64) ([]event, error) {
 
 		events = append(events, event{
 			ID:     id,
-			Type:   eventTypeCreated,
-			Status: eventStatusProcessed,
+			Type:   created,
+			Status: processed,
 		})
 	}
 

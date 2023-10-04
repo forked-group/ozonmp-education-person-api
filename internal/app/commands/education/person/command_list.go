@@ -2,28 +2,26 @@ package person
 
 import (
 	"encoding/json"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/path"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	"log"
 	"strings"
 )
 
-type callbackListData struct {
+type listCallbackData struct {
 	Cursor uint64 `json:"cursor"`
 }
 
 const listPageSize = 5
 
-func (c commander) List(inputMsg *tgbotapi.Message) {
+func (c Commander) List(inputMsg *tgbotapi.Message) {
 	c.listNext(inputMsg.Chat.ID, 0)
 }
 
-func (c commander) ListCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
-	const op = "commander.ListCallback"
+func (c Commander) ListCallback(callback *tgbotapi.CallbackQuery, callbackPath callbackPath) {
+	const op = "Commander.ListCallback"
 
-	var data callbackListData
+	var data listCallbackData
 	err := json.Unmarshal([]byte(callbackPath.CallbackData), &data)
 	if err != nil {
 		log.Printf("%s: can't unmarshal calback data: %v", op, err)
@@ -33,18 +31,19 @@ func (c commander) ListCallback(callback *tgbotapi.CallbackQuery, callbackPath p
 	c.listNext(callback.Message.Chat.ID, data.Cursor)
 }
 
-func (c commander) listNext(chatID int64, cursor uint64) {
-	const op = "commander.listNext"
+func (c Commander) listNext(chatID int64, cursor uint64) {
+	const op = "Commander.listNext"
 
 	entries, err := c.service.List(cursor, listPageSize)
 
-	switch {
-	case err == service.ErrNotFound || len(entries) == 0:
-		c.SendError(chatID, "no more entries")
-		return
-	case err != nil:
+	if err != nil {
 		log.Printf("%s: can't list entries: %v", op, err)
-		c.SendError(chatID, "internal error")
+		c.sendError(chatID, "internal error")
+		return
+	}
+
+	if len(entries) == 0 {
+		c.sendError(chatID, "no more entries")
 		return
 	}
 
@@ -57,11 +56,11 @@ func (c commander) listNext(chatID int64, cursor uint64) {
 
 	outputMsg := tgbotapi.NewMessage(chatID, outputText.String())
 
-	serializedData, _ := json.Marshal(callbackListData{
+	serializedData, _ := json.Marshal(listCallbackData{
 		Cursor: entries[len(entries)-1].ID + 1,
 	})
 
-	var callbackPath = path.CallbackPath{
+	var path = callbackPath{
 		Domain:       c.domain,
 		Subdomain:    c.subdomain,
 		CallbackName: "list",
@@ -70,7 +69,7 @@ func (c commander) listNext(chatID int64, cursor uint64) {
 
 	outputMsg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Next page", callbackPath.String()),
+			tgbotapi.NewInlineKeyboardButtonData("Next page", path.String()),
 		),
 	)
 

@@ -3,12 +3,11 @@ package person
 import (
 	"errors"
 	"fmt"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"strings"
 	"time"
 )
 
-func parsePersonNames(args []string, p *education.Person) ([]string, error) {
+func parsePersonNames(args []string, p *person) ([]string, error) {
 
 	names := make([]string, 0, 3)
 	for i := 0; i < 3 && i < len(args); i++ {
@@ -36,7 +35,7 @@ func parsePersonNames(args []string, p *education.Person) ([]string, error) {
 	return args, nil
 }
 
-func parsePersonFields(args []string, p *education.Person) (err error) {
+func parsePersonFields(args []string, p *person) (err error) {
 
 	for _, arg := range args {
 		pos := strings.IndexByte(arg, '=')
@@ -61,23 +60,23 @@ func parsePersonFields(args []string, p *education.Person) (err error) {
 			var v time.Time
 			if val == "" {
 				p.Birthday = time.Time{}
-			} else if v, err = education.ParseDate(val); err == nil {
+			} else if v, err = parseDate(val); err == nil {
 				p.Birthday = v
 			}
 
 		case "sex":
-			var v education.Sex
+			var v sex
 			if val == "" {
 				p.Sex = 0
-			} else if v, err = education.ParseSex(val); err == nil {
+			} else if v, err = parseSex(val); err == nil {
 				p.Sex = v
 			}
 
 		case "education":
-			var v education.Education
+			var v education
 			if val == "" {
 				p.Education = 0
-			} else if v, err = education.ParseEducation(val); err == nil {
+			} else if v, err = parseEducation(val); err == nil {
 				p.Education = v
 			}
 

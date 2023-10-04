@@ -14,6 +14,9 @@ type Person struct {
 	Birthday   time.Time
 	Sex
 	Education
+	Removed bool
+	Created time.Time
+	Updated time.Time
 }
 
 func (p Person) String() string {

@@ -6,40 +6,40 @@ import (
 	"strconv"
 )
 
-func (c commander) Delete(inputMsg *tgbotapi.Message) {
-	const op = "commander.Get"
+func (c Commander) Delete(inputMsg *tgbotapi.Message) {
+	const op = "Commander.Delete"
 	const usage = "/delete%s id"
 
 	chatID := inputMsg.Chat.ID
 
 	args, err := splitIntoArguments(inputMsg.CommandArguments())
 	if err != nil {
-		c.SendError(chatID, err.Error())
+		c.sendError(chatID, err.Error())
 		return
 	}
 
 	if len(args) == 0 {
-		c.SendError(chatID, "you must specify the person id")
+		c.sendError(chatID, "you must specify the person id")
 		return
 	}
 
 	if len(args) > 1 {
-		c.SendError(chatID, "you can only specify one person id")
+		c.sendError(chatID, "you can only specify one person id")
 		return
 	}
 
 	id, err := strconv.ParseUint(args[0], 0, 64)
 	if err != nil {
-		c.SendError(chatID, "id must be a positive number")
+		c.sendError(chatID, "id must be a positive number")
 		return
 	}
 
 	_, err = c.service.Remove(id)
 	if err != nil {
 		log.Printf("%s: can't remove person: %v", op, err)
-		c.SendError(chatID, "internal error")
+		c.sendError(chatID, "internal error")
 		return
 	}
 
-	c.SendOk(chatID, "successful deleted")
+	c.sendOk(chatID, "successful deleted")
 }

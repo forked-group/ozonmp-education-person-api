@@ -1,51 +1,51 @@
 package person
 
 import (
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/service"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"strconv"
 )
 
-func (c commander) Get(inputMsg *tgbotapi.Message) {
-	const op = "commander.Get"
+func (c Commander) Get(inputMsg *tgbotapi.Message) {
+	const op = "Commander.Get"
 	const usage = "usage: /get%s id"
 
 	chatID := inputMsg.Chat.ID
 
 	args, err := splitIntoArguments(inputMsg.CommandArguments())
 	if err != nil {
-		c.SendError(chatID, err.Error())
+		c.sendError(chatID, err.Error())
 		return
 	}
 
 	if len(args) == 0 {
-		c.SendError(chatID, "you must specify the person id")
+		c.sendError(chatID, "you must specify the person id")
 		return
 	}
 
 	if len(args) > 1 {
-		c.SendError(chatID, "you can only specify one person id")
+		c.sendError(chatID, "you can only specify one person id")
 		return
 	}
 
 	id, err := strconv.ParseUint(args[0], 0, 64)
 	if err != nil {
-		c.SendError(chatID, "id must be a positive number")
+		c.sendError(chatID, "id must be a positive number")
 		return
 	}
 
 	person, err := c.service.Describe(id)
 
-	switch {
-	case err == service.ErrNotFound:
-		c.SendError(chatID, "person id not found")
-		return
-	case err != nil:
+	if err != nil {
 		log.Printf("%s: can't get person: %v", op, err)
-		c.SendError(chatID, "internal error")
+		c.sendError(chatID, "internal error")
 		return
 	}
 
-	c.SendOk(chatID, person.String())
+	if person == nil {
+		c.sendError(chatID, "person id not found")
+		return
+	}
+
+	c.sendOk(chatID, person.String()) // TODO: send(...) without Ok?
 }

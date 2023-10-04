@@ -1,43 +1,32 @@
 package person
 
 import (
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/path"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 )
 
-// TODO: Зачем коммандеру интерфейс Service?
-//  Чтобы предоставить командам, т.к. они его методы.
-//  Imho, по фэн-шую, каждая команда должна требовать свой интерфейс:
-//  Describer, Listener и т.д. Команды должны быть отдельными
-//  сущностями?
+const (
+	myDomain    = "education"
+	mySubdomain = "person"
+)
 
-type Service interface {
-	Describe(PersonID uint64) (*education.Person, error)
-	List(cursor uint64, limit uint64) ([]education.Person, error)
-	Create(education.Person) (uint64, error)
-	Update(PersonID uint64, Person education.Person) error
-	Remove(PersonID uint64) (bool, error)
-}
-
-type commander struct {
+type Commander struct {
 	domain    string
 	subdomain string
 	bot       *tgbotapi.BotAPI
-	service   Service
+	service   personService
 }
 
-func newCommander(domain, subdomain string, bot *tgbotapi.BotAPI, service Service) commander {
-	return commander{
-		domain:    domain,
-		subdomain: subdomain,
+func NewCommander(bot *tgbotapi.BotAPI, service personService) *Commander {
+	return &Commander{
+		domain:    myDomain,
+		subdomain: mySubdomain,
 		bot:       bot,
 		service:   service,
 	}
 }
 
-func (c commander) checkPath(op string, domain, subdomain string) bool {
+func (c Commander) checkPath(op string, domain, subdomain string) bool {
 
 	if domain != c.domain || subdomain != c.subdomain {
 		log.Printf("%s: unknown path - %s/%s", op, domain, subdomain)
@@ -47,8 +36,8 @@ func (c commander) checkPath(op string, domain, subdomain string) bool {
 	return true
 }
 
-func (c commander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
-	const op = "commander.HandleCallback"
+func (c Commander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath callbackPath) {
+	const op = "Commander.HandleCallback"
 
 	if !c.checkPath(op, callbackPath.Domain, callbackPath.Subdomain) {
 		return
@@ -62,8 +51,8 @@ func (c commander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath
 	}
 }
 
-func (c commander) HandleCommand(inputMsg *tgbotapi.Message, commandPath path.CommandPath) {
-	const op = "commander.HandleCommand"
+func (c Commander) HandleCommand(inputMsg *tgbotapi.Message, commandPath commandPath) {
+	const op = "Commander.HandleCommand"
 
 	if !c.checkPath(op, commandPath.Domain, commandPath.Subdomain) {
 		return
@@ -87,16 +76,16 @@ func (c commander) HandleCommand(inputMsg *tgbotapi.Message, commandPath path.Co
 	}
 }
 
-func (c commander) SendError(chatID int64, msg string) {
-	c.Send(chatID, "ERR "+msg)
+func (c Commander) sendError(chatID int64, msg string) {
+	c.send(chatID, "ERR "+msg)
 }
 
-func (c commander) SendOk(chatID int64, msg string) {
-	c.Send(chatID, "OK "+msg)
+func (c Commander) sendOk(chatID int64, msg string) {
+	c.send(chatID, "OK "+msg)
 }
 
-func (c commander) Send(chatID int64, msg string) {
-	const op = "commander.Send"
+func (c Commander) send(chatID int64, msg string) {
+	const op = "Commander.send"
 
 	output := tgbotapi.NewMessage(chatID, msg)
 
@@ -105,6 +94,6 @@ func (c commander) Send(chatID int64, msg string) {
 	}
 }
 
-func (c commander) cmdSuffix() string {
+func (c Commander) cmdSuffix() string {
 	return "__" + c.domain + "__" + c.subdomain
 }

@@ -2,14 +2,13 @@ package api
 
 import (
 	"context"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/interfaces"
 	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/service"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/repo"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -24,14 +23,16 @@ var (
 	})
 )
 
-type personAPI struct {
+var _ pb.EducationPersonApiServiceServer = (*PersonAPI)(nil)
+
+type PersonAPI struct {
 	pb.UnimplementedEducationPersonApiServiceServer
-	repo repo.Repo
+	repo interfaces.PersonRepo
 }
 
 // NewPersonAPI returns api of education-person-api service
-func NewPersonAPI(r repo.Repo) pb.EducationPersonApiServiceServer {
-	return &personAPI{repo: r}
+func NewPersonAPI(r interfaces.PersonRepo) *PersonAPI {
+	return &PersonAPI{repo: r}
 }
 
 const unimplemented = "Unimplemented"
@@ -50,7 +51,7 @@ func timeToTimestamp(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(t)
 }
 
-func (o *personAPI) DescribePersonV1(
+func (o *PersonAPI) DescribePersonV1(
 	ctx context.Context,
 	req *pb.DescribePersonV1Request,
 ) (*pb.DescribePersonV1Response, error) {
@@ -65,7 +66,7 @@ func (o *personAPI) DescribePersonV1(
 	}
 
 	person, err := o.repo.DescribePerson(ctx, req.PersonId)
-	if err != nil && err != service.ErrNotFound { // TODO: Здесь мы общаемся с Repo а ошибка прилетает от Service
+	if err != nil {
 		log.Error().Err(err).Msgf("%s - failed")
 
 		return nil, status.Error(codes.Internal, err.Error())
@@ -93,7 +94,7 @@ func (o *personAPI) DescribePersonV1(
 	}, nil
 }
 
-func (o *personAPI) CreatePersonV1(
+func (o *PersonAPI) CreatePersonV1(
 	ctx context.Context,
 	req *pb.CreatePersonV1Request,
 ) (*pb.CreatePersonV1Response, error) {
@@ -127,7 +128,7 @@ func (o *personAPI) CreatePersonV1(
 	return &pb.CreatePersonV1Response{PersonId: id}, nil
 }
 
-func (o *personAPI) ListPersonV1(
+func (o *PersonAPI) ListPersonV1(
 	ctx context.Context,
 	req *pb.ListPersonV1Request,
 ) (*pb.ListPersonV1Response, error) {
@@ -143,7 +144,7 @@ func (o *personAPI) ListPersonV1(
 
 	persons, err := o.repo.ListPerson(ctx, req.Cursor, req.Limit)
 
-	if err != nil && err != service.ErrNotFound { // TODO: why *service*.ErrNotFound?
+	if err != nil {
 		log.Error().Err(err).Msgf("%s - can't create p", op)
 
 		// TODO: is it really necessary to returns the raw error?
@@ -173,7 +174,7 @@ func (o *personAPI) ListPersonV1(
 	}, nil
 }
 
-func (o *personAPI) RemovePersonV1(
+func (o *PersonAPI) RemovePersonV1(
 	ctx context.Context,
 	req *pb.RemovePersonV1Request,
 ) (*pb.RemovePersonV1Response, error) {
@@ -189,17 +190,16 @@ func (o *personAPI) RemovePersonV1(
 
 	ok, err := o.repo.RemovePerson(ctx, req.PersonId)
 
-	if err != nil && err != service.ErrNotFound { // TODO: why *service*.ErrNotFound?
+	if err != nil {
 		log.Error().Err(err).Msgf("%s - failed")
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &pb.RemovePersonV1Response{Ok: ok}, nil
-
 }
 
-func (o *personAPI) UpdatePersonV1(
+func (o *PersonAPI) UpdatePersonV1(
 	ctx context.Context,
 	req *pb.UpdatePersonV1Request,
 ) (*pb.UpdatePersonV1Response, error) {
@@ -216,7 +216,7 @@ func (o *personAPI) UpdatePersonV1(
 	// TODO: здесь гонка за запись в репо, мы сначала читаем, потом записываем
 
 	person, err := o.repo.DescribePerson(ctx, req.PersonId)
-	if err != nil && err != service.ErrNotFound { // TODO: Здесь мы общаемся с Repo а ошибка прилетает от Service
+	if err != nil {
 		log.Error().Err(err).Msgf("%s - failed")
 
 		return nil, status.Error(codes.Internal, err.Error())
@@ -249,14 +249,14 @@ func (o *personAPI) UpdatePersonV1(
 		person.Education = model.Education(p.Education.Value)
 	}
 
-	err = o.repo.UpdatePerson(ctx, p.PersonId, *person)
-	if err != nil && err != service.ErrNotFound { // TODO: Здесь мы общаемся с Repo а ошибка прилетает от Service
+	ok, err := o.repo.UpdatePerson(ctx, p.PersonId, *person)
+	if err != nil {
 		log.Error().Err(err).Msgf("%s - failed")
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	if err == service.ErrNotFound {
+	if !ok {
 		log.Debug().Uint64("personId", req.PersonId).Msg("person not found")
 		totalPersonNotFound.Inc()
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/interfaces"
 	"net"
 	"net/http"
 	"os"
@@ -25,17 +26,16 @@ import (
 
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/api"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/config"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/repo"
 	pb "github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api"
 )
 
 // GrpcServer is gRPC server
 type GrpcServer struct {
-	repo repo.Repo
+	repo interfaces.PersonRepo
 }
 
 // NewGrpcServer returns gRPC server with supporting of batch listing
-func NewGrpcServer(repo repo.Repo) *GrpcServer {
+func NewGrpcServer(repo interfaces.PersonRepo) *GrpcServer {
 	return &GrpcServer{
 		repo: repo,
 	}

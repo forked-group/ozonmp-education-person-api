@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-func (c commander) Help(inputMsg *tgbotapi.Message) {
-	const op = "commander.Help"
+func (c Commander) Help(inputMsg *tgbotapi.Message) {
+	const op = "Commander.Help"
 
 	suffix := c.cmdSuffix()
 	msg := strings.Builder{}
@@ -38,5 +38,5 @@ func (c commander) Help(inputMsg *tgbotapi.Message) {
 	msg.WriteString(suffix)
 	msg.WriteString(" id [field=value ...] — edit a entity\n")
 
-	c.Send(inputMsg.Chat.ID, msg.String())
+	c.send(inputMsg.Chat.ID, msg.String())
 }
