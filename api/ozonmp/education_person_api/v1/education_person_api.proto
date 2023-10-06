@@ -23,67 +23,66 @@ service EducationPersonApiService {
   rpc UpdatePersonV1(UpdatePersonV1Request) returns (UpdatePersonV1Response);
 }
 
-enum Sex {
-  SEX_NONE   = 0;
-  SEX_FEMALE = 1;
-  SEX_MALE   = 2;
-}
-
-enum Education {
-  EDU_NONE = 0;
-
-  // Дошкольное
-  EDU_PRESCHOOL = 1;
-
-  // Начальное общее — 1—4 классы
-  EDU_PRIMARY_GENERAL = 2;
-
-  // Основное общее — 5—9 классы
-  EDU_BASIC_GENERAL = 3;
-
-  // Среднее общее — 10—11 классы
-  EDU_SECONDARY_GENERAL = 4;
-
-  // Среднее профессиональное
-  EDU_SECONDARY_VOCATIONAL = 5;
-
-  // Высшее I степени — бакалавриат
-  EDU_HIGHER_1 = 6;
-
-  // Высшее II степени — специалитет, магистратура
-  EDU_HIGHER_2 = 7;
-
-  // Высшее III степени — подготовка кадров высшей квалификации
-  EDU_HIGHER_3 = 8;
-}
-
-message Person {
-  uint64 id           = 1;
-  string first_name   = 2;
-  string middle_name  = 3;
-  string last_name    = 4;
-  google.protobuf.Timestamp birthday = 5;
-  Sex    sex          = 6;
-  Education education = 7;
-
-  google.protobuf.Timestamp created = 8;
-  google.protobuf.Timestamp updated = 9;
+message Uint64Value {
+  uint64 value = 1;
 }
 
 message StringValue {
   string value = 1;
 }
 
+message TimestampValue {
+  google.protobuf.Timestamp value = 1;
+}
+
+enum Sex {
+  SEX_NONE   = 0;
+  SEX_FEMALE = 1;
+  SEX_MALE   = 2;
+}
+
 message SexValue {
   Sex value = 1;
+}
+
+enum Education {
+  EDU_NONE                 = 0;
+  EDU_PRESCHOOL            = 1;
+  EDU_PRIMARY_GENERAL      = 2;
+  EDU_BASIC_GENERAL        = 3;
+  EDU_SECONDARY_GENERAL    = 4;
+  EDU_SECONDARY_VOCATIONAL = 5;
+  EDU_HIGHER_1             = 6;
+  EDU_HIGHER_2             = 7;
+  EDU_HIGHER_3             = 8;
 }
 
 message EducationValue {
   Education value = 1;
 }
 
-message TimestampValue {
-  google.protobuf.Timestamp value = 1;
+message Person {
+  uint64    id          = 1;
+  string    first_name  = 2;
+  string    middle_name = 3;
+  string    last_name   = 4;
+
+  google.protobuf.Timestamp birthday = 5;
+
+  Sex       sex         = 6;
+  Education education   = 7;
+
+  google.protobuf.Timestamp created  = 8;
+  google.protobuf.Timestamp updated  = 9;
+}
+
+message PersonUpdate {
+  StringValue    first_name  = 1;
+  StringValue    middle_name = 2;
+  StringValue    last_name   = 3;
+  TimestampValue birthday    = 4;
+  SexValue       sex         = 5;
+  EducationValue education   = 6;
 }
 
 message CreatePersonV1Request {
@@ -121,12 +120,7 @@ message RemovePersonV1Response {
 
 message UpdatePersonV1Request {
   uint64 person_id = 1 [(validate.rules).uint64.gt = 0];
-  StringValue    first_name  = 2;
-  StringValue    middle_name = 3;
-  StringValue    last_name   = 4;
-  TimestampValue birthday    = 5;
-  SexValue       sex         = 6;
-  EducationValue education   = 7;
+  PersonUpdate person = 2;
 }
 
 message UpdatePersonV1Response {

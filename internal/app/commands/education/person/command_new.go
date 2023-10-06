@@ -22,14 +22,17 @@ func (c Commander) New(inputMsg *tgbotapi.Message) {
 		return
 	}
 
-	var p personCreate
+	var (
+		p person
+		f personField // stub
+	)
 
 	if args, err = parsePersonNames(args, &p); err != nil {
 		c.sendError(chatID, err.Error())
 		return
 	}
 
-	if err = parsePersonFields(args, &p); err != nil {
+	if err = parsePersonFields(args, &p, &f); err != nil {
 		c.sendError(chatID, err.Error())
 		return
 	}

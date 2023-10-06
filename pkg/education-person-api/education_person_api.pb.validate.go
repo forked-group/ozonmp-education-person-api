@@ -33,61 +33,22 @@ var (
 	_ = anypb.Any{}
 )
 
-// Validate checks the field values on Person with the rules defined in the
-// proto definition for this message. If any rules are violated, an error is returned.
-func (m *Person) Validate() error {
+// Validate checks the field values on Uint64Value with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *Uint64Value) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	// no validation rules for Id
-
-	// no validation rules for FirstName
-
-	// no validation rules for MiddleName
-
-	// no validation rules for LastName
-
-	if v, ok := interface{}(m.GetBirthday()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PersonValidationError{
-				field:  "Birthday",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	// no validation rules for Sex
-
-	// no validation rules for Education
-
-	if v, ok := interface{}(m.GetCreated()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PersonValidationError{
-				field:  "Created",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if v, ok := interface{}(m.GetUpdated()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return PersonValidationError{
-				field:  "Updated",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for Value
 
 	return nil
 }
 
-// PersonValidationError is the validation error returned by Person.Validate if
-// the designated constraints aren't met.
-type PersonValidationError struct {
+// Uint64ValueValidationError is the validation error returned by
+// Uint64Value.Validate if the designated constraints aren't met.
+type Uint64ValueValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -95,22 +56,22 @@ type PersonValidationError struct {
 }
 
 // Field function returns field value.
-func (e PersonValidationError) Field() string { return e.field }
+func (e Uint64ValueValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e PersonValidationError) Reason() string { return e.reason }
+func (e Uint64ValueValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e PersonValidationError) Cause() error { return e.cause }
+func (e Uint64ValueValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e PersonValidationError) Key() bool { return e.key }
+func (e Uint64ValueValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e PersonValidationError) ErrorName() string { return "PersonValidationError" }
+func (e Uint64ValueValidationError) ErrorName() string { return "Uint64ValueValidationError" }
 
 // Error satisfies the builtin error interface
-func (e PersonValidationError) Error() string {
+func (e Uint64ValueValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -122,14 +83,14 @@ func (e PersonValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sPerson.%s: %s%s",
+		"invalid %sUint64Value.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = PersonValidationError{}
+var _ error = Uint64ValueValidationError{}
 
 var _ interface {
 	Field() string
@@ -137,7 +98,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = PersonValidationError{}
+} = Uint64ValueValidationError{}
 
 // Validate checks the field values on StringValue with the rules defined in
 // the proto definition for this message. If any rules are violated, an error
@@ -205,6 +166,81 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = StringValueValidationError{}
+
+// Validate checks the field values on TimestampValue with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *TimestampValue) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetValue()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return TimestampValueValidationError{
+				field:  "Value",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// TimestampValueValidationError is the validation error returned by
+// TimestampValue.Validate if the designated constraints aren't met.
+type TimestampValueValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e TimestampValueValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e TimestampValueValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e TimestampValueValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e TimestampValueValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e TimestampValueValidationError) ErrorName() string { return "TimestampValueValidationError" }
+
+// Error satisfies the builtin error interface
+func (e TimestampValueValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sTimestampValue.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = TimestampValueValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = TimestampValueValidationError{}
 
 // Validate checks the field values on SexValue with the rules defined in the
 // proto definition for this message. If any rules are violated, an error is returned.
@@ -339,18 +375,49 @@ var _ interface {
 	ErrorName() string
 } = EducationValueValidationError{}
 
-// Validate checks the field values on TimestampValue with the rules defined in
-// the proto definition for this message. If any rules are violated, an error
-// is returned.
-func (m *TimestampValue) Validate() error {
+// Validate checks the field values on Person with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *Person) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	if v, ok := interface{}(m.GetValue()).(interface{ Validate() error }); ok {
+	// no validation rules for Id
+
+	// no validation rules for FirstName
+
+	// no validation rules for MiddleName
+
+	// no validation rules for LastName
+
+	if v, ok := interface{}(m.GetBirthday()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return TimestampValueValidationError{
-				field:  "Value",
+			return PersonValidationError{
+				field:  "Birthday",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Sex
+
+	// no validation rules for Education
+
+	if v, ok := interface{}(m.GetCreated()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PersonValidationError{
+				field:  "Created",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetUpdated()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PersonValidationError{
+				field:  "Updated",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}
@@ -360,9 +427,9 @@ func (m *TimestampValue) Validate() error {
 	return nil
 }
 
-// TimestampValueValidationError is the validation error returned by
-// TimestampValue.Validate if the designated constraints aren't met.
-type TimestampValueValidationError struct {
+// PersonValidationError is the validation error returned by Person.Validate if
+// the designated constraints aren't met.
+type PersonValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -370,22 +437,22 @@ type TimestampValueValidationError struct {
 }
 
 // Field function returns field value.
-func (e TimestampValueValidationError) Field() string { return e.field }
+func (e PersonValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e TimestampValueValidationError) Reason() string { return e.reason }
+func (e PersonValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e TimestampValueValidationError) Cause() error { return e.cause }
+func (e PersonValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e TimestampValueValidationError) Key() bool { return e.key }
+func (e PersonValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e TimestampValueValidationError) ErrorName() string { return "TimestampValueValidationError" }
+func (e PersonValidationError) ErrorName() string { return "PersonValidationError" }
 
 // Error satisfies the builtin error interface
-func (e TimestampValueValidationError) Error() string {
+func (e PersonValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -397,14 +464,14 @@ func (e TimestampValueValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sTimestampValue.%s: %s%s",
+		"invalid %sPerson.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = TimestampValueValidationError{}
+var _ error = PersonValidationError{}
 
 var _ interface {
 	Field() string
@@ -412,7 +479,132 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = TimestampValueValidationError{}
+} = PersonValidationError{}
+
+// Validate checks the field values on PersonUpdate with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *PersonUpdate) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if v, ok := interface{}(m.GetFirstName()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PersonUpdateValidationError{
+				field:  "FirstName",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetMiddleName()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PersonUpdateValidationError{
+				field:  "MiddleName",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetLastName()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PersonUpdateValidationError{
+				field:  "LastName",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetBirthday()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PersonUpdateValidationError{
+				field:  "Birthday",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetSex()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PersonUpdateValidationError{
+				field:  "Sex",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if v, ok := interface{}(m.GetEducation()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PersonUpdateValidationError{
+				field:  "Education",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	return nil
+}
+
+// PersonUpdateValidationError is the validation error returned by
+// PersonUpdate.Validate if the designated constraints aren't met.
+type PersonUpdateValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PersonUpdateValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PersonUpdateValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PersonUpdateValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PersonUpdateValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PersonUpdateValidationError) ErrorName() string { return "PersonUpdateValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PersonUpdateValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPersonUpdate.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PersonUpdateValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PersonUpdateValidationError{}
 
 // Validate checks the field values on CreatePersonV1Request with the rules
 // defined in the proto definition for this message. If any rules are
@@ -1027,60 +1219,10 @@ func (m *UpdatePersonV1Request) Validate() error {
 		}
 	}
 
-	if v, ok := interface{}(m.GetFirstName()).(interface{ Validate() error }); ok {
+	if v, ok := interface{}(m.GetPerson()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
 			return UpdatePersonV1RequestValidationError{
-				field:  "FirstName",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if v, ok := interface{}(m.GetMiddleName()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdatePersonV1RequestValidationError{
-				field:  "MiddleName",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if v, ok := interface{}(m.GetLastName()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdatePersonV1RequestValidationError{
-				field:  "LastName",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if v, ok := interface{}(m.GetBirthday()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdatePersonV1RequestValidationError{
-				field:  "Birthday",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if v, ok := interface{}(m.GetSex()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdatePersonV1RequestValidationError{
-				field:  "Sex",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	if v, ok := interface{}(m.GetEducation()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdatePersonV1RequestValidationError{
-				field:  "Education",
+				field:  "Person",
 				reason: "embedded message failed validation",
 				cause:  err,
 			}

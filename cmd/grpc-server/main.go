@@ -60,20 +60,20 @@ func main() {
 	//defer tracing.Close()
 
 	var r interfaces.PersonRepo
-	if _, ok := os.LookupEnv(envDummyRepo); ok {
-		r = repo.NewDummyRepo(batchSize)
+	//if _, ok := os.LookupEnv(envDummyRepo); ok {
+	//	r = repo.NewDummyRepo(batchSize) // broken
+	//
+	//} else {
+	db := openDB(cfg.Database)
+	if db == nil {
+		log.Error().Msg("Can't open data base")
 
-	} else {
-		db := openDB(cfg.Database)
-		if db == nil {
-			log.Error().Msg("Can't open data base")
-
-			return
-		}
-		defer db.Close()
-
-		r = repo.NewRepo(db, batchSize)
+		return
 	}
+	defer db.Close()
+
+	r = repo.NewPersonRepo(db, batchSize)
+	//}
 
 	router, err := startBot(personService.NewService(r))
 	if err != nil {

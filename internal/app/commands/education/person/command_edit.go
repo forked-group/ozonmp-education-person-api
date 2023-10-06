@@ -34,24 +34,15 @@ func (c Commander) Edit(inputMsg *tgbotapi.Message) {
 		return
 	}
 
-	p, err := c.service.Describe(id)
-	if err != nil {
-		log.Printf("%s: can't get person %d: %v", op, id, err)
-		c.sendError(chatID, "internal error")
-		return
-	}
+	var p person
+	var f personField
 
-	if p == nil {
-		c.sendError(chatID, "person %d not found", id)
-		return
-	}
-
-	if err = parsePersonFields(args[1:], &p.PersonCreate); err != nil {
+	if err = parsePersonFields(args[1:], &p, &f); err != nil {
 		c.sendError(chatID, err.Error())
 		return
 	}
 
-	ok, err := c.service.Update(id, p.PersonCreate)
+	ok, err := c.service.Update(id, p, f)
 	if err != nil {
 		log.Printf("%s: can't update person %d: %v", op, id, err)
 		c.sendError(chatID, "internal error")

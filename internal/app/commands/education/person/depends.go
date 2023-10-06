@@ -3,21 +3,21 @@ package person
 import (
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/path"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/interfaces"
-	education_ "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
+	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 )
 
 type (
-	person       = education_.Person
-	personCreate = education_.PersonCreate
-	sex          = education_.Sex
-	education    = education_.Education
-	date         = education_.Date
+	person      = model.Person
+	personField = model.PersonField
+	sex         = model.Sex
+	education   = model.Education
+	date        = model.Date
 )
 
 var (
-	parseSex       = education_.ParseSex
-	parseEducation = education_.ParseEducation
-	parseDate      = education_.ParseDate
+	parseSex       = model.ParseSex
+	parseEducation = model.ParseEducation
+	parseDate      = model.ParseDate
 )
 
 type (

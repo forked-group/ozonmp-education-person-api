@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"os"
 	"sync"
 	"time"
@@ -10,7 +11,7 @@ import (
 const envWithTestData = "WITH_TEST_DATA"
 
 // repo will be filled with this data if envWithTestData is set
-var personTestData = []personCreate{
+var personTestData = []model.Person{
 	{LastName: "One"},
 	{LastName: "Two"},
 	{LastName: "Three"},
@@ -23,16 +24,16 @@ var personTestData = []personCreate{
 	{LastName: "Ten"},
 }
 
-type DummyRepo struct {
+type PersonDummyRepo struct {
 	batchSize uint
-	data      []person
+	data      []model.Person
 	mu        sync.RWMutex
 }
 
-func NewDummyRepo(batchSize uint) *DummyRepo {
-	s := &DummyRepo{
+func NewDummyRepo(batchSize uint) *PersonDummyRepo {
+	s := &PersonDummyRepo{
 		batchSize: batchSize,
-		data:      []person{{Removed: true}}, // stub for unused index 0
+		data:      []model.Person{{Removed: true}}, // stub for unused index 0
 	}
 	if _, ok := os.LookupEnv(envWithTestData); ok {
 		s.fillTestData()
@@ -40,17 +41,17 @@ func NewDummyRepo(batchSize uint) *DummyRepo {
 	return s
 }
 
-func (s *DummyRepo) fillTestData() {
+func (s *PersonDummyRepo) fillTestData() {
 	for _, person := range personTestData {
 		_, _ = s.CreatePerson(context.Background(), person)
 	}
 }
 
-func (s *DummyRepo) inRange(index uint64) bool {
+func (s *PersonDummyRepo) inRange(index uint64) bool {
 	return 1 <= index && index < uint64(len(s.data))
 }
 
-func (s *DummyRepo) DescribePerson(ctx context.Context, personID uint64) (*person, error) {
+func (s *PersonDummyRepo) DescribePerson(_ context.Context, personID uint64) (*model.Person, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -66,7 +67,7 @@ func (s *DummyRepo) DescribePerson(ctx context.Context, personID uint64) (*perso
 	return &person, nil
 }
 
-func (s *DummyRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]person, error) {
+func (s *PersonDummyRepo) ListPerson(_ context.Context, cursor uint64, limit uint64) ([]model.Person, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -74,7 +75,7 @@ func (s *DummyRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64)
 		limit = uint64(s.batchSize)
 	}
 
-	result := make([]person, 0, limit)
+	result := make([]model.Person, 0, limit)
 
 	for i := cursor; i < uint64(len(s.data)) && uint64(len(result)) < limit; i++ {
 		if s.data[i].Removed {
@@ -86,22 +87,17 @@ func (s *DummyRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64)
 	return result, nil
 }
 
-func (s *DummyRepo) CreatePerson(ctx context.Context, pc personCreate) (uint64, error) {
+func (s *PersonDummyRepo) CreatePerson(_ context.Context, p model.Person) (uint64, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	id := uint64(len(s.data))
-	s.data = append(s.data, person{
-		ID:           id,
-		Created:      time.Now(),
-		Updated:      time.Now(),
-		PersonCreate: pc,
-	})
+	p.ID = uint64(len(s.data))
+	s.data = append(s.data, p)
 
-	return id, nil
+	return p.ID, nil
 }
 
-func (s *DummyRepo) UpdatePerson(ctx context.Context, personID uint64, pc personCreate) (bool, error) {
+func (s *PersonDummyRepo) UpdatePerson(_ context.Context, personID uint64, p model.Person, _ model.PersonField) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -110,16 +106,13 @@ func (s *DummyRepo) UpdatePerson(ctx context.Context, personID uint64, pc person
 		return false, nil
 	}
 
-	s.data[index] = person{
-		ID:           personID,
-		Updated:      time.Now(),
-		PersonCreate: pc,
-	}
+	p.ID = personID
+	s.data[index] = p
 
 	return true, nil
 }
 
-func (s *DummyRepo) RemovePerson(ctx context.Context, personID uint64) (bool, error) {
+func (s *PersonDummyRepo) RemovePerson(ctx context.Context, personID uint64) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

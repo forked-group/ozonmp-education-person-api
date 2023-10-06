@@ -3,7 +3,7 @@ package interfaces
 import (
 	"context"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/path"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
+	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -34,23 +34,23 @@ type PersonCommander interface {
 }
 
 type PersonService interface {
-	Describe(personID uint64) (*education.Person, error)
-	List(cursor uint64, limit uint64) ([]education.Person, error)
-	Create(create education.PersonCreate) (uint64, error)
-	Update(personID uint64, person education.PersonCreate) (bool, error)
+	Describe(personID uint64) (*model.Person, error)
+	List(cursor uint64, limit uint64) ([]model.Person, error)
+	Create(create model.Person) (uint64, error)
+	Update(personID uint64, person model.Person, fields model.PersonField) (bool, error)
 	Remove(personID uint64) (bool, error)
 }
 
 type PersonRepo interface {
-	DescribePerson(ctx context.Context, personID uint64) (*education.Person, error)
-	ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]education.Person, error)
-	CreatePerson(ctx context.Context, person education.PersonCreate) (uint64, error)
-	UpdatePerson(ctx context.Context, personID uint64, person education.PersonCreate) (bool, error)
+	DescribePerson(ctx context.Context, personID uint64) (*model.Person, error)
+	ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]model.Person, error)
+	CreatePerson(ctx context.Context, person model.Person) (uint64, error)
+	UpdatePerson(ctx context.Context, personID uint64, person model.Person, fields model.PersonField) (bool, error)
 	RemovePerson(ctx context.Context, personID uint64) (bool, error)
 }
 
 type PersonEventRepo interface {
-	Lock(ctx context.Context, n uint64) ([]education.PersonEvent, error)
+	Lock(ctx context.Context, n uint64) ([]model.PersonEvent, error)
 	Unlock(ctx context.Context, eventIDs []uint64) (uint64, error)
 	Remove(ctx context.Context, eventIDs []uint64) (uint64, error)
 }

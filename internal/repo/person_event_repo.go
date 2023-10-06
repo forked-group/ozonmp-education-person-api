@@ -6,24 +6,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/lib/log/lo"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
+	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"github.com/jmoiron/sqlx"
-	"strconv"
-	"strings"
 )
 
-type EventRepo struct {
+type PersonEventRepo struct {
 	db *sqlx.DB
 }
 
-func NewEventRepo(db *sqlx.DB) *EventRepo {
-	return &EventRepo{
+func NewEventRepo(db *sqlx.DB) *PersonEventRepo {
+	return &PersonEventRepo{
 		db: db,
 	}
 }
 
-func (r EventRepo) transaction(ctx context.Context, f func(tx *sql.Tx) error) error {
-	const op = "Repo.transaction"
+func (r PersonEventRepo) transaction(ctx context.Context, f func(tx *sql.Tx) error) error {
+	const op = "PersonRepo.transaction"
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -44,8 +42,9 @@ func (r EventRepo) transaction(ctx context.Context, f func(tx *sql.Tx) error) er
 	return nil
 }
 
-func (r EventRepo) Lock(ctx context.Context, n uint64) ([]education.PersonEvent, error) {
-	const op = "EventRepo.Lock"
+func (r PersonEventRepo) Lock(ctx context.Context, n uint64) ([]model.PersonEvent, error) {
+	const op = "PersonEventRepo.Lock"
+
 	const q = `
 		WITH
 		    batch(person_event_id) AS (
@@ -84,32 +83,34 @@ func (r EventRepo) Lock(ctx context.Context, n uint64) ([]education.PersonEvent,
 		    status,
 		    payload;
 `
-	var events []personEvent
+	var (
+		events []model.PersonEvent
+	)
 
 	err := r.transaction(ctx, func(tx *sql.Tx) error {
 
-		rows, err := tx.QueryContext(ctx, q, deferred, processed, n)
+		rows, err := tx.QueryContext(ctx, q, model.Deferred, model.Processed, n)
 		if err != nil {
 			return fmt.Errorf("can't update person_event: %w", err)
 		}
 
 		for rows.Next() {
 			var (
-				id       uint64
-				type_    eventType
-				status   eventStatus
-				personID uint64
-				payload  []byte
-				entity   *person
+				id          uint64
+				eventType   model.EventType
+				eventStatus model.EventStatus
+				personID    uint64
+				payload     []byte
+				entity      *model.Person
 			)
 
-			err = rows.Scan(&id, &personID, &type_, &status, &payload)
+			err = rows.Scan(&id, &personID, &eventType, &eventStatus, &payload)
 			if err != nil {
 				return fmt.Errorf("can't scan row: %w", err)
 			}
 
 			if len(payload) == 0 {
-				entity = &person{ID: personID}
+				entity = &model.Person{ID: personID}
 
 			} else {
 				err = json.Unmarshal(payload, entity)
@@ -118,10 +119,10 @@ func (r EventRepo) Lock(ctx context.Context, n uint64) ([]education.PersonEvent,
 				}
 			}
 
-			events = append(events, personEvent{
+			events = append(events, model.PersonEvent{
 				ID:     id,
-				Type:   type_,
-				Status: status,
+				Type:   eventType,
+				Status: eventStatus,
 				Entity: entity,
 			})
 		}
@@ -135,28 +136,9 @@ func (r EventRepo) Lock(ctx context.Context, n uint64) ([]education.PersonEvent,
 	return events, nil
 }
 
-func anySlice[T any](a []T) []any {
-	res := make([]any, len(a))
+func (r PersonEventRepo) Unlock(ctx context.Context, eventIDs []uint64) (uint64, error) {
+	const op = "PersonEventRepo.Unlock"
 
-	for i := range res {
-		res[i] = a[i]
-	}
-
-	return res
-}
-
-func placeholderList(first int, n int) string {
-	elems := make([]string, n)
-
-	for i, j := 0, first; i < n; i, j = i+1, j+1 {
-		elems[i] = "$" + strconv.Itoa(j)
-	}
-
-	return strings.Join(elems, ",")
-}
-
-func (r EventRepo) Unlock(ctx context.Context, eventIDs []uint64) (uint64, error) {
-	const op = "EventRepo.Unlock"
 	const q = `
 		UPDATE
 		    person_event
@@ -173,7 +155,7 @@ func (r EventRepo) Unlock(ctx context.Context, eventIDs []uint64) (uint64, error
 	lo.Debug("%s: qr: %v", op, qr)
 
 	args := make([]any, 0, len(eventIDs)+1)
-	args = append(args, deferred)
+	args = append(args, model.Deferred)
 	args = append(args, anySlice(eventIDs)...)
 
 	var n int64
@@ -199,8 +181,8 @@ func (r EventRepo) Unlock(ctx context.Context, eventIDs []uint64) (uint64, error
 	return uint64(n), nil
 }
 
-func (r EventRepo) Remove(ctx context.Context, eventIDs []uint64) (uint64, error) {
-	const op = "EventRepo.Remove"
+func (r PersonEventRepo) Remove(ctx context.Context, eventIDs []uint64) (uint64, error) {
+	const op = "PersonEventRepo.RemovePerson"
 	const q = `
 		DELETE FROM
 		    person_event

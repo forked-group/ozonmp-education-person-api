@@ -58,13 +58,6 @@ func dateToTimestamp(d *model.Date) *timestamppb.Timestamp {
 	return timeToTimestamp(d.Time)
 }
 
-func timestampToDate(t *timestamppb.Timestamp) *model.Date {
-	if t == nil {
-		return nil
-	}
-	return model.NewDate(t.AsTime())
-}
-
 func (o *PersonAPI) DescribePersonV1(
 	ctx context.Context,
 	req *pb.DescribePersonV1Request,
@@ -101,7 +94,7 @@ func (o *PersonAPI) DescribePersonV1(
 			FirstName:  person.FirstName,
 			MiddleName: person.MiddleName,
 			LastName:   person.LastName,
-			Birthday:   timeToTimestamp(person.Birthday.Time),
+			Birthday:   timeToTimestamp(person.Birthday),
 			Sex:        pb.Sex(person.Sex),
 			Education:  pb.Education(person.Education),
 		},
@@ -124,11 +117,11 @@ func (o *PersonAPI) CreatePersonV1(
 
 	p := req.Person
 
-	id, err := o.repo.CreatePerson(ctx, model.PersonCreate{
+	id, err := o.repo.CreatePerson(ctx, model.Person{
 		FirstName:  p.FirstName,
 		MiddleName: p.MiddleName,
 		LastName:   p.LastName,
-		Birthday:   model.Date{Time: timestampToTime(p.Birthday)},
+		Birthday:   timestampToTime(p.Birthday),
 		Sex:        model.Sex(p.Sex),
 		Education:  model.Education(p.Education),
 	})
@@ -172,7 +165,7 @@ func (o *PersonAPI) ListPersonV1(
 			FirstName:  p.FirstName,
 			MiddleName: p.MiddleName,
 			LastName:   p.LastName,
-			Birthday:   timeToTimestamp(p.Birthday.Time),
+			Birthday:   timeToTimestamp(p.Birthday),
 			Sex:        pb.Sex(p.Sex),
 			Education:  pb.Education(p.Education),
 		}
@@ -227,43 +220,38 @@ func (o *PersonAPI) UpdatePersonV1(
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// TODO: здесь гонка за запись в репо, мы сначала читаем, потом записываем
+	p := req.Person
+	var (
+		person model.Person
+		fields model.PersonField
+	)
 
-	person, err := o.repo.DescribePerson(ctx, req.PersonId)
-	if err != nil {
-		log.Error().Err(err).Msgf("%s - failed")
-
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if person == nil {
-		log.Debug().Uint64("personId", req.PersonId).Msg("person not found")
-		totalPersonNotFound.Inc()
-
-		return nil, status.Error(codes.NotFound, "person not found")
-	}
-
-	p := req
 	if p.FirstName != nil {
 		person.FirstName = p.FirstName.Value
+		fields |= model.PersonFirstName
 	}
 	if p.MiddleName != nil {
 		person.MiddleName = p.MiddleName.Value
+		fields |= model.PersonMiddleName
 	}
 	if p.LastName != nil {
 		person.LastName = p.LastName.Value
+		fields |= model.PersonLastName
 	}
 	if p.Birthday != nil {
-		person.Birthday = model.Date{Time: timestampToTime(p.Birthday.Value)}
+		person.Birthday = timestampToTime(p.Birthday.Value)
+		fields |= model.PersonBirthday
 	}
 	if p.Sex != nil {
 		person.Sex = model.Sex(p.Sex.Value)
+		fields |= model.PersonSex
 	}
 	if p.Education != nil {
 		person.Education = model.Education(p.Education.Value)
+		fields |= model.PersonEducation
 	}
 
-	ok, err := o.repo.UpdatePerson(ctx, p.PersonId, person.PersonCreate)
+	ok, err := o.repo.UpdatePerson(ctx, req.PersonId, person, fields)
 	if err != nil {
 		log.Error().Err(err).Msgf("%s - failed")
 

@@ -38,6 +38,6 @@ func (c *DemoSubdomainCommander) List(inputMessage *tgbotapi.Message) {
 
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Printf("DemoSubdomainCommander.List: error sending reply message to chat - %v", err)
+		log.Printf("DemoSubdomainCommander.ListPerson: error sending reply message to chat - %v", err)
 	}
 }

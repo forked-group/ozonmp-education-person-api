@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EducationPersonApiServiceClient interface {
-	// DescribePersonV1 - Describe a person
+	// DescribePersonV1 - DescribePerson a person
 	DescribePersonV1(ctx context.Context, in *DescribePersonV1Request, opts ...grpc.CallOption) (*DescribePersonV1Response, error)
 	CreatePersonV1(ctx context.Context, in *CreatePersonV1Request, opts ...grpc.CallOption) (*CreatePersonV1Response, error)
 	ListPersonV1(ctx context.Context, in *ListPersonV1Request, opts ...grpc.CallOption) (*ListPersonV1Response, error)
@@ -83,7 +83,7 @@ func (c *educationPersonApiServiceClient) UpdatePersonV1(ctx context.Context, in
 // All implementations must embed UnimplementedEducationPersonApiServiceServer
 // for forward compatibility
 type EducationPersonApiServiceServer interface {
-	// DescribePersonV1 - Describe a person
+	// DescribePersonV1 - DescribePerson a person
 	DescribePersonV1(context.Context, *DescribePersonV1Request) (*DescribePersonV1Response, error)
 	CreatePersonV1(context.Context, *CreatePersonV1Request) (*CreatePersonV1Response, error)
 	ListPersonV1(context.Context, *ListPersonV1Request) (*ListPersonV1Response, error)

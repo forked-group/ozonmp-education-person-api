@@ -6,21 +6,37 @@ import (
 	"time"
 )
 
-type PersonCreate struct {
-	FirstName  string `json:"first_name,omitempty"`
-	MiddleName string `json:"middle_name,omitempty"`
-	LastName   string `json:"last_name,omitempty"`
-	Birthday   Date   `json:"birthday,omitempty"`
-	Sex        `json:"sex,omitempty"`
-	Education  `json:"education,omitempty"`
+//go:generate stringer -type=PersonField
+type PersonField int
+
+const (
+	PersonID PersonField = 1 << iota
+	PersonFirstName
+	PersonMiddleName
+	PersonLastName
+	PersonBirthday
+	PersonSex
+	PersonEducation
+	PersonRemoved
+	PersonCreated
+	PersonUpdated
+)
+
+func (set PersonField) IsSet(f PersonField) bool {
+	return set&f != 0
 }
 
 type Person struct {
-	ID uint64 `json:"id"`
-	PersonCreate
-	Removed bool      `json:"removed,omitempty"`
-	Created time.Time `json:"created"`
-	Updated time.Time `json:"updated"`
+	ID         uint64
+	FirstName  string
+	MiddleName string
+	LastName   string
+	Birthday   time.Time
+	Sex
+	Education
+	Removed bool
+	Created time.Time
+	Updated time.Time
 }
 
 func (p Person) String() string {

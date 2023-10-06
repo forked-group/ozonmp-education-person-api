@@ -3,10 +3,14 @@ package person
 import (
 	"errors"
 	"fmt"
+	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"strings"
+	"time"
 )
 
-func parsePersonNames(args []string, p *personCreate) ([]string, error) {
+const DateLayout = "2006-02-03"
+
+func parsePersonNames(args []string, p *person) ([]string, error) {
 
 	names := make([]string, 0, 3)
 	for i := 0; i < 3 && i < len(args); i++ {
@@ -34,7 +38,7 @@ func parsePersonNames(args []string, p *personCreate) ([]string, error) {
 	return args, nil
 }
 
-func parsePersonFields(args []string, p *personCreate) (err error) {
+func parsePersonFields(args []string, p *person, f *personField) (err error) {
 
 	for _, arg := range args {
 		pos := strings.IndexByte(arg, '=')
@@ -48,36 +52,39 @@ func parsePersonFields(args []string, p *personCreate) (err error) {
 		switch name {
 		case "first_name":
 			p.FirstName = val
+			*f |= model.PersonFirstName
 
 		case "middle_name":
 			p.MiddleName = val
+			*f |= model.PersonMiddleName
 
 		case "last_name":
 			p.LastName = val
+			*f |= model.PersonLastName
 
 		case "birthday":
-			var v date
 			if val == "" {
-				p.Birthday = date{}
-			} else if v, err = parseDate(val); err == nil {
-				p.Birthday = v
+				p.Birthday = time.Time{}
+			} else {
+				p.Birthday, err = time.Parse(DateLayout, val)
 			}
+			*f |= model.PersonBirthday
 
 		case "sex":
-			var v sex
 			if val == "" {
 				p.Sex = 0
-			} else if v, err = parseSex(val); err == nil {
-				p.Sex = v
+			} else {
+				p.Sex, err = parseSex(val)
 			}
+			*f |= model.PersonSex
 
 		case "education":
-			var v education
 			if val == "" {
 				p.Education = 0
-			} else if v, err = parseEducation(val); err == nil {
-				p.Education = v
+			} else {
+				p.Education, err = parseEducation(val)
 			}
+			*f |= model.PersonEducation
 
 		default:
 			err = errors.New("unknown field")

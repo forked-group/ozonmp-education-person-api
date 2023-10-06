@@ -16,12 +16,12 @@ type Date struct {
 	time.Time
 }
 
-func NewDate(t time.Time) *Date {
-	return &Date{
-		time.Date(t.Year(), t.Month(), t.Day(),
-			0, 0, 0, 0, time.UTC),
-	}
-}
+//func NewDate(t time.Time) *Date {
+//	return &Date{
+//		time.Date(t.Year(), t.Month(), t.Day(),
+//			0, 0, 0, 0, time.UTC),
+//	}
+//}
 
 func ParseDate(s string) (Date, error) {
 	if t, err := time.Parse(DateLayout, s); err != nil {
