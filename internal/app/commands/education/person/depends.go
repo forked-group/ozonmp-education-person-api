@@ -7,9 +7,11 @@ import (
 )
 
 type (
-	person    = education_.Person
-	sex       = education_.Sex
-	education = education_.Education
+	person       = education_.Person
+	personCreate = education_.PersonCreate
+	sex          = education_.Sex
+	education    = education_.Education
+	date         = education_.Date
 )
 
 var (

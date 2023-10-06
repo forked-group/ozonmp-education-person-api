@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/jmoiron/sqlx"
 )
@@ -45,7 +46,7 @@ func (r *Repo) DescribePerson(ctx context.Context, personID uint64) (*person, er
 		&p.FirstName,
 		&p.MiddleName,
 		&p.LastName,
-		&p.Birthday,
+		&p.Birthday.Time,
 		&p.Sex,
 		&p.Education,
 		&p.Removed,
@@ -75,13 +76,14 @@ func (r *Repo) ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]p
 			created,
 			updated
 		FROM
-		    person
+			person
 		WHERE
-		    person_id >= $1 AND NOT removed
+			person_id >= $1 AND NOT removed
 		ORDER BY
-		    person_id
+			person_id
 		LIMIT
-		    $2;`
+			$2;
+`
 
 	if limit <= 0 || limit > uint64(r.batchSize) {
 		limit = uint64(r.batchSize)
@@ -101,7 +103,7 @@ func (r *Repo) ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]p
 			&p.FirstName,
 			&p.MiddleName,
 			&p.LastName,
-			&p.Birthday,
+			&p.Birthday.Time,
 			&p.Sex,
 			&p.Education,
 			&p.Removed,
@@ -118,25 +120,30 @@ func (r *Repo) ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]p
 	return list, nil
 }
 
-// TODO: add default values in sql migrations
+func createEvent(ctx context.Context, tx *sql.Tx, eventType eventType, person *person) error {
+	const op = "repo.createEvent"
 
-func createEvent(ctx context.Context, tx *sql.Tx, personID uint64, eventType eventType) error {
 	const q = `
-		INSERT INTO person_event 
+		INSERT INTO
+		    person_event
 		    (
-			person_id,
-		    type,
-		    status,
-		    updated
+		     person_id,
+		     type,
+		     payload
 		    )
-		VALUES ($1, $2, $3,
-		        now() at time zone 'utc'); -- updated`
+		VALUES ($1, $2, $3);
+`
 
-	_, err := tx.ExecContext(ctx, q, personID, eventType, deferred)
+	payload, err := json.Marshal(person)
+	if err != nil {
+		return fmt.Errorf("%s: can't marshal person: %w", op, err)
+	}
+
+	_, err = tx.ExecContext(ctx, q, person.ID, eventType, payload)
 	return err
 }
 
-func (r *Repo) transaction(ctx context.Context, eventType eventType, f func(tx *sql.Tx) (uint64, error)) error {
+func (r *Repo) transaction(ctx context.Context, f func(tx *sql.Tx) error) error {
 	const op = "Repo.transaction"
 
 	tx, err := r.db.BeginTx(ctx, nil)
@@ -145,14 +152,9 @@ func (r *Repo) transaction(ctx context.Context, eventType eventType, f func(tx *
 	}
 	defer tx.Rollback() // TODO: handing error?
 
-	personID, err := f(tx)
+	err = f(tx)
 	if err != nil {
 		return err
-	}
-
-	err = createEvent(ctx, tx, personID, eventType)
-	if err != nil {
-		return fmt.Errorf("%s: can't create event: %w", op, err)
 	}
 
 	err = tx.Commit()
@@ -163,58 +165,65 @@ func (r *Repo) transaction(ctx context.Context, eventType eventType, f func(tx *
 	return nil
 }
 
-func (r *Repo) CreatePerson(ctx context.Context, p person) (uint64, error) {
+func (r *Repo) CreatePerson(ctx context.Context, pc personCreate) (uint64, error) {
 	const op = "Repo.CreatePerson"
+
 	const q = `
-		INSERT INTO	person (
-			first_name,
-			middle_name,
-			last_name, 
-			birthday,
-			sex,
-			education,
-		    removed,
-			created,
-		    updated)
+		INSERT INTO	person
+		    (
+			 first_name,
+			 middle_name,
+			 last_name, 
+			 birthday,
+			 sex,
+			 education
+			)
 		VALUES
-		    ($1, $2, $3, $4, $5, $6, 
-		     false, -- removed
-		     now() at time zone 'utc', -- created
-		     now() at time zone 'utc') -- updated
+		    ($1, $2, $3, $4, $5, $6) 
 		RETURNING
-			person_id;`
+			person_id,
+			created;
+`
+	var p person
 
-	var personID uint64
+	err := r.transaction(ctx, func(tx *sql.Tx) error {
 
-	err := r.transaction(ctx, created, func(tx *sql.Tx) (uint64, error) {
 		row := tx.QueryRowContext(ctx, q,
-			p.FirstName,
-			p.MiddleName,
-			p.LastName,
-			p.Birthday,
-			p.Sex,
-			p.Education,
+			pc.FirstName,
+			pc.MiddleName,
+			pc.LastName,
+			pc.Birthday.Time,
+			pc.Sex,
+			pc.Education,
 		)
 
-		err := row.Scan(&personID)
+		err := row.Scan(&p.ID, &p.Created)
 		if err != nil {
-			return 0, fmt.Errorf("can't create person: %w", err)
+			return fmt.Errorf("can't create person: %w", err)
 		}
 
-		return personID, nil
+		p.PersonCreate = pc
+
+		err = createEvent(ctx, tx, created, &p)
+		if err != nil {
+			return fmt.Errorf("can't create event: %w", err)
+		}
+
+		return nil
 	})
 
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return personID, nil
+	return p.ID, nil
 }
 
 // UpdatePerson returns true if the record with id found and false if the record does
 // not exist or an error occurred.
-func (r *Repo) UpdatePerson(ctx context.Context, personID uint64, p person) (bool, error) {
+func (r *Repo) UpdatePerson(ctx context.Context, personID uint64, pc personCreate) (bool, error) {
 	const op = "Repo.UpdatePerson"
+
 	const q = `
 		UPDATE
 		    person
@@ -227,43 +236,58 @@ func (r *Repo) UpdatePerson(ctx context.Context, personID uint64, p person) (boo
 			education   = $6,
 			updated     = (now() at time zone 'utc')
 		WHERE
-		    person_id = $7;`
+		    person_id = $7 AND NOT removed 
+		RETURNING
+			updated;
+`
+	var ok bool
 
-	var count int64
+	err := r.transaction(ctx, func(tx *sql.Tx) error {
 
-	err := r.transaction(ctx, updated, func(tx *sql.Tx) (uint64, error) {
-		res, err := tx.ExecContext(ctx, q,
-			p.FirstName,
-			p.MiddleName,
-			p.LastName,
-			p.Birthday,
-			p.Sex,
-			p.Education,
+		row := tx.QueryRowContext(ctx, q,
+			pc.FirstName,
+			pc.MiddleName,
+			pc.LastName,
+			pc.Birthday.Time,
+			pc.Sex,
+			pc.Education,
 			personID,
 		)
+
+		var p person
+
+		err := row.Scan(&p.Updated)
+		if err == sql.ErrNoRows {
+			return nil
+		}
 		if err != nil {
-			return 0, fmt.Errorf("can't update: %w", err)
+			return fmt.Errorf("can't update: %w", err)
 		}
 
-		count, err = res.RowsAffected()
+		ok = true
+		p.ID = personID
+		p.PersonCreate = pc
+
+		err = createEvent(ctx, tx, updated, &p)
 		if err != nil {
-			return 0, fmt.Errorf("can't get query result: %w", err)
+			return fmt.Errorf("can't create event: %w", err)
 		}
 
-		return personID, nil
+		return nil
 	})
 
 	if err != nil {
 		return false, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return count != 0, nil
+	return ok, nil
 }
 
 // RemovePerson returns true if the record was indeed removed, and false if the
 // record does not exist or an error occurred.
 func (r *Repo) RemovePerson(ctx context.Context, personID uint64) (bool, error) {
 	const op = "Repo.RemovePerson"
+
 	const q = `
 		UPDATE 
 		    person 
@@ -271,27 +295,35 @@ func (r *Repo) RemovePerson(ctx context.Context, personID uint64) (bool, error) 
 		    removed = true,
 		    updated = (now() at time zone 'utc')
 		WHERE
-		    person_id = $1 AND NOT removed;`
+		    person_id = $1 AND NOT removed
+		RETURNING
+			updated;
+`
+	var person person
 
-	var count int64
+	err := r.transaction(ctx, func(tx *sql.Tx) error {
 
-	err := r.transaction(ctx, removed, func(tx *sql.Tx) (uint64, error) {
-		res, err := r.db.ExecContext(ctx, q, personID)
+		row := tx.QueryRowContext(ctx, q, personID)
+
+		err := row.Scan(&person.Updated)
+		if err == sql.ErrNoRows {
+			return nil
+		}
 		if err != nil {
-			return 0, fmt.Errorf("can't delete: %w", err)
+			return fmt.Errorf("can't update: %w", err)
 		}
 
-		count, err = res.RowsAffected()
+		err = createEvent(ctx, tx, removed, &person)
 		if err != nil {
-			return 0, fmt.Errorf("can't get result: %w", err)
+			return fmt.Errorf("can't create event: %w", err)
 		}
 
-		return personID, nil
+		return nil
 	})
 
 	if err != nil {
 		return false, fmt.Errorf("%s: %w", op, err)
 	}
 
-	return count != 0, nil
+	return person.Removed, nil
 }

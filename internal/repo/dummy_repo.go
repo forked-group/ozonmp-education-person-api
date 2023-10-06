@@ -10,7 +10,7 @@ import (
 const envWithTestData = "WITH_TEST_DATA"
 
 // repo will be filled with this data if envWithTestData is set
-var personTestData = []person{
+var personTestData = []personCreate{
 	{LastName: "One"},
 	{LastName: "Two"},
 	{LastName: "Three"},
@@ -86,19 +86,22 @@ func (s *DummyRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64)
 	return result, nil
 }
 
-func (s *DummyRepo) CreatePerson(ctx context.Context, person person) (uint64, error) {
+func (s *DummyRepo) CreatePerson(ctx context.Context, pc personCreate) (uint64, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	person.ID = uint64(len(s.data))
-	person.Created = time.Now()
-	person.Updated = time.Now()
-	s.data = append(s.data, person)
+	id := uint64(len(s.data))
+	s.data = append(s.data, person{
+		ID:           id,
+		Created:      time.Now(),
+		Updated:      time.Now(),
+		PersonCreate: pc,
+	})
 
-	return person.ID, nil
+	return id, nil
 }
 
-func (s *DummyRepo) UpdatePerson(ctx context.Context, personID uint64, person person) (bool, error) {
+func (s *DummyRepo) UpdatePerson(ctx context.Context, personID uint64, pc personCreate) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -107,9 +110,11 @@ func (s *DummyRepo) UpdatePerson(ctx context.Context, personID uint64, person pe
 		return false, nil
 	}
 
-	person.ID = personID
-	person.Updated = time.Now()
-	s.data[index] = person
+	s.data[index] = person{
+		ID:           personID,
+		Updated:      time.Now(),
+		PersonCreate: pc,
+	}
 
 	return true, nil
 }

@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 )
 
-func parsePersonNames(args []string, p *person) ([]string, error) {
+func parsePersonNames(args []string, p *personCreate) ([]string, error) {
 
 	names := make([]string, 0, 3)
 	for i := 0; i < 3 && i < len(args); i++ {
@@ -35,7 +34,7 @@ func parsePersonNames(args []string, p *person) ([]string, error) {
 	return args, nil
 }
 
-func parsePersonFields(args []string, p *person) (err error) {
+func parsePersonFields(args []string, p *personCreate) (err error) {
 
 	for _, arg := range args {
 		pos := strings.IndexByte(arg, '=')
@@ -57,9 +56,9 @@ func parsePersonFields(args []string, p *person) (err error) {
 			p.LastName = val
 
 		case "birthday":
-			var v time.Time
+			var v date
 			if val == "" {
-				p.Birthday = time.Time{}
+				p.Birthday = date{}
 			} else if v, err = parseDate(val); err == nil {
 				p.Birthday = v
 			}

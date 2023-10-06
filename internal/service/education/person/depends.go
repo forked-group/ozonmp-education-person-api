@@ -6,8 +6,9 @@ import (
 )
 
 type (
-	person     = education.Person
-	personRepo = interfaces.PersonRepo
+	person       = education.Person
+	personCreate = education.PersonCreate
+	personRepo   = interfaces.PersonRepo
 )
 
 var _ interfaces.PersonService = (*Service)(nil)

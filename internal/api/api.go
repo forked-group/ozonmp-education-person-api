@@ -51,6 +51,20 @@ func timeToTimestamp(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(t)
 }
 
+func dateToTimestamp(d *model.Date) *timestamppb.Timestamp {
+	if d == nil {
+		return nil
+	}
+	return timeToTimestamp(d.Time)
+}
+
+func timestampToDate(t *timestamppb.Timestamp) *model.Date {
+	if t == nil {
+		return nil
+	}
+	return model.NewDate(t.AsTime())
+}
+
 func (o *PersonAPI) DescribePersonV1(
 	ctx context.Context,
 	req *pb.DescribePersonV1Request,
@@ -87,7 +101,7 @@ func (o *PersonAPI) DescribePersonV1(
 			FirstName:  person.FirstName,
 			MiddleName: person.MiddleName,
 			LastName:   person.LastName,
-			Birthday:   timeToTimestamp(person.Birthday),
+			Birthday:   timeToTimestamp(person.Birthday.Time),
 			Sex:        pb.Sex(person.Sex),
 			Education:  pb.Education(person.Education),
 		},
@@ -110,11 +124,11 @@ func (o *PersonAPI) CreatePersonV1(
 
 	p := req.Person
 
-	id, err := o.repo.CreatePerson(ctx, model.Person{
+	id, err := o.repo.CreatePerson(ctx, model.PersonCreate{
 		FirstName:  p.FirstName,
 		MiddleName: p.MiddleName,
 		LastName:   p.LastName,
-		Birthday:   timestampToTime(p.Birthday),
+		Birthday:   model.Date{Time: timestampToTime(p.Birthday)},
 		Sex:        model.Sex(p.Sex),
 		Education:  model.Education(p.Education),
 	})
@@ -158,7 +172,7 @@ func (o *PersonAPI) ListPersonV1(
 			FirstName:  p.FirstName,
 			MiddleName: p.MiddleName,
 			LastName:   p.LastName,
-			Birthday:   timeToTimestamp(p.Birthday),
+			Birthday:   timeToTimestamp(p.Birthday.Time),
 			Sex:        pb.Sex(p.Sex),
 			Education:  pb.Education(p.Education),
 		}
@@ -240,7 +254,7 @@ func (o *PersonAPI) UpdatePersonV1(
 		person.LastName = p.LastName.Value
 	}
 	if p.Birthday != nil {
-		person.Birthday = timestampToTime(p.Birthday.Value)
+		person.Birthday = model.Date{Time: timestampToTime(p.Birthday.Value)}
 	}
 	if p.Sex != nil {
 		person.Sex = model.Sex(p.Sex.Value)
@@ -249,7 +263,7 @@ func (o *PersonAPI) UpdatePersonV1(
 		person.Education = model.Education(p.Education.Value)
 	}
 
-	ok, err := o.repo.UpdatePerson(ctx, p.PersonId, *person)
+	ok, err := o.repo.UpdatePerson(ctx, p.PersonId, person.PersonCreate)
 	if err != nil {
 		log.Error().Err(err).Msgf("%s - failed")
 

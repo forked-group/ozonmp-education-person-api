@@ -6,8 +6,11 @@ import (
 )
 
 type (
-	eventType = education.EventType
-	person    = education.Person
+	person       = education.Person
+	personCreate = education.PersonCreate
+	personEvent  = education.PersonEvent
+	eventType    = education.EventType
+	eventStatus  = education.EventStatus
 )
 
 const (
@@ -21,3 +24,4 @@ const (
 
 var _ interfaces.PersonRepo = (*DummyRepo)(nil)
 var _ interfaces.PersonRepo = (*Repo)(nil)
+var _ interfaces.PersonEventRepo = (*EventRepo)(nil)

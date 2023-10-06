@@ -22,11 +22,11 @@ func (p Service) List(cursor uint64, limit uint64) ([]person, error) {
 	return p.repo.ListPerson(context.TODO(), cursor, limit)
 }
 
-func (p Service) Create(person person) (uint64, error) {
+func (p Service) Create(person personCreate) (uint64, error) {
 	return p.repo.CreatePerson(context.TODO(), person)
 }
 
-func (p Service) Update(personID uint64, person person) (bool, error) {
+func (p Service) Update(personID uint64, person personCreate) (bool, error) {
 	return p.repo.UpdatePerson(context.TODO(), personID, person)
 }
 

@@ -36,16 +36,21 @@ type PersonCommander interface {
 type PersonService interface {
 	Describe(personID uint64) (*education.Person, error)
 	List(cursor uint64, limit uint64) ([]education.Person, error)
-	Create(education.Person) (uint64, error)
-	Update(personID uint64, person education.Person) (bool, error)
+	Create(create education.PersonCreate) (uint64, error)
+	Update(personID uint64, person education.PersonCreate) (bool, error)
 	Remove(personID uint64) (bool, error)
 }
 
-// PersonRepo is DAO for Person
 type PersonRepo interface {
 	DescribePerson(ctx context.Context, personID uint64) (*education.Person, error)
 	ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]education.Person, error)
-	CreatePerson(ctx context.Context, person education.Person) (uint64, error)
-	UpdatePerson(ctx context.Context, personID uint64, person education.Person) (bool, error)
+	CreatePerson(ctx context.Context, person education.PersonCreate) (uint64, error)
+	UpdatePerson(ctx context.Context, personID uint64, person education.PersonCreate) (bool, error)
 	RemovePerson(ctx context.Context, personID uint64) (bool, error)
+}
+
+type PersonEventRepo interface {
+	Lock(ctx context.Context, n uint64) ([]education.PersonEvent, error)
+	Unlock(ctx context.Context, eventIDs []uint64) (uint64, error)
+	Remove(ctx context.Context, eventIDs []uint64) (uint64, error)
 }

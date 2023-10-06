@@ -22,7 +22,7 @@ func (c Commander) New(inputMsg *tgbotapi.Message) {
 		return
 	}
 
-	var p person
+	var p personCreate
 
 	if args, err = parsePersonNames(args, &p); err != nil {
 		c.sendError(chatID, err.Error())
