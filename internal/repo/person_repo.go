@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/lib/log/lo"
 	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"github.com/jmoiron/sqlx"
 )
@@ -21,31 +22,24 @@ func NewPersonRepo(db *sqlx.DB, batchSize uint) *PersonRepo {
 	}
 }
 
-func (r *PersonRepo) DescribePerson(ctx context.Context, personID uint64) (*model.Person, error) {
-	const op = "PersonRepo.DescribePerson"
+var personRowFields = CommaList([]string{
+	"person_id",
+	"first_name",
+	"middle_name",
+	"last_name",
+	"birthday",
+	"sex",
+	"education",
+	"removed",
+	"created",
+	"updated",
+})
 
-	const query = `
-		SELECT
-			first_name,
-			middle_name,
-			last_name,
-			birthday,
-			sex,
-			education,
-			removed,
-			created,
-			updated
-		FROM
-		    person
-		WHERE
-		    person_id = $1 AND NOT removed;
-`
-	person := &model.Person{ID: personID}
-
-	row := r.db.QueryRowContext(ctx, query, person.ID)
-
+func scanPerson(row interface{ Scan(p ...any) error }, person *model.Person) error {
 	var birthday sql.NullTime
+
 	err := row.Scan(
+		&person.ID,
 		&person.FirstName,
 		&person.MiddleName,
 		&person.LastName,
@@ -56,35 +50,55 @@ func (r *PersonRepo) DescribePerson(ctx context.Context, personID uint64) (*mode
 		&person.Created,
 		&person.Updated,
 	)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil && err != sql.ErrNoRows {
-		return nil, fmt.Errorf("%s: can't select: %w", op, err)
+	if err != nil {
+		return err
 	}
 
 	if birthday.Valid {
 		person.Birthday = &model.Date{Time: birthday.Time}
 	}
 
-	return person, nil
+	return nil
+}
+
+func (r *PersonRepo) DescribePerson(ctx context.Context, personID uint64) (*model.Person, error) {
+	const op = "PersonRepo.DescribePerson"
+	var person model.Person
+
+	var query = `
+		SELECT
+		    /*personRowFields*/%s
+		FROM
+		    person
+		WHERE
+		    person_id = $1 AND NOT removed;
+`
+	query = fmt.Sprintf(query, personRowFields)
+
+	row := r.db.QueryRowContext(ctx, query, personID)
+
+	err := scanPerson(row, &person)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("%s: can't do query: %w", op, err)
+	}
+
+	return &person, nil
 }
 
 func (r *PersonRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]model.Person, error) {
 	const op = "PersonRepo.ListPerson"
 
-	const query = `
+	if limit <= 0 || limit > uint64(r.batchSize) {
+		limit = uint64(r.batchSize)
+	}
+	list := make([]model.Person, 0, limit)
+
+	var query = `
 		SELECT
-			person_id,
-			first_name,
-			middle_name,
-			last_name,
-			birthday,
-			sex,
-			education,
-			removed,
-			created,
-			updated
+		    /*personRowFields*/%s
 		FROM
 			person
 		WHERE
@@ -94,40 +108,22 @@ func (r *PersonRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64
 		LIMIT
 			$2;
 `
-
-	if limit <= 0 || limit > uint64(r.batchSize) {
-		limit = uint64(r.batchSize)
-	}
+	query = fmt.Sprintf(query, personRowFields)
 
 	rows, err := r.db.QueryContext(ctx, query, cursor, limit)
 	if err != nil {
-		return nil, fmt.Errorf("%s: can't select: %w", op, err)
+		return nil, fmt.Errorf("%s: can't do query: %w", op, err)
 	}
 
-	list := make([]model.Person, 0, limit)
-
+	var person model.Person
 	for rows.Next() {
-		var person model.Person
-		var birthday sql.NullTime
-
-		err = rows.Scan(
-			&person.ID,
-			&person.FirstName,
-			&person.MiddleName,
-			&person.LastName,
-			&birthday,
-			&person.Sex,
-			&person.Education,
-			&person.Removed,
-			&person.Created,
-			&person.Updated,
-		)
 		if err != nil {
-			return list, fmt.Errorf("%s: can't scan row: %w", op, err)
+			return list, fmt.Errorf("%s: can't get next row: %w", op, err)
 		}
 
-		if birthday.Valid {
-			person.Birthday = &model.Date{Time: birthday.Time}
+		err = scanPerson(rows, &person)
+		if err != nil {
+			return nil, fmt.Errorf("%s: can't scan row: %w", err)
 		}
 
 		list = append(list, person)
@@ -136,71 +132,35 @@ func (r *PersonRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64
 	return list, nil
 }
 
-func createEventPayload(person model.Person, fields model.PersonField) ([]byte, error) {
-	f := FieldSet[model.PersonField](fields)
-	m := map[string]any{}
-
-	if f.Includes(model.PersonID) {
-		m["person_id"] = person.ID
-	}
-	if f.Includes(model.PersonFirstName) {
-		m["first_name"] = person.FirstName
-	}
-	if f.Includes(model.PersonMiddleName) {
-		m["middle_name"] = person.MiddleName
-	}
-	if f.Includes(model.PersonLastName) {
-		m["last_name"] = person.LastName
-	}
-	if f.Includes(model.PersonBirthday) {
-		m["birthday"] = &person.Birthday
-	}
-	if f.Includes(model.PersonSex) {
-		m["sex"] = person.Sex
-	}
-	if f.Includes(model.PersonEducation) {
-		m["education"] = person.Education
-	}
-	if f.Includes(model.PersonRemoved) {
-		m["removed"] = person.Removed
-	}
-	if f.Includes(model.PersonCreated) {
-		m["created"] = &person.Created
-	}
-	if f.Includes(model.PersonUpdated) {
-		m["updated"] = &person.Updated
-	}
-
-	return json.Marshal(m)
-}
-
-func createEvent(ctx context.Context, tx *sql.Tx, eventType model.EventType, person model.Person, fields model.PersonField) error {
+func createEvent(ctx context.Context, tx *sql.Tx, eventType model.EventType, person model.Person) error {
 	const op = "repo.createEvent"
 
+	payload, err := json.Marshal(person)
+	if err != nil {
+		return fmt.Errorf("%s: can't marshal person: %w", op, err)
+	}
+
 	const query = `
-		INSERT INTO person_event 
-		    (
-		     person_id,
-		     type,
-		     status,
-		     payload
-		    )	
+		INSERT INTO person_event(
+			person_id,
+			type,
+			status,
+			payload
+		)	
 		VALUES 
 		    ($1, $2, $3, $4);
 `
-
-	payload, err := createEventPayload(person, fields)
-	if err != nil {
-		return fmt.Errorf("%s: can't create payload: %w", op, err)
-	}
-
 	_, err = tx.ExecContext(ctx, query,
 		person.ID,
 		eventType,
 		model.Deferred,
 		payload,
 	)
-	return err
+	if err != nil {
+		return fmt.Errorf("%s: can't exec query: %w", op, err)
+	}
+
+	return nil
 }
 
 func (r *PersonRepo) transaction(ctx context.Context, f func(tx *sql.Tx) error) error {
@@ -232,6 +192,16 @@ const editableFields = model.PersonFirstName |
 	model.PersonSex |
 	model.PersonEducation
 
+func addFields(b *ListsBuilder, person model.Person, fields model.PersonField) {
+	s := FieldSet[model.PersonField](editableFields & fields)
+	b.AddField(s.Includes(model.PersonFirstName), "first_name", person.FirstName)
+	b.AddField(s.Includes(model.PersonMiddleName), "middle_name", person.MiddleName)
+	b.AddField(s.Includes(model.PersonLastName), "last_name", person.LastName)
+	b.AddField(s.Includes(model.PersonBirthday), "birthday", person.Birthday.NullTime())
+	b.AddField(s.Includes(model.PersonSex), "sex", person.Sex)
+	b.AddField(s.Includes(model.PersonEducation), "education", person.Education)
+}
+
 func (r *PersonRepo) CreatePerson(ctx context.Context, person model.Person) (uint64, error) {
 	const op = "PersonRepo.CreatePerson"
 
@@ -240,39 +210,24 @@ func (r *PersonRepo) CreatePerson(ctx context.Context, person model.Person) (uin
 			(%s)
 		VALUES 
 			(%s)
-		RETURNING 
-			person_id,
-			created,
-			updated;
+		RETURNING
+			/*personRowFields*/%s; 
 `
-	h := NewListsBuilder(editableFields)
-	h.AddField(model.PersonFirstName, "first_name", person.FirstName)
-	h.AddField(model.PersonMiddleName, "middle_name", person.MiddleName)
-	h.AddField(model.PersonLastName, "last_name", person.LastName)
-	h.AddField(model.PersonBirthday, "birthday", person.Birthday.NullTime())
-	h.AddField(model.PersonSex, "sex", person.Sex)
-	h.AddField(model.PersonEducation, "education", person.Education)
+	var b ListsBuilder
+	addFields(&b, person, editableFields)
 
-	fieldsToEvent := h.Fields |
-		model.PersonID |
-		model.PersonCreated |
-		model.PersonUpdated
-
-	query = fmt.Sprintf(query, h.NameList(), h.ValueListTemplate())
+	query = fmt.Sprintf(query, b.NameList(), b.ValueListTemplate(), personRowFields)
+	lo.Debug("%s: query: %s", op, query)
 
 	err := r.transaction(ctx, func(tx *sql.Tx) error {
-		row := tx.QueryRowContext(ctx, query, h.Args...)
+		row := tx.QueryRowContext(ctx, query, b.Args...)
 
-		err := row.Scan(
-			&person.ID,
-			&person.Created,
-			&person.Updated,
-		)
+		err := scanPerson(row, &person)
 		if err != nil {
-			return fmt.Errorf("can't create person: %w", err)
+			return fmt.Errorf("can't do query: %w", err)
 		}
 
-		err = createEvent(ctx, tx, model.Created, person, fieldsToEvent)
+		err = createEvent(ctx, tx, model.Created, person)
 		if err != nil {
 			return fmt.Errorf("can't create event: %w", err)
 		}
@@ -296,45 +251,36 @@ func (r *PersonRepo) UpdatePerson(ctx context.Context, personID uint64, person m
 		UPDATE 
 			person
 		SET 
-			%s,	updated = (now() at time zone 'utc')
+			%s,
+		    updated = (now() at time zone 'utc')
 		WHERE
 			person_id=$1 AND NOT removed 
 		RETURNING
-			updated;
+			/*personRowFields*/%s;
 `
-	person.ID = personID
+	var b ListsBuilder
+	b.Args = []any{personID}
+	addFields(&b, person, fields&editableFields)
 
-	b := NewListsBuilder(fields & editableFields)
-	b.Args = []any{person.ID}
-	b.AddField(model.PersonFirstName, "first_name", person.FirstName)
-	b.AddField(model.PersonMiddleName, "middle_name", person.MiddleName)
-	b.AddField(model.PersonLastName, "last_name", person.LastName)
-	b.AddField(model.PersonBirthday, "birthday", person.Birthday.NullTime())
-	b.AddField(model.PersonSex, "sex", person.Sex)
-	b.AddField(model.PersonEducation, "education", person.Education)
-
-	fieldsToEvent := b.Fields |
-		model.PersonID |
-		model.PersonUpdated
-
-	query = fmt.Sprintf(query, b.FieldListTemplate())
+	query = fmt.Sprintf(query, b.FieldListTemplate(), personRowFields)
+	lo.Debug("%s: query: %s", op, query)
 
 	var ok bool
 
 	err := r.transaction(ctx, func(tx *sql.Tx) error {
 		row := tx.QueryRowContext(ctx, query, b.Args...)
 
-		err := row.Scan(&person.Updated)
+		err := scanPerson(row, &person)
 		if err == sql.ErrNoRows {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("can't update: %w", err)
+			return fmt.Errorf("can't do query: %w", err)
 		}
 
 		ok = true
 
-		err = createEvent(ctx, tx, model.Updated, person, fieldsToEvent)
+		err = createEvent(ctx, tx, model.Updated, person)
 		if err != nil {
 			return fmt.Errorf("can't create event: %w", err)
 		}
@@ -354,7 +300,7 @@ func (r *PersonRepo) UpdatePerson(ctx context.Context, personID uint64, person m
 func (r *PersonRepo) RemovePerson(ctx context.Context, personID uint64) (bool, error) {
 	const op = "PersonRepo.RemovePerson"
 
-	const query = `
+	var query = `
 		UPDATE 
 		    person
 		SET 
@@ -363,33 +309,28 @@ func (r *PersonRepo) RemovePerson(ctx context.Context, personID uint64) (bool, e
 		WHERE
 		    person_id = $1 AND NOT removed
 		RETURNING
-			updated;
+			/*personRowFields*/%s;
 `
-	person := model.Person{
-		ID:      personID,
-		Removed: true,
-	}
-
-	fieldsToEvent := model.PersonID |
-		model.PersonRemoved |
-		model.PersonUpdated
+	query = fmt.Sprintf(query, personRowFields)
+	lo.Debug("%s: query: %s", op, query)
 
 	var ok bool
 
 	err := r.transaction(ctx, func(tx *sql.Tx) error {
-		row := tx.QueryRowContext(ctx, query, person.ID)
+		row := tx.QueryRowContext(ctx, query, personID)
 
-		err := row.Scan(&person.Updated)
+		var person model.Person
+		err := scanPerson(row, &person)
 		if err == sql.ErrNoRows {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("can't update: %w", err)
+			return fmt.Errorf("can't do query: %w", err)
 		}
 
 		ok = true
 
-		err = createEvent(ctx, tx, model.Removed, person, fieldsToEvent)
+		err = createEvent(ctx, tx, model.Updated, person)
 		if err != nil {
 			return fmt.Errorf("can't create event: %w", err)
 		}

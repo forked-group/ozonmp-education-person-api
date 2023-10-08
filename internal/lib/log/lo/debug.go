@@ -1,7 +1,7 @@
 package lo
 
 import (
-	"github.com/rs/zerolog/log"
+	"fmt"
 	"os"
 )
 
@@ -12,7 +12,10 @@ func init() {
 }
 
 func Debug(f string, v ...any) {
+	if len(f) > 0 && f[len(f)-1] != '\n' {
+		f += "\n"
+	}
 	if DebugEnable {
-		log.Printf(f, v...)
+		fmt.Fprintf(os.Stderr, "DEBUG: "+f, v...)
 	}
 }
