@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/lib/log/lo"
 	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"github.com/jmoiron/sqlx"
 )
@@ -45,7 +44,11 @@ func (r PersonEventRepo) transaction(ctx context.Context, f func(tx *sql.Tx) err
 func (r PersonEventRepo) Lock(ctx context.Context, n uint64) ([]model.PersonEvent, error) {
 	const op = "PersonEventRepo.Lock"
 
-	const q = `
+	if n == 0 {
+		return nil, nil
+	}
+
+	const query = `
 		WITH
 		    batch(person_event_id) AS (
 				SELECT
@@ -53,24 +56,24 @@ func (r PersonEventRepo) Lock(ctx context.Context, n uint64) ([]model.PersonEven
 				FROM
 					person_event
 				WHERE 
-					status = $1/*deferred*/ AND
+					status = /*Deferred*/$1 AND
 					person_id NOT IN (
 						SELECT DISTINCT 
 							person_id
 						FROM
 							person_event
 						WHERE 
-							status = $2/*processed*/	    		
+							status = /*Processed*/$2	    		
 					)
 				GROUP BY 
 				    person_id
 				LIMIT
-					$3/*n*/  
+					/*n*/$3  
 		    )
 		UPDATE
 			person_event AS p
 		SET
-			status = $2/*processed*/,
+			status = /*Processed*/$2,
 			updated = (now() at time zone 'utc')
 		FROM
 		    batch AS b
@@ -83,13 +86,12 @@ func (r PersonEventRepo) Lock(ctx context.Context, n uint64) ([]model.PersonEven
 		    status,
 		    payload;
 `
-	var (
-		events []model.PersonEvent
-	)
+	args := []any{model.Deferred, model.Processed, n}
+
+	var events []model.PersonEvent
 
 	err := r.transaction(ctx, func(tx *sql.Tx) error {
-
-		rows, err := tx.QueryContext(ctx, q, model.Deferred, model.Processed, n)
+		rows, err := tx.QueryContext(ctx, query, args...)
 		if err != nil {
 			return fmt.Errorf("can't update person_event: %w", err)
 		}
@@ -104,7 +106,13 @@ func (r PersonEventRepo) Lock(ctx context.Context, n uint64) ([]model.PersonEven
 				entity      *model.Person
 			)
 
-			err = rows.Scan(&id, &personID, &eventType, &eventStatus, &payload)
+			err = rows.Scan(
+				&id,
+				&personID,
+				&eventType,
+				&eventStatus,
+				&payload,
+			)
 			if err != nil {
 				return fmt.Errorf("can't scan row: %w", err)
 			}
@@ -139,20 +147,19 @@ func (r PersonEventRepo) Lock(ctx context.Context, n uint64) ([]model.PersonEven
 func (r PersonEventRepo) Unlock(ctx context.Context, eventIDs []uint64) (uint64, error) {
 	const op = "PersonEventRepo.Unlock"
 
-	const q = `
-		UPDATE
-		    person_event
-		SET
-		    status = $1
-		WHERE
-		    person_event_id IN (%s);
-`
 	if len(eventIDs) == 0 {
 		return 0, nil
 	}
 
-	qr := fmt.Sprintf(q, placeholderList(2, len(eventIDs)))
-	lo.Debug("%s: qr: %v", op, qr)
+	var query = `
+		UPDATE
+		    person_event
+		SET
+		    status = /*Deferred*/$1
+		WHERE
+		    person_event_id IN (/*eventsIDs*/%s);
+`
+	query = fmt.Sprintf(query, ValueListTemplate(2, len(eventIDs)))
 
 	args := make([]any, 0, len(eventIDs)+1)
 	args = append(args, model.Deferred)
@@ -161,8 +168,7 @@ func (r PersonEventRepo) Unlock(ctx context.Context, eventIDs []uint64) (uint64,
 	var n int64
 
 	err := r.transaction(ctx, func(tx *sql.Tx) error {
-
-		res, err := r.db.ExecContext(ctx, qr, args...)
+		res, err := r.db.ExecContext(ctx, query, args...)
 		if err != nil {
 			return fmt.Errorf("%s: can't update person_event: %w", op, err)
 		}
@@ -183,24 +189,24 @@ func (r PersonEventRepo) Unlock(ctx context.Context, eventIDs []uint64) (uint64,
 
 func (r PersonEventRepo) Remove(ctx context.Context, eventIDs []uint64) (uint64, error) {
 	const op = "PersonEventRepo.RemovePerson"
-	const q = `
-		DELETE FROM
-		    person_event
-		WHERE
-		    person_event_id IN (%s);
-`
+
 	if len(eventIDs) == 0 {
 		return 0, nil
 	}
 
-	qr := fmt.Sprintf(q, placeholderList(1, len(eventIDs)))
+	var query = `
+		DELETE FROM
+		    person_event
+		WHERE
+		    person_event_id IN (/*eventIDs*/%s);
+`
+	query = fmt.Sprintf(query, ValueListTemplate(1, len(eventIDs)))
 	args := anySlice(eventIDs)
 
 	var n int64
 
 	err := r.transaction(ctx, func(tx *sql.Tx) error {
-
-		res, err := tx.ExecContext(ctx, qr, args...)
+		res, err := tx.ExecContext(ctx, query, args...)
 		if err != nil {
 			return fmt.Errorf("can't update person_event: %w", err)
 		}

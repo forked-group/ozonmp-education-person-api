@@ -5,10 +5,9 @@ import (
 	"fmt"
 	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"strings"
-	"time"
 )
 
-const DateLayout = "2006-02-03"
+const DateLayout = "2006-01-02"
 
 func parsePersonNames(args []string, p *person) ([]string, error) {
 
@@ -64,9 +63,9 @@ func parsePersonFields(args []string, p *person, f *personField) (err error) {
 
 		case "birthday":
 			if val == "" {
-				p.Birthday = time.Time{}
+				p.Birthday = nil
 			} else {
-				p.Birthday, err = time.Parse(DateLayout, val)
+				p.Birthday, err = model.ParseDate(val)
 			}
 			*f |= model.PersonBirthday
 

@@ -51,3 +51,12 @@ type PersonEvent struct {
 	Status EventStatus
 	Entity *Person
 }
+
+type PersonEventField uint64
+
+const (
+	PersonEventID PersonEventField = 1 << iota
+	PersonEventType
+	PersonEventStatus
+	PersonEventEntry
+)

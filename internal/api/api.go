@@ -6,6 +6,7 @@ import (
 	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"google.golang.org/genproto/googleapis/type/date"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 
@@ -51,11 +52,24 @@ func timeToTimestamp(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(t)
 }
 
-func dateToTimestamp(d *model.Date) *timestamppb.Timestamp {
+func dateToModelDate(d *date.Date) *model.Date {
 	if d == nil {
 		return nil
 	}
-	return timeToTimestamp(d.Time)
+	t := time.Date(int(d.Year), time.Month(d.Month), int(d.Day),
+		0, 0, 0, 0, time.UTC)
+	return &model.Date{Time: t}
+}
+
+func modelDateToDate(d *model.Date) *date.Date {
+	if d == nil {
+		return nil
+	}
+	return &date.Date{
+		Year:  int32(d.Year()),
+		Month: int32(d.Month()),
+		Day:   int32(d.Day()),
+	}
 }
 
 func (o *PersonAPI) DescribePersonV1(
@@ -94,9 +108,11 @@ func (o *PersonAPI) DescribePersonV1(
 			FirstName:  person.FirstName,
 			MiddleName: person.MiddleName,
 			LastName:   person.LastName,
-			Birthday:   timeToTimestamp(person.Birthday),
+			Birthday:   modelDateToDate(person.Birthday),
 			Sex:        pb.Sex(person.Sex),
 			Education:  pb.Education(person.Education),
+			Created:    timeToTimestamp(person.Created),
+			Updated:    timeToTimestamp(person.Updated),
 		},
 	}, nil
 }
@@ -121,7 +137,7 @@ func (o *PersonAPI) CreatePersonV1(
 		FirstName:  p.FirstName,
 		MiddleName: p.MiddleName,
 		LastName:   p.LastName,
-		Birthday:   timestampToTime(p.Birthday),
+		Birthday:   dateToModelDate(p.Birthday),
 		Sex:        model.Sex(p.Sex),
 		Education:  model.Education(p.Education),
 	})
@@ -129,7 +145,8 @@ func (o *PersonAPI) CreatePersonV1(
 	if err != nil {
 		log.Error().Err(err).Msgf("%s - can't create person", op)
 
-		return nil, status.Error(codes.Internal, err.Error()) // TODO: нужно ли здесь возвращать сырую ошибку?
+		// TODO: is it really necessary to returns the raw error?
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &pb.CreatePersonV1Response{PersonId: id}, nil
@@ -159,15 +176,17 @@ func (o *PersonAPI) ListPersonV1(
 	}
 
 	buf := make([]pb.Person, len(persons))
-	for i, p := range persons {
+	for i, person := range persons {
 		buf[i] = pb.Person{
-			Id:         p.ID,
-			FirstName:  p.FirstName,
-			MiddleName: p.MiddleName,
-			LastName:   p.LastName,
-			Birthday:   timeToTimestamp(p.Birthday),
-			Sex:        pb.Sex(p.Sex),
-			Education:  pb.Education(p.Education),
+			Id:         person.ID,
+			FirstName:  person.FirstName,
+			MiddleName: person.MiddleName,
+			LastName:   person.LastName,
+			Birthday:   modelDateToDate(person.Birthday),
+			Sex:        pb.Sex(person.Sex),
+			Education:  pb.Education(person.Education),
+			Created:    timeToTimestamp(person.Created),
+			Updated:    timeToTimestamp(person.Updated),
 		}
 	}
 
@@ -230,22 +249,27 @@ func (o *PersonAPI) UpdatePersonV1(
 		person.FirstName = p.FirstName.Value
 		fields |= model.PersonFirstName
 	}
+
 	if p.MiddleName != nil {
 		person.MiddleName = p.MiddleName.Value
 		fields |= model.PersonMiddleName
 	}
+
 	if p.LastName != nil {
 		person.LastName = p.LastName.Value
 		fields |= model.PersonLastName
 	}
+
 	if p.Birthday != nil {
-		person.Birthday = timestampToTime(p.Birthday.Value)
+		person.Birthday = dateToModelDate(p.Birthday.Value)
 		fields |= model.PersonBirthday
 	}
+
 	if p.Sex != nil {
 		person.Sex = model.Sex(p.Sex.Value)
 		fields |= model.PersonSex
 	}
+
 	if p.Education != nil {
 		person.Education = model.Education(p.Education.Value)
 		fields |= model.PersonEducation
@@ -253,7 +277,7 @@ func (o *PersonAPI) UpdatePersonV1(
 
 	ok, err := o.repo.UpdatePerson(ctx, req.PersonId, person, fields)
 	if err != nil {
-		log.Error().Err(err).Msgf("%s - failed")
+		log.Error().Err(err).Msgf("%s - failed", op)
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}

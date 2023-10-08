@@ -16,23 +16,29 @@ type Date struct {
 	time.Time
 }
 
-//func NewDate(t time.Time) *Date {
-//	return &Date{
-//		time.Date(t.Year(), t.Month(), t.Day(),
-//			0, 0, 0, 0, time.UTC),
-//	}
-//}
-
-func ParseDate(s string) (Date, error) {
-	if t, err := time.Parse(DateLayout, s); err != nil {
-		return Date{}, err
-	} else {
-		return Date{t}, nil
+func NewDate(year int, month time.Month, day int) *Date {
+	return &Date{
+		time.Date(year, month, day, 0, 0, 0, 0, time.UTC),
 	}
 }
 
+func ParseDate(s string) (*Date, error) {
+	t, err := time.Parse(DateLayout, s)
+	if err != nil {
+		return nil, err
+	}
+	return &Date{Time: t}, err
+}
+
+func (d *Date) NullTime() *time.Time {
+	if d == nil {
+		return nil
+	}
+	return &d.Time
+}
+
 func (d Date) String() string {
-	return d.Time.Format(DateLayout)
+	return d.Format(DateLayout)
 }
 
 func (d Date) MarshalJSON() ([]byte, error) {
@@ -54,6 +60,6 @@ func (d *Date) UnmarshalJSON(text []byte) error {
 		return err
 	}
 
-	*d = v
+	*d = *v
 	return nil
 }

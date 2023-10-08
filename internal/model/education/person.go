@@ -7,7 +7,7 @@ import (
 )
 
 //go:generate stringer -type=PersonField
-type PersonField int
+type PersonField uint64
 
 const (
 	PersonID PersonField = 1 << iota
@@ -27,16 +27,16 @@ func (set PersonField) IsSet(f PersonField) bool {
 }
 
 type Person struct {
-	ID         uint64
-	FirstName  string
-	MiddleName string
-	LastName   string
-	Birthday   time.Time
-	Sex
-	Education
-	Removed bool
-	Created time.Time
-	Updated time.Time
+	ID         uint64    `json:"person_id"`
+	FirstName  string    `json:"first_name"`
+	MiddleName string    `json:"middle_name"`
+	LastName   string    `json:"last_name"`
+	Birthday   *Date     `json:"birthday"`
+	Sex        Sex       `json:"sex"`
+	Education  Education `json:"education"`
+	Removed    bool      `json:"removed"`
+	Created    time.Time `json:"created"`
+	Updated    time.Time `json:"updated"`
 }
 
 func (p Person) String() string {
@@ -60,9 +60,9 @@ func (p Person) String() string {
 		sb.WriteString(p.LastName)
 	}
 
-	if !p.Birthday.IsZero() {
+	if p.Birthday != nil {
 		sb.WriteString(",  ")
-		sb.WriteString(p.Birthday.Format(DateLayout))
+		sb.WriteString(p.Birthday.String())
 	}
 
 	if p.Sex != 0 {

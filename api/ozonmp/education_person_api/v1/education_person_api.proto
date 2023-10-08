@@ -5,60 +5,63 @@ package ozonmp.education_person_api.v1;
 import "validate/validate.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
+import "google/type/date.proto";
 
 option go_package = "github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api;education_person_api";
 
 // EducationPersonApiService - Service for working with templates
 service EducationPersonApiService {
+
   // DescribePersonV1 - Describe a person
   rpc DescribePersonV1(DescribePersonV1Request) returns (DescribePersonV1Response) {
-    // Q: что это за опция?
     option (google.api.http) = {
-      get: "/v1/templates/{person_id}"
+      get: "/v1/person/{person_id}"
     };
   }
-  rpc CreatePersonV1(CreatePersonV1Request) returns (CreatePersonV1Response);
-  rpc ListPersonV1(ListPersonV1Request)     returns (ListPersonV1Response);
-  rpc RemovePersonV1(RemovePersonV1Request) returns (RemovePersonV1Response);
-  rpc UpdatePersonV1(UpdatePersonV1Request) returns (UpdatePersonV1Response);
+
+  rpc ListPersonV1(ListPersonV1Request) returns (ListPersonV1Response) {
+    option (google.api.http) = {
+      get: "/v1/person"
+    };
+  }
+
+  rpc CreatePersonV1(CreatePersonV1Request) returns (CreatePersonV1Response) {
+    option (google.api.http) = {
+      post: "/v1/person"
+    };
+  }
+
+  rpc UpdatePersonV1(UpdatePersonV1Request) returns (UpdatePersonV1Response) {
+    option (google.api.http) = {
+      patch: "/v1/person/{person_id}"
+      body: "person"
+    };
+  }
+
+  rpc RemovePersonV1(RemovePersonV1Request) returns (RemovePersonV1Response) {
+    option (google.api.http) = {
+      delete: "/v1/person/{person_id}"
+    };
+  }
 }
 
-message Uint64Value {
-  uint64 value = 1;
-}
-
-message StringValue {
-  string value = 1;
-}
-
-message TimestampValue {
-  google.protobuf.Timestamp value = 1;
-}
 
 enum Sex {
-  SEX_NONE   = 0;
-  SEX_FEMALE = 1;
-  SEX_MALE   = 2;
-}
-
-message SexValue {
-  Sex value = 1;
+  SEX_UNSPECIFIED = 0;
+  SEX_FEMALE      = 1;
+  SEX_MALE        = 2;
 }
 
 enum Education {
-  EDU_NONE                 = 0;
-  EDU_PRESCHOOL            = 1;
-  EDU_PRIMARY_GENERAL      = 2;
-  EDU_BASIC_GENERAL        = 3;
-  EDU_SECONDARY_GENERAL    = 4;
-  EDU_SECONDARY_VOCATIONAL = 5;
-  EDU_HIGHER_1             = 6;
-  EDU_HIGHER_2             = 7;
-  EDU_HIGHER_3             = 8;
-}
-
-message EducationValue {
-  Education value = 1;
+  EDUCATION_UNSPECIFIED          = 0;
+  EDUCATION_PRESCHOOL            = 1;
+  EDUCATION_PRIMARY_GENERAL      = 2;
+  EDUCATION_BASIC_GENERAL        = 3;
+  EDUCATION_SECONDARY_GENERAL    = 4;
+  EDUCATION_SECONDARY_VOCATIONAL = 5;
+  EDUCATION_HIGHER_1             = 6;
+  EDUCATION_HIGHER_2             = 7;
+  EDUCATION_HIGHER_3             = 8;
 }
 
 message Person {
@@ -67,20 +70,36 @@ message Person {
   string    middle_name = 3;
   string    last_name   = 4;
 
-  google.protobuf.Timestamp birthday = 5;
+  google.type.Date birthday = 5;
 
   Sex       sex         = 6;
   Education education   = 7;
 
-  google.protobuf.Timestamp created  = 8;
-  google.protobuf.Timestamp updated  = 9;
+  google.protobuf.Timestamp created = 8;
+  google.protobuf.Timestamp updated = 9;
+}
+
+message StringValue {
+  string value = 1;
+}
+
+message DateValue {
+  google.type.Date value = 1;
+}
+
+message SexValue {
+  Sex value = 1;
+}
+
+message EducationValue {
+  Education value = 1;
 }
 
 message PersonUpdate {
   StringValue    first_name  = 1;
   StringValue    middle_name = 2;
   StringValue    last_name   = 3;
-  TimestampValue birthday    = 4;
+  DateValue      birthday    = 4;
   SexValue       sex         = 5;
   EducationValue education   = 6;
 }
@@ -103,19 +122,11 @@ message DescribePersonV1Response {
 
 message ListPersonV1Request {
   uint64 cursor = 1;
-  uint64 limit  = 2 [(validate.rules).uint64.gt = 0];
+  uint64 limit  = 2;
 }
 
 message ListPersonV1Response {
   repeated Person persons = 1;
-}
-
-message RemovePersonV1Request {
-  uint64 person_id = 1 [(validate.rules).uint64.gt = 0];
-}
-
-message RemovePersonV1Response {
-  bool ok = 1;
 }
 
 message UpdatePersonV1Request {
@@ -124,5 +135,13 @@ message UpdatePersonV1Request {
 }
 
 message UpdatePersonV1Response {
+  bool ok = 1;
+}
+
+message RemovePersonV1Request {
+  uint64 person_id = 1 [(validate.rules).uint64.gt = 0];
+}
+
+message RemovePersonV1Response {
   bool ok = 1;
 }

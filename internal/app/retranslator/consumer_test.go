@@ -118,7 +118,7 @@ func TestConfig_Run(t *testing.T) {
 				0,
 			},
 		},
-		// TODO: Add test cases.
+		// TODO: AddField test cases.
 	}
 
 	for _, tt := range tests {
