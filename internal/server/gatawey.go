@@ -25,7 +25,7 @@ var (
 )
 
 func createGatewayServer(grpcAddr, gatewayAddr string) *http.Server {
-	// CreatePerson a client connection to the gRPC Server we just started.
+	// Create a client connection to the gRPC Server we just started.
 	// This is where the gRPC-Gateway proxies the requests.
 	conn, err := grpc.DialContext(
 		context.Background(),

@@ -28,13 +28,13 @@ func (set PersonField) Includes(f PersonField) bool {
 
 type Person struct {
 	ID         uint64    `json:"person_id"`
-	FirstName  string    `json:"first_name"`
-	MiddleName string    `json:"middle_name"`
-	LastName   string    `json:"last_name"`
-	Birthday   *Date     `json:"birthday"`
-	Sex        Sex       `json:"sex"`
-	Education  Education `json:"education"`
-	Removed    bool      `json:"removed"`
+	FirstName  string    `json:"first_name,omitempty"`
+	MiddleName string    `json:"middle_name,omitempty"`
+	LastName   string    `json:"last_name,omitempty"`
+	Birthday   *Date     `json:"birthday,omitempty"`
+	Sex        Sex       `json:"sex,omitempty"`
+	Education  Education `json:"education,omitempty"`
+	Removed    bool      `json:"removed,omitempty"`
 	Created    time.Time `json:"created"`
 	Updated    time.Time `json:"updated"`
 }

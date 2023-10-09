@@ -52,7 +52,7 @@ func (mr *MockEventRepoMockRecorder) Lock(arg0 interface{}) *gomock.Call {
 // Remove mocks base method.
 func (m *MockEventRepo) Remove(arg0 []uint64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemovePerson", arg0)
+	ret := m.ctrl.Call(m, "Remove", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
@@ -60,7 +60,7 @@ func (m *MockEventRepo) Remove(arg0 []uint64) error {
 // Remove indicates an expected call of Remove.
 func (mr *MockEventRepoMockRecorder) Remove(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemovePerson", reflect.TypeOf((*MockEventRepo)(nil).Remove), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockEventRepo)(nil).Remove), arg0)
 }
 
 // Unlock mocks base method.

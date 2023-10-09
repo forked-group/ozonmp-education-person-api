@@ -42,11 +42,11 @@ type PersonService interface {
 }
 
 type PersonRepo interface {
-	DescribePerson(ctx context.Context, personID uint64) (*model.Person, error)
-	ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]model.Person, error)
-	CreatePerson(ctx context.Context, person model.Person) (uint64, error)
-	UpdatePerson(ctx context.Context, personID uint64, person model.Person, fields model.PersonField) (bool, error)
-	RemovePerson(ctx context.Context, personID uint64) (bool, error)
+	Describe(ctx context.Context, personID uint64) (*model.Person, error)
+	List(ctx context.Context, cursor uint64, limit uint64) ([]model.Person, error)
+	Create(ctx context.Context, person model.Person) (uint64, error)
+	Update(ctx context.Context, personID uint64, person model.Person, fields model.PersonField) (bool, error)
+	Remove(ctx context.Context, personID uint64) (bool, error)
 }
 
 type PersonEventRepo interface {

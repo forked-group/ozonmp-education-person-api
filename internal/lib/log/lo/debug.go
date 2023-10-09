@@ -16,6 +16,6 @@ func Debug(f string, v ...any) {
 		f += "\n"
 	}
 	if DebugEnable {
-		fmt.Fprintf(os.Stderr, "DEBUG: "+f, v...)
+		fmt.Fprintf(os.Stderr, f, v...)
 	}
 }

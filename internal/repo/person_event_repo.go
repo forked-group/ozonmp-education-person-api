@@ -188,7 +188,7 @@ func (r PersonEventRepo) Unlock(ctx context.Context, eventIDs []uint64) (uint64,
 }
 
 func (r PersonEventRepo) Remove(ctx context.Context, eventIDs []uint64) (uint64, error) {
-	const op = "PersonEventRepo.RemovePerson"
+	const op = "PersonEventRepo.Remove"
 
 	if len(eventIDs) == 0 {
 		return 0, nil

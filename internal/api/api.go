@@ -37,8 +37,6 @@ func NewPersonAPI(r interfaces.PersonRepo) *PersonAPI {
 	return &PersonAPI{repo: r}
 }
 
-const unimplemented = "Unimplemented"
-
 func timestampToTime(t *timestamppb.Timestamp) time.Time {
 	if t == nil {
 		return time.Time{}
@@ -58,6 +56,7 @@ func dateToModelDate(d *date.Date) (*model.Date, error) {
 		return nil, nil
 	}
 
+	// here we use ParseDate instead of NewDate to validate the date
 	v, err := model.ParseDate(fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.Day))
 	if err != nil {
 		return nil, fmt.Errorf("invalid date value: %v", err)
@@ -86,12 +85,12 @@ func (o *PersonAPI) DescribePersonV1(
 	log.Debug().Msgf("%s - req=%v", op, req)
 
 	if err := req.Validate(); err != nil {
-		log.Error().Err(err).Msgf("%s - invalid argument", op)
+		log.Warn().Err(err).Msgf("%s - invalid argument", op)
 
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	person, err := o.repo.DescribePerson(ctx, req.PersonId)
+	person, err := o.repo.Describe(ctx, req.PersonId)
 	if err != nil {
 		log.Error().Err(err).Msgf("%s - failed")
 
@@ -131,7 +130,7 @@ func (o *PersonAPI) CreatePersonV1(
 	log.Debug().Msgf("%s - req=%v", op, req)
 
 	if err := req.Validate(); err != nil {
-		log.Error().Err(err).Msgf("%s - invalid argument", op)
+		log.Warn().Err(err).Msgf("%s - invalid argument", op)
 
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -140,10 +139,13 @@ func (o *PersonAPI) CreatePersonV1(
 
 	birthday, err := dateToModelDate(p.Birthday)
 	if err != nil {
-		return nil, fmt.Errorf("%s: birthday: %v", op, err)
+		err = fmt.Errorf("%s: birthday: %v", op, err)
+		log.Warn().Err(err).Msgf("%s - invalid argument", op)
+
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	id, err := o.repo.CreatePerson(ctx, model.Person{
+	id, err := o.repo.Create(ctx, model.Person{
 		FirstName:  p.FirstName,
 		MiddleName: p.MiddleName,
 		LastName:   p.LastName,
@@ -171,23 +173,23 @@ func (o *PersonAPI) ListPersonV1(
 	log.Debug().Msgf("%s - req=%v", op, req)
 
 	if err := req.Validate(); err != nil {
-		log.Error().Err(err).Msgf("%s - invalid argument", op)
+		log.Warn().Err(err).Msgf("%s - invalid argument", op)
 
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	persons, err := o.repo.ListPerson(ctx, req.Cursor, req.Limit)
+	modelList, err := o.repo.List(ctx, req.Cursor, req.Limit)
 
 	if err != nil {
-		log.Error().Err(err).Msgf("%s - can't create p", op)
+		log.Error().Err(err).Msgf("%s - failed", op)
 
 		// TODO: is it really necessary to returns the raw error?
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	buf := make([]pb.Person, len(persons))
-	for i, person := range persons {
-		buf[i] = pb.Person{
+	list := make([]pb.Person, len(modelList))
+	for i, person := range modelList {
+		list[i] = pb.Person{
 			Id:         person.ID,
 			FirstName:  person.FirstName,
 			MiddleName: person.MiddleName,
@@ -200,13 +202,13 @@ func (o *PersonAPI) ListPersonV1(
 		}
 	}
 
-	pp := make([]*pb.Person, len(buf))
-	for i := range buf {
-		pp[i] = &buf[i]
+	pointerList := make([]*pb.Person, len(list))
+	for i := range list {
+		pointerList[i] = &list[i]
 	}
 
 	return &pb.ListPersonV1Response{
-		Persons: pp,
+		Persons: pointerList,
 	}, nil
 }
 
@@ -219,12 +221,12 @@ func (o *PersonAPI) RemovePersonV1(
 	log.Debug().Msgf("%s - req=%v", op, req)
 
 	if err := req.Validate(); err != nil {
-		log.Error().Err(err).Msgf("%s - invalid argument", op)
+		log.Warn().Err(err).Msgf("%s - invalid argument", op)
 
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	ok, err := o.repo.RemovePerson(ctx, req.PersonId)
+	ok, err := o.repo.Remove(ctx, req.PersonId)
 
 	if err != nil {
 		log.Error().Err(err).Msgf("%s - failed")
@@ -244,7 +246,7 @@ func (o *PersonAPI) UpdatePersonV1(
 	log.Debug().Msgf("%s - req=%v", op, req)
 
 	if err := req.Validate(); err != nil {
-		log.Error().Err(err).Msgf("%s - invalid argument", op)
+		log.Warn().Err(err).Msgf("%s - invalid argument", op)
 
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -273,7 +275,10 @@ func (o *PersonAPI) UpdatePersonV1(
 	if p.Birthday != nil {
 		birthday, err := dateToModelDate(p.Birthday.Value)
 		if err != nil {
-			return nil, fmt.Errorf("%s: birthday: %v", op, err)
+			err = fmt.Errorf("%s: birthday: %v", op, err)
+			log.Warn().Err(err).Msgf("%s - invalid argument", op)
+
+			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 
 		person.Birthday = birthday
@@ -290,7 +295,7 @@ func (o *PersonAPI) UpdatePersonV1(
 		fields |= model.PersonEducation
 	}
 
-	ok, err := o.repo.UpdatePerson(ctx, req.PersonId, person, fields)
+	ok, err := o.repo.Update(ctx, req.PersonId, person, fields)
 	if err != nil {
 		log.Error().Err(err).Msgf("%s - failed", op)
 

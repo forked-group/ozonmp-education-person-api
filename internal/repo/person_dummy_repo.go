@@ -43,7 +43,7 @@ func NewDummyRepo(batchSize uint) *PersonDummyRepo {
 
 func (s *PersonDummyRepo) fillTestData() {
 	for _, person := range personTestData {
-		_, _ = s.CreatePerson(context.Background(), person)
+		_, _ = s.Create(context.Background(), person)
 	}
 }
 
@@ -51,7 +51,7 @@ func (s *PersonDummyRepo) inRange(index uint64) bool {
 	return 1 <= index && index < uint64(len(s.data))
 }
 
-func (s *PersonDummyRepo) DescribePerson(_ context.Context, personID uint64) (*model.Person, error) {
+func (s *PersonDummyRepo) Describe(_ context.Context, personID uint64) (*model.Person, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -67,7 +67,7 @@ func (s *PersonDummyRepo) DescribePerson(_ context.Context, personID uint64) (*m
 	return &person, nil
 }
 
-func (s *PersonDummyRepo) ListPerson(_ context.Context, cursor uint64, limit uint64) ([]model.Person, error) {
+func (s *PersonDummyRepo) List(_ context.Context, cursor uint64, limit uint64) ([]model.Person, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -87,7 +87,7 @@ func (s *PersonDummyRepo) ListPerson(_ context.Context, cursor uint64, limit uin
 	return result, nil
 }
 
-func (s *PersonDummyRepo) CreatePerson(_ context.Context, p model.Person) (uint64, error) {
+func (s *PersonDummyRepo) Create(_ context.Context, p model.Person) (uint64, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -97,7 +97,7 @@ func (s *PersonDummyRepo) CreatePerson(_ context.Context, p model.Person) (uint6
 	return p.ID, nil
 }
 
-func (s *PersonDummyRepo) UpdatePerson(_ context.Context, personID uint64, p model.Person, _ model.PersonField) (bool, error) {
+func (s *PersonDummyRepo) Update(_ context.Context, personID uint64, p model.Person, _ model.PersonField) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -112,7 +112,7 @@ func (s *PersonDummyRepo) UpdatePerson(_ context.Context, personID uint64, p mod
 	return true, nil
 }
 
-func (s *PersonDummyRepo) RemovePerson(ctx context.Context, personID uint64) (bool, error) {
+func (s *PersonDummyRepo) Remove(ctx context.Context, personID uint64) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

@@ -37,7 +37,7 @@ type ListsBuilder struct {
 	Names []string
 }
 
-func (r *ListsBuilder) AddField(enable bool, name string, val any) {
+func (r *ListsBuilder) AddFieldIf(enable bool, name string, val any) {
 	if enable {
 		r.Args = append(r.Args, val)
 		if r.first == 0 {

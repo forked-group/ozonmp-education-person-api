@@ -35,7 +35,7 @@ var personRowFields = CommaList([]string{
 	"updated",
 })
 
-func scanPerson(row interface{ Scan(p ...any) error }, person *model.Person) error {
+func scanPerson(row interface{ Scan(...any) error }, person *model.Person) error {
 	var birthday sql.NullTime
 
 	err := row.Scan(
@@ -61,8 +61,8 @@ func scanPerson(row interface{ Scan(p ...any) error }, person *model.Person) err
 	return nil
 }
 
-func (r *PersonRepo) DescribePerson(ctx context.Context, personID uint64) (*model.Person, error) {
-	const op = "PersonRepo.DescribePerson"
+func (r *PersonRepo) Describe(ctx context.Context, personID uint64) (*model.Person, error) {
+	const op = "PersonRepo.Describe"
 	var person model.Person
 
 	var query = `
@@ -71,7 +71,7 @@ func (r *PersonRepo) DescribePerson(ctx context.Context, personID uint64) (*mode
 		FROM
 		    person
 		WHERE
-		    person_id = $1 AND NOT removed;
+		    person_id = /*personID*/$1 AND NOT removed;
 `
 	query = fmt.Sprintf(query, personRowFields)
 
@@ -88,12 +88,13 @@ func (r *PersonRepo) DescribePerson(ctx context.Context, personID uint64) (*mode
 	return &person, nil
 }
 
-func (r *PersonRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64) ([]model.Person, error) {
-	const op = "PersonRepo.ListPerson"
+func (r *PersonRepo) List(ctx context.Context, cursor uint64, limit uint64) ([]model.Person, error) {
+	const op = "PersonRepo.List"
 
 	if limit <= 0 || limit > uint64(r.batchSize) {
 		limit = uint64(r.batchSize)
 	}
+
 	list := make([]model.Person, 0, limit)
 
 	var query = `
@@ -102,11 +103,11 @@ func (r *PersonRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64
 		FROM
 			person
 		WHERE
-			person_id >= $1 AND NOT removed
+			person_id >= /*cursor*/$1 AND NOT removed
 		ORDER BY
 			person_id
 		LIMIT
-			$2;
+			/*limit*/$2;
 `
 	query = fmt.Sprintf(query, personRowFields)
 
@@ -129,8 +130,8 @@ func (r *PersonRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64
 	return list, nil
 }
 
-func createEvent(ctx context.Context, tx *sql.Tx, eventType model.EventType, person model.Person) error {
-	const op = "repo.createEvent"
+func createPersonRepoEvent(ctx context.Context, tx *sql.Tx, eventType model.EventType, person model.Person) error {
+	const op = "createPersonRepoEvent"
 
 	payload, err := json.Marshal(person)
 	if err != nil {
@@ -182,36 +183,37 @@ func (r *PersonRepo) transaction(ctx context.Context, f func(tx *sql.Tx) error) 
 	return nil
 }
 
-const editableFields = model.PersonFirstName |
+const editablePersonFields = model.PersonFirstName |
 	model.PersonMiddleName |
 	model.PersonLastName |
 	model.PersonBirthday |
 	model.PersonSex |
 	model.PersonEducation
 
-func addFields(b *ListsBuilder, person model.Person, fields model.PersonField) {
-	s := FieldSet[model.PersonField](editableFields & fields)
-	b.AddField(s.Includes(model.PersonFirstName), "first_name", person.FirstName)
-	b.AddField(s.Includes(model.PersonMiddleName), "middle_name", person.MiddleName)
-	b.AddField(s.Includes(model.PersonLastName), "last_name", person.LastName)
-	b.AddField(s.Includes(model.PersonBirthday), "birthday", person.Birthday.NullTime())
-	b.AddField(s.Includes(model.PersonSex), "sex", person.Sex)
-	b.AddField(s.Includes(model.PersonEducation), "education", person.Education)
+func addPersonFields(b *ListsBuilder, person model.Person, fields model.PersonField) {
+	mask := FieldSet[model.PersonField](editablePersonFields & fields)
+
+	b.AddFieldIf(mask.Includes(model.PersonFirstName), "first_name", person.FirstName)
+	b.AddFieldIf(mask.Includes(model.PersonMiddleName), "middle_name", person.MiddleName)
+	b.AddFieldIf(mask.Includes(model.PersonLastName), "last_name", person.LastName)
+	b.AddFieldIf(mask.Includes(model.PersonBirthday), "birthday", person.Birthday.NullTime())
+	b.AddFieldIf(mask.Includes(model.PersonSex), "sex", person.Sex)
+	b.AddFieldIf(mask.Includes(model.PersonEducation), "education", person.Education)
 }
 
-func (r *PersonRepo) CreatePerson(ctx context.Context, person model.Person) (uint64, error) {
-	const op = "PersonRepo.CreatePerson"
+func (r *PersonRepo) Create(ctx context.Context, person model.Person) (uint64, error) {
+	const op = "PersonRepo.Create"
 
 	var query = `
 		INSERT INTO person 
-			(%s)
+			(/*NameList*/%s)
 		VALUES 
-			(%s)
+			(/*ValueListTemplate*/%s)
 		RETURNING
 			/*personRowFields*/%s; 
 `
 	var b ListsBuilder
-	addFields(&b, person, editableFields)
+	addPersonFields(&b, person, editablePersonFields)
 
 	query = fmt.Sprintf(query, b.NameList(), b.ValueListTemplate(), personRowFields)
 	lo.Debug("%s: query: %s", op, query)
@@ -224,7 +226,7 @@ func (r *PersonRepo) CreatePerson(ctx context.Context, person model.Person) (uin
 			return fmt.Errorf("can't do query: %w", err)
 		}
 
-		err = createEvent(ctx, tx, model.Created, person)
+		err = createPersonRepoEvent(ctx, tx, model.Created, person)
 		if err != nil {
 			return fmt.Errorf("can't create event: %w", err)
 		}
@@ -239,25 +241,25 @@ func (r *PersonRepo) CreatePerson(ctx context.Context, person model.Person) (uin
 	return person.ID, nil
 }
 
-// UpdatePerson returns true if the record with id found and false if the record does
+// Update returns true if the record with id found and false if the record does
 // not exist or an error occurred.
-func (r *PersonRepo) UpdatePerson(ctx context.Context, personID uint64, person model.Person, fields model.PersonField) (bool, error) {
-	const op = "PersonRepo.UpdatePerson"
+func (r *PersonRepo) Update(ctx context.Context, personID uint64, person model.Person, fields model.PersonField) (bool, error) {
+	const op = "PersonRepo.Update"
 
 	var query = `
 		UPDATE 
 			person
 		SET 
-			%s,
+			/*FieldListTemplate*/%s,
 		    updated = (now() at time zone 'utc')
 		WHERE
-			person_id=$1 AND NOT removed 
+			person_id = /*personID*/$1 AND NOT removed 
 		RETURNING
 			/*personRowFields*/%s;
 `
 	var b ListsBuilder
 	b.Args = []any{personID}
-	addFields(&b, person, fields&editableFields)
+	addPersonFields(&b, person, fields&editablePersonFields)
 
 	query = fmt.Sprintf(query, b.FieldListTemplate(), personRowFields)
 	lo.Debug("%s: query: %s", op, query)
@@ -277,7 +279,7 @@ func (r *PersonRepo) UpdatePerson(ctx context.Context, personID uint64, person m
 
 		ok = true
 
-		err = createEvent(ctx, tx, model.Updated, person)
+		err = createPersonRepoEvent(ctx, tx, model.Updated, person)
 		if err != nil {
 			return fmt.Errorf("can't create event: %w", err)
 		}
@@ -292,10 +294,10 @@ func (r *PersonRepo) UpdatePerson(ctx context.Context, personID uint64, person m
 	return ok, nil
 }
 
-// RemovePerson returns true if the record was indeed removed, and false if the
+// Remove returns true if the record was indeed removed, and false if the
 // record does not exist or an error occurred.
-func (r *PersonRepo) RemovePerson(ctx context.Context, personID uint64) (bool, error) {
-	const op = "PersonRepo.RemovePerson"
+func (r *PersonRepo) Remove(ctx context.Context, personID uint64) (bool, error) {
+	const op = "PersonRepo.Remove"
 
 	var query = `
 		UPDATE 
@@ -304,7 +306,7 @@ func (r *PersonRepo) RemovePerson(ctx context.Context, personID uint64) (bool, e
 		    removed = true,
 		    updated = (now() at time zone 'utc')
 		WHERE
-		    person_id = $1 AND NOT removed
+		    person_id = /*personID*/$1 AND NOT removed
 		RETURNING
 			/*personRowFields*/%s;
 `
@@ -327,7 +329,7 @@ func (r *PersonRepo) RemovePerson(ctx context.Context, personID uint64) (bool, e
 
 		ok = true
 
-		err = createEvent(ctx, tx, model.Updated, person)
+		err = createPersonRepoEvent(ctx, tx, model.Updated, person)
 		if err != nil {
 			return fmt.Errorf("can't create event: %w", err)
 		}
