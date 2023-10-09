@@ -47,7 +47,7 @@ func (d Date) MarshalJSON() ([]byte, error) {
 
 func (d *Date) UnmarshalJSON(text []byte) error {
 	if bytes.Equal(text, []byte("null")) {
-		return nil
+		return nil // RTFM
 	}
 
 	s, err := strconv.Unquote(string(text))

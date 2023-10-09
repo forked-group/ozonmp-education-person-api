@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/interfaces"
 	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"github.com/prometheus/client_golang/prometheus"
@@ -52,13 +53,17 @@ func timeToTimestamp(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(t)
 }
 
-func dateToModelDate(d *date.Date) *model.Date {
+func dateToModelDate(d *date.Date) (*model.Date, error) {
 	if d == nil {
-		return nil
+		return nil, nil
 	}
-	t := time.Date(int(d.Year), time.Month(d.Month), int(d.Day),
-		0, 0, 0, 0, time.UTC)
-	return &model.Date{Time: t}
+
+	v, err := model.ParseDate(fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.Day))
+	if err != nil {
+		return nil, fmt.Errorf("invalid date value: %v", err)
+	}
+
+	return v, nil
 }
 
 func modelDateToDate(d *model.Date) *date.Date {
@@ -133,11 +138,16 @@ func (o *PersonAPI) CreatePersonV1(
 
 	p := req.Person
 
+	birthday, err := dateToModelDate(p.Birthday)
+	if err != nil {
+		return nil, fmt.Errorf("%s: birthday: %v", op, err)
+	}
+
 	id, err := o.repo.CreatePerson(ctx, model.Person{
 		FirstName:  p.FirstName,
 		MiddleName: p.MiddleName,
 		LastName:   p.LastName,
-		Birthday:   dateToModelDate(p.Birthday),
+		Birthday:   birthday,
 		Sex:        model.Sex(p.Sex),
 		Education:  model.Education(p.Education),
 	})
@@ -261,7 +271,12 @@ func (o *PersonAPI) UpdatePersonV1(
 	}
 
 	if p.Birthday != nil {
-		person.Birthday = dateToModelDate(p.Birthday.Value)
+		birthday, err := dateToModelDate(p.Birthday.Value)
+		if err != nil {
+			return nil, fmt.Errorf("%s: birthday: %v", op, err)
+		}
+
+		person.Birthday = birthday
 		fields |= model.PersonBirthday
 	}
 

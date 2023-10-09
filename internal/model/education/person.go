@@ -22,7 +22,7 @@ const (
 	PersonUpdated
 )
 
-func (set PersonField) IsSet(f PersonField) bool {
+func (set PersonField) Includes(f PersonField) bool {
 	return set&f != 0
 }
 

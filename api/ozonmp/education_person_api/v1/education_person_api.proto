@@ -28,6 +28,7 @@ service EducationPersonApiService {
   rpc CreatePersonV1(CreatePersonV1Request) returns (CreatePersonV1Response) {
     option (google.api.http) = {
       post: "/v1/person"
+      body: "person"
     };
   }
 
@@ -64,21 +65,6 @@ enum Education {
   EDUCATION_HIGHER_3             = 8;
 }
 
-message Person {
-  uint64    id          = 1;
-  string    first_name  = 2;
-  string    middle_name = 3;
-  string    last_name   = 4;
-
-  google.type.Date birthday = 5;
-
-  Sex       sex         = 6;
-  Education education   = 7;
-
-  google.protobuf.Timestamp created = 8;
-  google.protobuf.Timestamp updated = 9;
-}
-
 message StringValue {
   string value = 1;
 }
@@ -95,25 +81,34 @@ message EducationValue {
   Education value = 1;
 }
 
+message Person {
+  uint64    id          = 1 [json_name="person_id"];
+  string    first_name  = 2 [json_name="first_name"];
+  string    middle_name = 3 [json_name="middle_name"];
+  string    last_name   = 4 [json_name="last_name"];
+
+  google.type.Date
+            birthday    = 5;
+  Sex       sex         = 6;
+  Education education   = 7;
+
+  google.protobuf.Timestamp
+            created     = 8;
+  google.protobuf.Timestamp
+            updated     = 9;
+}
+
 message PersonUpdate {
-  StringValue    first_name  = 1;
-  StringValue    middle_name = 2;
-  StringValue    last_name   = 3;
+  StringValue    first_name  = 1 [json_name="first_name"];;
+  StringValue    middle_name = 2 [json_name="middle_name"];;
+  StringValue    last_name   = 3 [json_name="last_name"];;
   DateValue      birthday    = 4;
   SexValue       sex         = 5;
   EducationValue education   = 6;
 }
 
-message CreatePersonV1Request {
-  Person person = 1;
-}
-
-message CreatePersonV1Response {
-  uint64 person_id = 1 [(validate.rules).uint64.gt = 0];
-}
-
 message DescribePersonV1Request {
-  uint64 person_id = 1;
+  uint64 person_id = 1 [json_name="person_id", (validate.rules).uint64.gt = 0];
 }
 
 message DescribePersonV1Response {
@@ -129,8 +124,16 @@ message ListPersonV1Response {
   repeated Person persons = 1;
 }
 
+message CreatePersonV1Request {
+  Person person = 1 [(validate.rules).any.required = true];
+}
+
+message CreatePersonV1Response {
+  uint64 person_id = 1 [json_name="person_id"];
+}
+
 message UpdatePersonV1Request {
-  uint64 person_id = 1 [(validate.rules).uint64.gt = 0];
+  uint64 person_id = 1 [json_name="person_id", (validate.rules).uint64.gt = 0];
   PersonUpdate person = 2;
 }
 
@@ -139,7 +142,7 @@ message UpdatePersonV1Response {
 }
 
 message RemovePersonV1Request {
-  uint64 person_id = 1 [(validate.rules).uint64.gt = 0];
+  uint64 person_id = 1 [json_name="person_id", (validate.rules).uint64.gt = 0];
 }
 
 message RemovePersonV1Response {

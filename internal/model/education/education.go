@@ -48,15 +48,15 @@ func ParseEducation(s string) (Education, error) {
 	const op = "ParseEducation"
 
 	if i, err := strconv.Atoi(s); err == nil {
-		if ed := Education(i); ed.Valid() {
-			return ed, nil
+		if Education(i).Valid() {
+			return Education(i), nil
 		}
 		return 0, fmt.Errorf("%s: unknown value: %s", op, s)
 	}
 
-	for ed := MinEducation; ed <= MaxEducation; ed++ {
-		if strings.EqualFold(s, ed.String()) {
-			return ed, nil
+	for i := MinEducation; i <= MaxEducation; i++ {
+		if strings.EqualFold(s, i.String()) {
+			return i, nil
 		}
 	}
 

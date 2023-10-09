@@ -25,15 +25,15 @@ func ParseSex(s string) (Sex, error) {
 	const op = "ParseSex"
 
 	if i, err := strconv.Atoi(s); err == nil {
-		if sex := Sex(i); sex.Valid() {
-			return sex, nil
+		if Sex(i).Valid() {
+			return Sex(i), nil
 		}
 		return 0, fmt.Errorf("%s: unknown value: %s", op, s)
 	}
 
-	for sex := MinSex; sex <= MaxSex; sex++ {
-		if strings.EqualFold(s, sex.String()) {
-			return sex, nil
+	for i := MinSex; i <= MaxSex; i++ {
+		if strings.EqualFold(s, i.String()) {
+			return i, nil
 		}
 	}
 

@@ -1,7 +1,5 @@
 package education
 
-import "fmt"
-
 type EventType uint8
 
 //go:generate stringer -type=EventType
@@ -12,19 +10,6 @@ const (
 	Removed
 )
 
-func ParseEventType(s string) (EventType, error) {
-	const op = "ParseEventStatus"
-	switch s {
-	case Created.String():
-		return Created, nil
-	case Updated.String():
-		return Updated, nil
-	case Removed.String():
-		return Removed, nil
-	}
-	return 0, fmt.Errorf("%s: unknown event status: %q", op, s)
-}
-
 type EventStatus uint8
 
 //go:generate stringer -type=EventStatus
@@ -33,17 +18,6 @@ const (
 	Deferred
 	Processed
 )
-
-func ParseEventStatus(s string) (EventStatus, error) {
-	const op = "ParseEventStatus"
-	switch s {
-	case Deferred.String():
-		return Deferred, nil
-	case Processed.String():
-		return Processed, nil
-	}
-	return 0, fmt.Errorf("%s: unknown event status: %q", op, s)
-}
 
 type PersonEvent struct {
 	ID     uint64
@@ -54,9 +28,14 @@ type PersonEvent struct {
 
 type PersonEventField uint64
 
+//go:generate stringer -type=EventStatus
 const (
 	PersonEventID PersonEventField = 1 << iota
 	PersonEventType
 	PersonEventStatus
 	PersonEventEntry
 )
+
+func (mask PersonEventField) Includes(f PersonEventField) bool {
+	return mask&f != 0
+}
