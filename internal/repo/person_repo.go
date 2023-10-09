@@ -115,11 +115,8 @@ func (r *PersonRepo) ListPerson(ctx context.Context, cursor uint64, limit uint64
 		return nil, fmt.Errorf("%s: can't do query: %w", op, err)
 	}
 
-	var person model.Person
 	for rows.Next() {
-		if err != nil {
-			return list, fmt.Errorf("%s: can't get next row: %w", op, err)
-		}
+		var person model.Person
 
 		err = scanPerson(rows, &person)
 		if err != nil {
