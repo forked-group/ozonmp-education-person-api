@@ -246,6 +246,11 @@ func (r *PersonRepo) Create(ctx context.Context, person model.Person) (uint64, e
 func (r *PersonRepo) Update(ctx context.Context, personID uint64, person model.Person, fields model.PersonField) (bool, error) {
 	const op = "PersonRepo.Update"
 
+	fields &= editablePersonFields
+	if fields == 0 {
+		return false, fmt.Errorf("%s: no any fields to update", op)
+	}
+
 	var query = `
 		UPDATE 
 			person
@@ -259,7 +264,7 @@ func (r *PersonRepo) Update(ctx context.Context, personID uint64, person model.P
 `
 	var b ListsBuilder
 	b.Args = []any{personID}
-	addPersonFields(&b, person, fields&editablePersonFields)
+	addPersonFields(&b, person, fields)
 
 	query = fmt.Sprintf(query, b.FieldListTemplate(), personRowFields)
 	lo.Debug("%s: query: %s", op, query)
