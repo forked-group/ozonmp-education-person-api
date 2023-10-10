@@ -1,22 +1,21 @@
 package retranslator
 
-import "context"
+import (
+	"context"
+)
 
-// TODO: need to use `context.WithValue` instead of type wrapper
+type contextValueKey int
 
-type _contextWithTerm struct {
-	context.Context
-	term context.Context
-}
+const termKey contextValueKey = 1
 
 func termFromContext(ctx context.Context) context.Context {
-	return ctx.(*_contextWithTerm).term
+	if term := ctx.Value(termKey).(context.Context); term != nil {
+		return term
+	}
+	return ctx
 }
 
-func contextWithTerm(ctx context.Context) (*_contextWithTerm, context.CancelFunc) {
+func contextWithTerm(ctx context.Context) (context.Context, context.CancelFunc) {
 	term, sendTerm := context.WithCancel(ctx)
-	return &_contextWithTerm{
-		Context: ctx,
-		term:    term,
-	}, sendTerm
+	return context.WithValue(ctx, termKey, term), sendTerm
 }
