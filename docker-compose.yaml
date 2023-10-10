@@ -126,8 +126,8 @@ services:
       - ./swagger:/swagger
     environment:
       SWAGGER_JSON: /swagger/ozonmp/education_person_api/v1/education_person_api.swagger.json
-    depends_on:
-      - education-person-api
+#    depends_on:
+#      - education-person-api
     networks:
       - ompnw
 
