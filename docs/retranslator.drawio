@@ -1,0 +1,109 @@
+<mxfile host="app.diagrams.net" modified="2023-10-11T17:39:52.193Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.967 YaBrowser/23.9.1.967 Yowser/2.5 Safari/537.36" etag="4fGIcKZc4ytr32Jsh1ts" version="21.6.8" type="google">
+  <diagram name="Страница 1" id="rPLJCwPzJy3Q9IWxEGzV">
+    <mxGraphModel dx="1006" dy="1433" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="29RWeEltPoiVit_mjaSB-18" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.375;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="29RWeEltPoiVit_mjaSB-2" target="29RWeEltPoiVit_mjaSB-3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-2" value="Distributor" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="210" y="250" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-24" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="29RWeEltPoiVit_mjaSB-4" target="29RWeEltPoiVit_mjaSB-22" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-4" value="Remover&lt;br&gt;(collector)" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="490" y="250" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-10" value="" style="group;rounded=1;" parent="1" connectable="0" vertex="1">
+          <mxGeometry x="190" y="80" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-6" value="Reader" style="rounded=1;whiteSpace=wrap;html=1;" parent="29RWeEltPoiVit_mjaSB-10" vertex="1">
+          <mxGeometry x="20" y="20" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-11" value="" style="group;rounded=1;" parent="1" connectable="0" vertex="1">
+          <mxGeometry x="380" y="414" width="150" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-3" value="Producer" style="rounded=1;whiteSpace=wrap;html=1;" parent="29RWeEltPoiVit_mjaSB-11" vertex="1">
+          <mxGeometry width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-7" value="Producer" style="rounded=1;whiteSpace=wrap;html=1;" parent="29RWeEltPoiVit_mjaSB-11" vertex="1">
+          <mxGeometry x="10" y="10" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-8" value="Producer" style="rounded=1;whiteSpace=wrap;html=1;" parent="29RWeEltPoiVit_mjaSB-11" vertex="1">
+          <mxGeometry x="20" y="20" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-9" value="Senders" style="rounded=1;whiteSpace=wrap;html=1;" parent="29RWeEltPoiVit_mjaSB-11" vertex="1">
+          <mxGeometry x="30" y="30" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-25" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="29RWeEltPoiVit_mjaSB-13" target="29RWeEltPoiVit_mjaSB-22" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-13" value="Unlocker&lt;br&gt;(collector)" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="670" y="250" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-19" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="29RWeEltPoiVit_mjaSB-14" target="29RWeEltPoiVit_mjaSB-6" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="259.96000000000004" y="78.98000000000002" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-14" value="DB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
+          <mxGeometry x="425" y="-110" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-16" value="Recipients" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="410" y="640" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="29RWeEltPoiVit_mjaSB-6" target="29RWeEltPoiVit_mjaSB-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-23" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="1" source="29RWeEltPoiVit_mjaSB-21" target="29RWeEltPoiVit_mjaSB-14" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="620" y="90" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-21" value="Worker" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="570" y="100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-22" value="Writer" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="580" y="110" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-26" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="29RWeEltPoiVit_mjaSB-3" target="29RWeEltPoiVit_mjaSB-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-39" value="OK" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="29RWeEltPoiVit_mjaSB-26" connectable="0" vertex="1">
+          <mxGeometry x="0.0932" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-27" value="FAIL" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="29RWeEltPoiVit_mjaSB-3" target="29RWeEltPoiVit_mjaSB-13" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-28" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;shape=flexArrow;" parent="1" source="29RWeEltPoiVit_mjaSB-9" target="29RWeEltPoiVit_mjaSB-16" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-32" value="Читает пакет&lt;br&gt;сообщений и&lt;br&gt;блокирует их" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="90" y="95" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-33" value="Раздает пакет&lt;br&gt;в розницу&lt;br&gt;сендерам" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="75" y="243" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-34" value="Собирают пакет&lt;br&gt;подтверждений или отмен" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="800" y="253" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-35" value="&amp;nbsp;Удаляет пакет отправленных&lt;br&gt;сообщений или разблокирует&lt;br&gt;&amp;nbsp;пакет не доставленных&amp;nbsp;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="710" y="110" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-36" value="Отправляют&lt;br&gt;сообщения" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="270" y="439" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-37" value="Ок. Если у нас одно сообщение - один получатель. Иначе логично собирать пакет для каждого получателя." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=19;" parent="1" vertex="1">
+          <mxGeometry x="600" y="480" width="320" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="29RWeEltPoiVit_mjaSB-38" value="Ок. Пакетное чтение и запись в базу" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=19;" parent="1" vertex="1">
+          <mxGeometry x="550" y="-60" width="320" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
