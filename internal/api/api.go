@@ -3,18 +3,18 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/interfaces"
-	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"google.golang.org/genproto/googleapis/type/date"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/interfaces"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
+	"google.golang.org/genproto/googleapis/type/date"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
+	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	pb "github.com/aaa2ppp/ozonmp-education-person-api/pkg/education-person-api"
 )
 
@@ -92,7 +92,7 @@ func (o *PersonAPI) DescribePersonV1(
 
 	person, err := o.repo.Describe(ctx, req.PersonId)
 	if err != nil {
-		log.Error().Err(err).Msgf("%s - failed")
+		log.Error().Err(err).Msgf("%s - failed", op)
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -229,7 +229,7 @@ func (o *PersonAPI) RemovePersonV1(
 	ok, err := o.repo.Remove(ctx, req.PersonId)
 
 	if err != nil {
-		log.Error().Err(err).Msgf("%s - failed")
+		log.Error().Err(err).Msgf("%s - failed", op)
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}

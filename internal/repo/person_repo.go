@@ -121,7 +121,7 @@ func (r *PersonRepo) List(ctx context.Context, cursor uint64, limit uint64) ([]m
 
 		err = scanPerson(rows, &person)
 		if err != nil {
-			return nil, fmt.Errorf("%s: can't scan row: %w", err)
+			return nil, fmt.Errorf("%s: can't scan row: %w", op, err)
 		}
 
 		list = append(list, person)
@@ -168,7 +168,11 @@ func (r *PersonRepo) transaction(ctx context.Context, f func(tx *sql.Tx) error) 
 	if err != nil {
 		return fmt.Errorf("%s: can't start transaction: %w", op, err)
 	}
-	defer tx.Rollback() // TODO: handing error?
+	defer func() {
+		if e := tx.Rollback(); e != nil && err == nil {
+			err = e
+		}
+	}()
 
 	err = f(tx)
 	if err != nil {

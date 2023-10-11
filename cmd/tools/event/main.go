@@ -129,6 +129,8 @@ func debug(f string, a ...any) {
 	msg(f, a...)
 }
 
+var _ = debug // avoid the linter
+
 func info(f string, a ...any) {
 	msg(f, a...)
 }

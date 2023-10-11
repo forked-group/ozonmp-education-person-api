@@ -19,14 +19,18 @@ func NewEventRepo(db *sqlx.DB) *PersonEventRepo {
 	}
 }
 
-func (r PersonEventRepo) transaction(ctx context.Context, f func(tx *sql.Tx) error) error {
+func (r PersonEventRepo) transaction(ctx context.Context, f func(tx *sql.Tx) error) (err error) {
 	const op = "PersonRepo.transaction"
 
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("%s: can't start transaction: %w", op, err)
 	}
-	defer tx.Rollback() // TODO: handing error?
+	defer func() {
+		if e := tx.Rollback(); e != nil && err == nil {
+			err = e
+		}
+	}()
 
 	err = f(tx)
 	if err != nil {
@@ -219,7 +223,7 @@ func (r PersonEventRepo) Remove(ctx context.Context, eventIDs []uint64) (uint64,
 		return err
 	})
 	if err != nil {
-		err = fmt.Errorf("%s: %w", op, err)
+		return 0, fmt.Errorf("%s: %w", op, err)
 	}
 
 	return uint64(n), nil
