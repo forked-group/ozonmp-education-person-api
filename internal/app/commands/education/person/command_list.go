@@ -8,18 +8,19 @@ import (
 	"strings"
 )
 
-type listCallbackData struct {
-	Cursor uint64 `json:"cursor"`
-}
-
+const listUsage = "/list%s"
 const listPageSize = 5
 
 func (c Commander) List(inputMsg *tgbotapi.Message) {
 	c.listNext(inputMsg.Chat.ID, 0)
 }
 
-func (c Commander) ListCallback(callback *tgbotapi.CallbackQuery, callbackPath callbackPath) {
-	const op = "Commander.ListCallback"
+type listCallbackData struct {
+	Cursor uint64 `json:"cursor"`
+}
+
+func (c Commander) listCallback(callback *tgbotapi.CallbackQuery, callbackPath callbackPath) {
+	const op = "Commander.listCallback"
 
 	var data listCallbackData
 	err := json.Unmarshal([]byte(callbackPath.CallbackData), &data)

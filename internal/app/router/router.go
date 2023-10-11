@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/commands/demo"
@@ -47,15 +48,36 @@ func (r *Router) Route(domain, subdomain string, commander commander) {
 	r.routes[domain+"/"+subdomain] = commander
 }
 
+const panicSep = "/runtime/panic.go"
+
+func trimStack(stack []byte) []byte {
+	idx := bytes.Index(stack, []byte(panicSep))
+	if idx == -1 {
+		return stack
+	}
+
+	idx += len(panicSep)
+	for idx < len(stack) && stack[idx] != '\n' {
+		idx++
+	}
+
+	if idx < len(stack) {
+		idx++
+	}
+
+	return stack[idx:]
+}
+
 // HandleUpdate You should not use this method directly. This is left for
-// backward compatibility only. Use the Start/Close methods to start and
+// backward compatibility only. Use the Start and Close methods to start and
 // stop the router.
 func (r *Router) HandleUpdate(update tgbotapi.Update) {
 	const op = "Router.HandleUpdate"
 
 	defer func() {
 		if panicValue := recover(); panicValue != nil {
-			log.Error().Msgf("%s: recovered from panic: %v\n%v", op, panicValue, string(debug.Stack()))
+			log.Error().Msgf("%s: recovered from panic: %v\n%s", op, panicValue,
+				trimStack(debug.Stack()))
 		}
 	}()
 
@@ -143,7 +165,7 @@ func (r *Router) Start(ctx context.Context, cfg tgbotapi.UpdateConfig) (err erro
 }
 
 func (r *Router) start(ctx context.Context, cfg tgbotapi.UpdateConfig) error {
-	const op = "Router.Start"
+	const op = "Router.start"
 
 	updates, err := r.bot.GetUpdatesChan(cfg)
 	if err != nil {

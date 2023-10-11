@@ -6,9 +6,10 @@ import (
 	"strconv"
 )
 
+const editUsage = "/edit%s id field=value ..."
+
 func (c Commander) Edit(inputMsg *tgbotapi.Message) {
 	const op = "Commander.Edit"
-	const usage = "/edit%s id field=value ..."
 
 	chatID := inputMsg.Chat.ID
 

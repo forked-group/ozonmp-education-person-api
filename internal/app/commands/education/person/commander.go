@@ -44,7 +44,7 @@ func (c Commander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath
 
 	switch callbackPath.CallbackName {
 	case "list":
-		c.ListCallback(callback, callbackPath)
+		c.listCallback(callback, callbackPath)
 	default:
 		log.Printf("%s: unknown callback name: %s", op, callbackPath.CallbackName)
 	}

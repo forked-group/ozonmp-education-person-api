@@ -1,9 +1,6 @@
-
-GO_VERSION_REQUIRED=1.20
 GO_VERSION_SHORT:=$(shell echo `go version` | sed -E 's/.* go(.*) .*/\1/g')
-
-ifneq ("$(GO_VERSION_REQUIRED)","$(shell printf "$(GO_VERSION_SHORT)\n$(GO_VERSION_REQUIRED)" | sort -V | head -1)")
-	$(error NEED GO VERSION >= $(GO_VERSION_REQUIRED). Found: $(GO_VERSION_SHORT))
+ifneq ("1.16","$(shell printf "$(GO_VERSION_SHORT)\n1.16" | sort -V | head -1)")
+$(error NEED GO VERSION >= 1.16. Found: $(GO_VERSION_SHORT))
 endif
 
 export GO111MODULE=on
@@ -20,17 +17,17 @@ GO_BIN=$(shell go env GOPATH)/bin
 BUF_EXE=$(GO_BIN)/buf$(shell go env GOEXE)
 
 ifeq ("NT", "$(findstring NT,$(OS_NAME))")
-	OS_NAME=Windows
+OS_NAME=Windows
 endif
 
 .PHONY: run
 run:
-	go run cmd/grpc-server/grpc-server.go & \
-	go run cmd/telegram-bot/telegram-bot.go
+	go run cmd/grpc-server/main.go
 
 .PHONY: lint
 lint:
 	golangci-lint run ./...
+
 
 .PHONY: test
 test:
@@ -88,27 +85,14 @@ build: generate .build
 .PHONY: build-go
 build-go: generate-go .build
 
-.build: mod-download build-grpc-server build-telegram-bot
-
-.PHONY: mod-download
-mod-download:
-	go mod download
-
-.PHONY: build-grpc-server
-build-grpc-server:
-	CGO_ENABLED=0  go build \
+.build:
+	go mod download && CGO_ENABLED=0  go build \
 		-tags='no_mysql no_sqlite3' \
 		-ldflags=" \
 			-X 'github.com/$(SERVICE_PATH)/internal/config.version=$(VERSION)' \
 			-X 'github.com/$(SERVICE_PATH)/internal/config.commitHash=$(COMMIT_HASH)' \
 		" \
-		-o ./bin/grpc-server$(shell go env GOEXE) ./cmd/grpc-server/grpc-server.go
-
-.PHONY: build-telegram-bot
-build-telegram-bot:
-	go build -o ./bin/telegram-bot($shell go env GOEXE) ./cmd/telegram-bot/telegram-bot.go
-
-# ----------------------------------------------------------------
+		-o ./bin/grpc-server$(shell go env GOEXE) ./cmd/grpc-server/main.go
 
 .PHONY: my-test
 my-test:

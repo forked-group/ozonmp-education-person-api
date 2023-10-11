@@ -9,9 +9,15 @@ import (
 type (
 	person      = model.Person
 	personField = model.PersonField
-	sex         = model.Sex
-	education   = model.Education
-	date        = model.Date
+)
+
+const (
+	personFirstName  = model.PersonFirstName
+	personMiddleName = model.PersonMiddleName
+	personLastName   = model.PersonLastName
+	personBirthday   = model.PersonBirthday
+	personSex        = model.PersonSex
+	personEducation  = model.PersonEducation
 )
 
 var (

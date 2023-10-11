@@ -3,19 +3,14 @@ package person
 import (
 	"errors"
 	"fmt"
-	model "github.com/aaa2ppp/ozonmp-education-person-api/internal/model/education"
 	"strings"
 )
 
-const DateLayout = "2006-01-02"
-
 func parsePersonNames(args []string, p *person) ([]string, error) {
+	n := min(3, len(args))
 
-	names := make([]string, 0, 3)
-	for i := 0; i < 3 && i < len(args); i++ {
-		if strings.IndexByte(args[i], '=') != -1 {
-			break
-		}
+	names := make([]string, 0, n)
+	for i := 0; i < n && strings.IndexByte(args[i], '=') == -1; i++ {
 		names = append(names, args[i])
 	}
 
@@ -23,10 +18,12 @@ func parsePersonNames(args []string, p *person) ([]string, error) {
 	case 1:
 		p.LastName = names[0]
 		args = args[1:]
+
 	case 2:
 		p.FirstName = names[0]
 		p.LastName = names[1]
 		args = args[2:]
+
 	case 3:
 		p.FirstName = names[0]
 		p.MiddleName = names[1]
@@ -37,7 +34,7 @@ func parsePersonNames(args []string, p *person) ([]string, error) {
 	return args, nil
 }
 
-func parsePersonFields(args []string, p *person, f *personField) (err error) {
+func parsePersonFields(args []string, p *person, f *personField) error {
 
 	for _, arg := range args {
 		pos := strings.IndexByte(arg, '=')
@@ -48,26 +45,28 @@ func parsePersonFields(args []string, p *person, f *personField) (err error) {
 		name := arg[:pos]
 		val := arg[pos+1:]
 
+		var err error
+
 		switch name {
 		case "first_name":
 			p.FirstName = val
-			*f |= model.PersonFirstName
+			*f |= personFirstName
 
 		case "middle_name":
 			p.MiddleName = val
-			*f |= model.PersonMiddleName
+			*f |= personMiddleName
 
 		case "last_name":
 			p.LastName = val
-			*f |= model.PersonLastName
+			*f |= personLastName
 
 		case "birthday":
 			if val == "" {
 				p.Birthday = nil
 			} else {
-				p.Birthday, err = model.ParseDate(val)
+				p.Birthday, err = parseDate(val)
 			}
-			*f |= model.PersonBirthday
+			*f |= personBirthday
 
 		case "sex":
 			if val == "" {
@@ -75,7 +74,7 @@ func parsePersonFields(args []string, p *person, f *personField) (err error) {
 			} else {
 				p.Sex, err = parseSex(val)
 			}
-			*f |= model.PersonSex
+			*f |= personSex
 
 		case "education":
 			if val == "" {
@@ -83,7 +82,7 @@ func parsePersonFields(args []string, p *person, f *personField) (err error) {
 			} else {
 				p.Education, err = parseEducation(val)
 			}
-			*f |= model.PersonEducation
+			*f |= personEducation
 
 		default:
 			err = errors.New("unknown field")

@@ -5,9 +5,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const newUsage = "/new%s [[first_name [middle_name]] last_name] [field=value ...]"
+
 func (c Commander) New(inputMsg *tgbotapi.Message) {
 	const op = "Commander.New"
-	const usage = "/new%s [[first_name [middle_name]] last_name] [field=value ...]"
 
 	chatID := inputMsg.Chat.ID
 

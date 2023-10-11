@@ -7,6 +7,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+// telegram-bot interfaces
+
 type Commander interface {
 	HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath)
 	HandleCommand(callback *tgbotapi.Message, commandPath path.CommandPath)
@@ -40,6 +42,8 @@ type PersonService interface {
 	Update(personID uint64, person model.Person, fields model.PersonField) (bool, error)
 	Remove(personID uint64) (bool, error)
 }
+
+// gRPC server interfaces
 
 type PersonRepo interface {
 	Describe(ctx context.Context, personID uint64) (*model.Person, error)

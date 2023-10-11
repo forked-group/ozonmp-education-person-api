@@ -6,9 +6,10 @@ import (
 	"strconv"
 )
 
+const getUsage = "/get%s id"
+
 func (c Commander) Get(inputMsg *tgbotapi.Message) {
 	const op = "Commander.Get"
-	const usage = "usage: /get%s id"
 
 	chatID := inputMsg.Chat.ID
 

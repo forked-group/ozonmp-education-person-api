@@ -1,28 +1,22 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"flag"
 	"fmt"
-	personCommands "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/commands/education/person"
-	routerPkg "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/router"
+
+	_ "github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+	"github.com/pressly/goose/v3"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/config"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/database"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/interfaces"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/repo"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/server"
-	personService "github.com/aaa2ppp/ozonmp-education-person-api/internal/service/education/person"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	_ "github.com/jackc/pgx/v4"
-	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/jmoiron/sqlx"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
-	"github.com/pressly/goose/v3"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"os"
 )
 
 const (
@@ -31,7 +25,10 @@ const (
 )
 
 func main() {
-	_ = godotenv.Load() // XXX
+	defer func() {
+		log.Info().Msg("finished")
+	}()
+	log.Info().Msg("starting")
 
 	if err := config.ReadConfigYML("config.yml"); err != nil {
 		log.Fatal().Err(err).Msg("Failed init configuration")
@@ -60,32 +57,17 @@ func main() {
 	//defer tracing.Close()
 
 	var r interfaces.PersonRepo
-	//if _, ok := os.LookupEnv(envDummyRepo); ok {
-	//	r = repo.NewDummyRepo(batchSize) // broken
-	//
-	//} else {
 	db := openDB(cfg.Database)
 	if db == nil {
 		log.Error().Msg("Can't open data base")
-
 		return
 	}
 	defer db.Close()
 
 	r = repo.NewPersonRepo(db, batchSize)
-	//}
-
-	router, err := startBot(personService.NewService(r))
-	if err != nil {
-		log.Error().Err(err).Msgf("Can't start Telegram bot")
-
-		return
-	}
-	defer router.Close()
 
 	if err := server.NewGrpcServer(r).Start(&cfg); err != nil {
 		log.Error().Err(err).Msg("Failed creating gRPC server")
-
 		return
 	}
 }
@@ -120,33 +102,4 @@ func openDB(cfg config.Database) *sqlx.DB {
 	}
 
 	return db
-}
-
-func startBot(service interfaces.PersonService) (*routerPkg.Router, error) {
-	token, found := os.LookupEnv("TOKEN")
-	if !found {
-		return nil, errors.New("environment variable TOKEN not found in .env")
-	}
-
-	bot, err := tgbotapi.NewBotAPI(token)
-	if err != nil {
-		return nil, err
-	}
-
-	// Uncomment if you want debugging
-	// bot.Debug = true
-
-	log.Info().Msgf("Authorized on account %s", bot.Self.UserName)
-
-	router := routerPkg.NewRouter(bot)
-
-	router.Route("education", "person",
-		personCommands.NewCommander(service),
-	)
-
-	err = router.Start(context.Background(), tgbotapi.UpdateConfig{
-		Timeout: 60,
-	})
-
-	return router, nil
 }

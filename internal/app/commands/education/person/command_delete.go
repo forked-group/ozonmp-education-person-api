@@ -6,9 +6,10 @@ import (
 	"strconv"
 )
 
+const deleteUsage = "/delete%s id"
+
 func (c Commander) Delete(inputMsg *tgbotapi.Message) {
 	const op = "Commander.Delete"
-	const usage = "/delete%s id"
 
 	chatID := inputMsg.Chat.ID
 
