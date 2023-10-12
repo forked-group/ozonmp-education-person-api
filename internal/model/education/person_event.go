@@ -20,10 +20,10 @@ const (
 )
 
 type PersonEvent struct {
-	ID     uint64
-	Type   EventType
-	Status EventStatus
-	Entity *Person
+	ID     uint64      `json:"person_event_id"`
+	Type   EventType   `json:"type"`
+	Status EventStatus `json:"status"`
+	Entity *Person     `json:"entity"`
 }
 
 type PersonEventField uint64

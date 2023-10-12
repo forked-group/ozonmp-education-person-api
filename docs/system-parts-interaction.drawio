@@ -1,0 +1,112 @@
+<mxfile host="Electron" modified="2023-10-12T12:36:51.312Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.0.2 Chrome/114.0.5735.289 Electron/25.8.4 Safari/537.36" etag="MQ9Q1ldEOb-zwuMUHvHZ" version="22.0.2" type="device">
+  <diagram name="Страница — 1" id="jM4UAXQ-53DUuUMlllH-">
+    <mxGraphModel dx="1687" dy="993" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ZMEA96QxX4W5FmUuIoxe-7" value="ozonmp-bot" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;dashed=1;labelPosition=center;verticalLabelPosition=middle;align=left;verticalAlign=top;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="287" y="280" width="240" height="345" as="geometry" />
+        </mxCell>
+        <mxCell id="ZMEA96QxX4W5FmUuIoxe-6" value="ozonmp-{subdomain}-api" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;dashed=1;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="620" y="280" width="347" height="345" as="geometry" />
+        </mxCell>
+        <mxCell id="ZMEA96QxX4W5FmUuIoxe-8" value="ozonmp-{fasade}" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;dashed=1;labelPosition=center;verticalLabelPosition=middle;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="1170" y="280" width="287" height="345" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;" parent="1" source="In0g9n-9haiToU50004C-1" target="In0g9n-9haiToU50004C-2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-4" value="gRPC" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="In0g9n-9haiToU50004C-3" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" y="3" relative="1" as="geometry">
+            <mxPoint x="29" y="3" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;" parent="1" source="In0g9n-9haiToU50004C-1" target="In0g9n-9haiToU50004C-7" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="407" y="690" />
+              <mxPoint x="1257" y="690" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-16" value="gRPC" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="In0g9n-9haiToU50004C-15" vertex="1" connectable="0">
+          <mxGeometry x="-0.05" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-1" value="bot" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="347" y="510" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;" parent="1" source="In0g9n-9haiToU50004C-2" target="In0g9n-9haiToU50004C-5" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="707" y="370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;" parent="1" source="ZMEA96QxX4W5FmUuIoxe-1" target="In0g9n-9haiToU50004C-14" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1017" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-2" value="{subdomain}-api" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="647" y="510" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ZMEA96QxX4W5FmUuIoxe-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="In0g9n-9haiToU50004C-5" target="ZMEA96QxX4W5FmUuIoxe-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="882" y="370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-5" value="DB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
+          <mxGeometry x="767" y="330" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;" parent="1" source="In0g9n-9haiToU50004C-7" target="In0g9n-9haiToU50004C-12" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-7" value="{subdomain}-fasade" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="1197" y="510" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;" parent="1" source="In0g9n-9haiToU50004C-14" target="In0g9n-9haiToU50004C-7" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1137" y="540" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-12" value="DB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
+          <mxGeometry x="1227" y="330" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-14" value="Kafka" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+          <mxGeometry x="1007" y="500" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-17" value="Создает сущьности" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="642" y="580" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-18" value="Читает события из Кафки&lt;br&gt;обновляет данные в своей базе" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="1267" y="450" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-19" value="LIST" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="777" y="650" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-20" value="CRUD" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="547" y="500" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="In0g9n-9haiToU50004C-21" target="In0g9n-9haiToU50004C-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="In0g9n-9haiToU50004C-21" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+          <mxGeometry x="187" y="510" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ZMEA96QxX4W5FmUuIoxe-1" value="retranslator" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="822" y="510" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ZMEA96QxX4W5FmUuIoxe-4" value="Читает события из базы и&amp;nbsp;&lt;br&gt;отправляет их в Кафку" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="797" y="575" width="170" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ZMEA96QxX4W5FmUuIoxe-5" value="Принимает запросы пользователя.&lt;br&gt;Запросы CUD и одиночное чтение &lt;br&gt;отправляет в api, а LIST в fasade." style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="297" y="440" width="220" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -36,8 +36,8 @@ func TestStart(t *testing.T) {
 			CollectSize:     10,
 			CollectMaxDelay: 330 * time.Millisecond,
 
-			WorkerCount: 2,
-			WorkTimeout: 100 * time.Millisecond,
+			WorkerCount:      2,
+			WorkErrorTimeout: 100 * time.Millisecond,
 
 			Repo:   repo,
 			Sender: sender,
@@ -75,8 +75,8 @@ func TestStart(t *testing.T) {
 			CollectSize:     10,
 			CollectMaxDelay: 330 * time.Millisecond,
 
-			WorkerCount: 2,
-			WorkTimeout: 100 * time.Millisecond,
+			WorkerCount:      2,
+			WorkErrorTimeout: 100 * time.Millisecond,
 
 			Repo:   repo,
 			Sender: sender,
@@ -122,8 +122,8 @@ func TestStart2(t *testing.T) {
 				CollectSize:     4,
 				CollectMaxDelay: 50 * time.Millisecond,
 
-				WorkerCount: 2,
-				WorkTimeout: 100 * time.Millisecond,
+				WorkerCount:      2,
+				WorkErrorTimeout: 100 * time.Millisecond,
 			},
 		},
 		{
@@ -150,8 +150,8 @@ func TestStart2(t *testing.T) {
 				CollectSize:     100,
 				CollectMaxDelay: 50 * time.Millisecond,
 
-				WorkerCount: 4,
-				WorkTimeout: 100 * time.Millisecond,
+				WorkerCount:      4,
+				WorkErrorTimeout: 100 * time.Millisecond,
 			},
 		},
 	}

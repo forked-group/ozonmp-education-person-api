@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/retranslator"
+	"github.com/aaa2ppp/ozonmp-education-person-api/internal/app/sender"
+	"time"
 
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -12,9 +16,9 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	repo2 "github.com/aaa2ppp/ozonmp-education-person-api/internal/app/repo"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/config"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/database"
-	"github.com/aaa2ppp/ozonmp-education-person-api/internal/interfaces"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/repo"
 	"github.com/aaa2ppp/ozonmp-education-person-api/internal/server"
 )
@@ -22,6 +26,7 @@ import (
 const (
 	envDummyRepo = "DUMMY_REPO"
 	batchSize    = 2 // TODO: ???
+	kafka        = "localhost:9094"
 )
 
 func main() {
@@ -56,17 +61,44 @@ func main() {
 	//}
 	//defer tracing.Close()
 
-	var r interfaces.PersonRepo
 	db := openDB(cfg.Database)
 	if db == nil {
 		log.Error().Msg("Can't open data base")
 		return
 	}
-	defer db.Close()
+	defer func() {
+		err := db.Close()
+		if err != nil {
+			log.Error().Err(err).Msg("Can't close database")
+			return
+		}
+		log.Info().Msg("Data base closed")
+	}()
 
-	r = repo.NewPersonRepo(db, batchSize)
+	eventRepo := repo2.EventRepoAdapter{Repo: repo.NewEventRepo(db)}
+	eventSender, err := sender.NewEventSender(kafka)
+	if err != nil {
+		log.Error().Err(err).Msg("Can't create event sender")
+		return
+	}
+	defer func() {
+		err := eventSender.Close()
+		if err != nil {
+			log.Error().Err(err).Msg("Can't close event sender")
+			return
+		}
+		log.Info().Msg("Event sender closed")
+	}()
 
-	if err := server.NewGrpcServer(r).Start(&cfg); err != nil {
+	eventRetranslator := startRetranslator(eventRepo, eventSender)
+	defer func() {
+		eventRetranslator.Close()
+		log.Info().Msg("Event retranslator stopped")
+	}()
+	log.Info().Msg("Event retranslator started")
+
+	personRepo := repo.NewPersonRepo(db, batchSize)
+	if err := server.NewGrpcServer(personRepo).Start(&cfg); err != nil {
 		log.Error().Err(err).Msg("Failed creating gRPC server")
 		return
 	}
@@ -102,4 +134,28 @@ func openDB(cfg config.Database) *sqlx.DB {
 	}
 
 	return db
+}
+
+func startRetranslator(repo repo2.EventRepo, sender sender.EventSender) *retranslator.Retranslator {
+	cfg := retranslator.Config{
+		ChannelSize: 0,
+
+		ConsumerCount:  1,
+		ConsumeSize:    10,
+		ConsumeTimeout: 1000 * time.Millisecond,
+
+		ProducerCount:  10,
+		ProduceTimeout: 1000 * time.Millisecond,
+
+		CollectSize:     10,
+		CollectMaxDelay: 1000 * time.Millisecond,
+
+		WorkerCount:      2,
+		WorkErrorTimeout: 1000 * time.Millisecond,
+
+		Repo:   repo,
+		Sender: sender,
+	}
+
+	return cfg.Start(context.TODO())
 }

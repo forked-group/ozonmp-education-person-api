@@ -23,8 +23,8 @@ type Config struct {
 	CollectSize     int
 	CollectMaxDelay time.Duration
 
-	WorkerCount int
-	WorkTimeout time.Duration
+	WorkerCount      int
+	WorkErrorTimeout time.Duration
 
 	Repo   EventRepo
 	Sender EventSender
@@ -100,7 +100,7 @@ func (cfg *Config) Start(ctx context.Context) *Retranslator {
 	workers := startN(ctx, cfg.WorkerCount,
 		&workerConfig{
 			In:      jobs,
-			Timeout: cfg.WorkTimeout,
+			Timeout: cfg.WorkErrorTimeout,
 		})
 
 	return &Retranslator{

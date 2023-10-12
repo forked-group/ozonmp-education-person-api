@@ -168,11 +168,7 @@ func (r *PersonRepo) transaction(ctx context.Context, f func(tx *sql.Tx) error) 
 	if err != nil {
 		return fmt.Errorf("%s: can't start transaction: %w", op, err)
 	}
-	defer func() {
-		if e := tx.Rollback(); e != nil && err == nil {
-			err = e
-		}
-	}()
+	defer tx.Rollback() // TODO: error handing?
 
 	err = f(tx)
 	if err != nil {

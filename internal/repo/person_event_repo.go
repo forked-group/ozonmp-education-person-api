@@ -26,11 +26,7 @@ func (r PersonEventRepo) transaction(ctx context.Context, f func(tx *sql.Tx) err
 	if err != nil {
 		return fmt.Errorf("%s: can't start transaction: %w", op, err)
 	}
-	defer func() {
-		if e := tx.Rollback(); e != nil && err == nil {
-			err = e
-		}
-	}()
+	defer tx.Rollback() // TODO: error handing?
 
 	err = f(tx)
 	if err != nil {
@@ -107,7 +103,7 @@ func (r PersonEventRepo) Lock(ctx context.Context, n uint64) ([]model.PersonEven
 				eventStatus model.EventStatus
 				personID    uint64
 				payload     []byte
-				entity      *model.Person
+				entity      model.Person
 			)
 
 			err = rows.Scan(
@@ -122,10 +118,10 @@ func (r PersonEventRepo) Lock(ctx context.Context, n uint64) ([]model.PersonEven
 			}
 
 			if len(payload) == 0 {
-				entity = &model.Person{ID: personID}
+				entity.ID = personID
 
 			} else {
-				err = json.Unmarshal(payload, entity)
+				err = json.Unmarshal(payload, &entity)
 				if err != nil {
 					return fmt.Errorf("can't unmarhal event payload: %w", err)
 				}
@@ -135,7 +131,7 @@ func (r PersonEventRepo) Lock(ctx context.Context, n uint64) ([]model.PersonEven
 				ID:     id,
 				Type:   eventType,
 				Status: eventStatus,
-				Entity: entity,
+				Entity: &entity,
 			})
 		}
 
